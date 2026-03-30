@@ -5,10 +5,13 @@ import Auth from './components/Auth'
 import AdminPage from './pages/AdminPage'
 import MatchPage from './pages/MatchPage'
 import MatchDetails from './pages/MatchDetails'
+import ProtectedRoute from './ProtectedRoute'
 
 import { useEffect, useState } from 'react'
 import { db } from './config/Firebase'
 import { collection, onSnapshot } from 'firebase/firestore'
+import Loginpage from './pages/LoginPage'
+
 
 function App() {
   const [matches, setMatches] = useState([])
@@ -33,11 +36,12 @@ function App() {
   return (
     
     <>
-    <Auth/>
+    
     
     <Routes>
       <Route index element={<MatchPage matches={matches}/>} />
-      <Route path="/admin" element={<AdminPage />} />
+      <Route path="/login" element={<Loginpage />} />
+      <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
       <Route path="/match/:id" element={<MatchDetails matches={matches} />} />
   
     </Routes>

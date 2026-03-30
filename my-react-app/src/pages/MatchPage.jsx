@@ -4,14 +4,15 @@ import Tabs from "../components/Tabs";
 import MatchFilters from "../components/MatchFilters";
 import MatchList from "../components/MatchList";
 
-import {  useRef, useState } from "react";
-import useMatchEvents from "../hooks/useMatchEvents";
-
+import { useEffect, useState, useRef} from "react"
+import { collection,  onSnapshot, query, orderBy } from "firebase/firestore";
+import {db} from "../config/Firebase"
 
 
 export default function MatchPage({matches}){
     const [activeTab, setActiveTab] = useState ("rapport")
-    
+     const [events, setEvents] = useState([]);
+
  // Filtre
   const [selectedRound, setSelectedRound] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(null);
@@ -21,9 +22,7 @@ export default function MatchPage({matches}){
   const upcomingRef = useRef(null)
 
   const hasMatches = matches && matches.length > 0;
-  if(!matches || matches.length === 0){
-        return <p>Laster kamper...</p>
-    }
+  
 
    
     //Siste spilte kamp (for resultatvisning)
@@ -35,7 +34,7 @@ export default function MatchPage({matches}){
 
     //Kamp for live rapport ( for test)
     const selectedMatch = matches[0]
-    const events = useMatchEvents(selectedMatch);
+  
 
 
   //Filtering i kamp-fanen
@@ -51,6 +50,28 @@ export default function MatchPage({matches}){
         ? m.homeTeam === selectedTeam || m.awayTeam === selectedTeam
         : true
     );
+    useEffect(() => {
+    if (!selectedMatch) return;
+
+    const q = query(
+      collection(db, "matches", selectedMatch.id, "events"),
+      orderBy("createdAt", "asc")
+    );
+
+    const unsub = onSnapshot(q, (snapshot) => {
+      const list = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setEvents(list);
+    });
+
+    return () => unsub();
+  }, [selectedMatch]);
+
+if(!matches || matches.length === 0){
+        return <p>Laster kamper...</p>
+    }
     
 
 
