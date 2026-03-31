@@ -35,18 +35,19 @@ export default function Countdown({date, time}){
             const days = Math.floor(time / (1000 * 60 * 60 * 24))
 
             return( 
-                <section>
+                <section className="countdown">
+                <p>Kampstart om: </p>
                 <div>
-                {days.toString().padStart(2, "0")} <span>dager</span>
+                {days.toString().padStart(2, "0")} <span>d</span>
                 </div>
                 <div>
-                {hours.toString().padStart(2, "0")} <span>timer</span>
+                {hours.toString().padStart(2, "0")} <span>t</span>
                 </div>
                 <div>
-                {minutes.toString().padStart(2, "0")} <span>min</span>
+                {minutes.toString().padStart(2, "0")} <span>m</span>
                 </div>
                 <div>
-                {seconds.toString().padStart(2, "0")} <span>sek</span>
+                {seconds.toString().padStart(2, "0")} <span>s</span>
                 </div>
                 </section>
 

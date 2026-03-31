@@ -43,18 +43,23 @@ const datePart = nextBase.toISOString().split("T")[0];
     
     return(
         <>
-        <section>
-          <h2>{next.homeTeam} - {next.awayTeam}</h2> 
-          <p> {next.day} {kampDato.toLocaleDateString("no-NO")}-{next.time}</p> 
-        </section>
-        <Countdown
+        <section className="next-match">
+          <h2 className="match-title">{next.homeTeam} - {next.awayTeam}</h2> 
+          <p className="dato"> {next.day} {kampDato.toLocaleDateString("no-NO")}-kl {next.time}</p> 
+
+       
+        <Countdown 
         date={next.date}
         time={next.time}
         />
+    
+       <div className="knapp-linje">
         <Link to={`/match/${next.id}`}>
-        <button>Se kampdetaljer</button>
-        
+        <button className="knapp-kampdetaljer">Se kampdetaljer</button>
         </Link>
+        </div>
+
+        </section>
         </>
     )
 }

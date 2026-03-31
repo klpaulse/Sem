@@ -1,0 +1,230 @@
+:root{
+    --background: #0D1117;
+    --logo : #ffff; 
+    --nextmatch-text: #ffff;
+    --countdown-text: #E63946; 
+    --countdown-bottom: #E63946;
+    --plen-top: #00780040; 
+    --plen-bottom: #00500026; 
+    --plen-gradient: linear-gradient( 
+      180deg,
+      var(--plen-top),
+      var(--plen-bottom)
+    );
+    --status-dark: #1f1f1f ; 
+    --status-light: #3a3a3a; 
+    --status-gradient: linear-gradient(
+      90deg, 
+      var(--status-dark),
+      var(--status-light)
+    );
+    --card-bg: #ffffff0d ; 
+  
+}
+
+body{
+    background-color: var(--background);
+}
+  .header{
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 12px;
+    padding: 1rem 0;
+    margin-bottom: 1.5rem; 
+ 
+  }
+
+  .SEM{
+    color: var(--logo);
+   font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+
+    }
+
+  .semif-logo{
+    width: 40px;
+    height: auto;
+  background-color: #ffff;
+  
+  border-radius: 50%;
+  }
+
+   .next-match * {
+    text-align: center; 
+    font-size: 1rem; 
+  font-weight: 600; 
+    
+   
+  
+  }
+
+  .match-title{
+  color: var(--nextmatch-text);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 0.6rem; 
+  margin-bottom: 0.2rem; 
+ 
+  }
+
+  .dato{
+    color: var(--nextmatch-text);
+  }
+
+/*Kommende kamp*/
+  .countdown{
+    display: flex; 
+    flex-direction: row;
+    color: var(--countdown-text);
+    align-items: center; 
+    justify-content: center; 
+    gap: 0.6rem;  
+  
+  }
+
+  .knapp-kampdetaljer{
+    color: var(--nextmatch-text);
+    background-color: var(--countdown-bottom);
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: 0.2s ease;
+    text-align: center;
+   
+   
+  }
+
+  .knapp-linje{
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 1rem;   /* luft før streken */
+  
+
+
+  }
+
+  /*last-played-card*/
+ .last-played-card {
+  margin: 1rem 1rem; 
+  padding: 1.2rem;
+  border-radius: 12px;
+ background: var(--plen-gradient);
+ border-bottom: 1px solid #ffffff33; 
+  text-align: center;
+}
+
+.lp-row{
+   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+
+}
+
+.lp-title{
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--nextmatch-text);
+}
+
+
+.lp-result{
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--nextmatch-text);
+  margin: 0.6rem 0 0.8rem 0;
+ 
+}
+
+.lp-status{
+display: inline-block;
+  background: var(--status-gradient);
+  padding: 0.25rem 1.4rem;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  border-left: 4px solid var(--countdown-text);
+  margin-bottom: 0.8rem; 
+  opacity: 0.9;
+  margin-right: 2rem;
+
+}
+
+.lp-goals{
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 1rem;
+
+}
+
+.lp-goal-item{
+  color: var(--nextmatch-text);
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.lp-date {
+  font-size: 0.75rem;
+  opacity: 0.6;
+  color: var(--nextmatch-text);
+  margin-top: 1.2rem;
+  letter-spacing: 0.5px; 
+  margin-right: 2rem; 
+}
+
+
+/*main*/
+.content-box{
+  margin: 1rem; 
+        margin-top: 1rem;
+        background: var(--card-bg);
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        backdrop-filter: blur(4px);
+}
+
+.nav{
+  display: flex; 
+  justify-content: center; 
+  gap: 1.5rem; 
+  margin: 1.2rem 0; 
+}
+
+.nav-btn {
+  background: none; 
+  border: none; 
+  color: #ffffffcc; 
+  font-size: 0.95rem; 
+  font-weight: 600; 
+  cursor: pointer; 
+  padding: 0; 
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.nav-btn:hover{
+  color: var(--countdown-text);
+  text-decoration: underline; 
+}
+
+
+
+
+
+
+
+  @media (min-width:768px){
+    .header{
+      justify-content: flex-start; 
+      padding-left: 2rem; 
+    }
+    
+  }

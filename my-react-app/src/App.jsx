@@ -1,7 +1,7 @@
 
 import { Route, Routes } from 'react-router-dom'
 import './App.css'
-import Auth from './components/Auth'
+
 import AdminPage from './pages/AdminPage'
 import MatchPage from './pages/MatchPage'
 import MatchDetails from './pages/MatchDetails'

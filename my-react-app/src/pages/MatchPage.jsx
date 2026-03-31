@@ -3,6 +3,8 @@ import MatchReport from "../components/MatchReport";
 import Tabs from "../components/Tabs";
 import MatchFilters from "../components/MatchFilters";
 import MatchList from "../components/MatchList";
+import "../assets/style/matchPage.css";
+import semifLogo from "../assets/Semif-logo.png"
 
 import { useEffect, useState, useRef} from "react"
 import { collection,  onSnapshot, query, orderBy } from "firebase/firestore";
@@ -77,31 +79,41 @@ if(!matches || matches.length === 0){
 
 
     return(
-        <main>
-            <h1>SEM IF</h1>
-            <img src="https://spond.com/storage/upload/2B18FDF9D6AE99421FD11B8D98F4B2AC/1749751180_0E00D12E/Sem_IF_LOGO.png" />
+        <>
+        <header className="header">
+            <h1 className="SEM">SEM IF</h1>
+            <img className="semif-logo" src={semifLogo} alt="SEM IF logo" />
+            </header>
+            
             <NextMatch matches={matches} />
+            
 
             {lastPlayed && (
-                <>
-                <p><strong>{lastPlayed.homeTeam}</strong> {lastPlayed.homeScore} - {lastPlayed.awayScore} <strong>{lastPlayed.awayTeam}</strong></p>
-            <p>{lastPlayed.date.toDate().toLocaleDateString("no-NO")}</p>
-            </>
+                <section className="last-played-card">
+                <p className="lp-status">Slutt</p>
+                 <div className="lp-row">
+                <span className="lp-title">{lastPlayed.homeTeam}</span>
+                <p className="lp-result"> {lastPlayed.homeScore} - {lastPlayed.awayScore} </p>
+                <span className="lp-title">{lastPlayed.awayTeam}</span>
+              </div>
+
+              <div className="lp-goals">
+                {lastPlayed.goals?.map((g, i) => (
+                  <p key={i} className="lp-goal-item">
+                    {g.player} {g.minute}
+                  </p>
+                ))}
+               </div>
+
+            <p className="lp-date">{lastPlayed.date.toDate().toLocaleDateString("no-NO")}</p>
+            </section>
             )}
 
             <Tabs activeTab={activeTab} setActiveTab={setActiveTab} upcomingRef={upcomingRef} />
 
             
-  {/* Hvit boks som bytter innhold */}
-      <section
-       style={{
-        marginTop: "1rem",
-        background: "white",
-        padding: "1rem",
-        borderRadius: "8px",
-        boxShadow: "0 2px 6px rgba(0,0,0,0.1)"
-      }}
-      >
+  
+      <section className="content-box">
       
         {activeTab === "rapport" && (
             <MatchReport match={matches[0]} events={events} />
@@ -154,6 +166,6 @@ if(!matches || matches.length === 0){
 
             </section>
 
-        </main>
+        </>
     )
 }
