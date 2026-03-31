@@ -12,7 +12,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyD0nz-dh0Gogtlb4rkTxAEiGnpzV7tyg1s", 
   authDomain: "fotball-lag-4326f.firebaseapp.com",
   projectId: "fotball-lag-4326f",
-  storageBucket: "fotball-lag-4326f.firebasestorage.app",
+  storageBucket: "fotball-lag-4326f.appspot.com",
   messagingSenderId: "850881569053",
   appId: "1:850881569053:web:65f6d6bfb377ebefbd81f4",
   measurementId: "G-WJQ79QL1C2"

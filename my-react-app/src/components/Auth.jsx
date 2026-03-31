@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import {auth, googleProvider} from '../config/Firebase'
-import {createUserWithEmailAndPassword, signInWithPopup, signOut} from 'firebase/auth'
+import {signInWithEmailAndPassword, signInWithPopup, signOut} from 'firebase/auth'
 
 export default function Auth(){
     const [email, setEmail] =useState("")
@@ -10,8 +10,9 @@ export default function Auth(){
 
     const signIn = async () =>{
         try{
-        await createUserWithEmailAndPassword(auth, email, password)
+        await signInWithEmailAndPassword(auth, email, password)
         }catch (err) {
+              alert(err.message)
             console.error(err)
         }
 
