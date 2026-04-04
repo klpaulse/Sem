@@ -1,9 +1,13 @@
+import { useEffect, useState } from "react";
+import { getTeam } from "../services/TeamService";
+
 export default function PlayedMatches({ matches }) {
+  const [teamData, setTeamData] = useState({}); // cache for lag
   const now = new Date();
 
-  // Filtrer kamper som er ferdige
+  // Filtrer ferdigspilte kamper
   const past = matches
-    .filter(m => {
+    .filter((m) => {
       if (!m.date) return false;
 
       const baseDate = m.date.toDate ? m.date.toDate() : new Date(m.date);
@@ -24,6 +28,28 @@ export default function PlayedMatches({ matches }) {
       return bDate - aDate; // nyeste først
     });
 
+  // Hent lag basert på ID
+  useEffect(() => {
+    async function loadTeams() {
+      const cache = {};
+
+      for (const match of past) {
+        if (!cache[match.homeTeam]) {
+          cache[match.homeTeam] = await getTeam(match.homeTeam);
+        }
+        if (!cache[match.awayTeam]) {
+          cache[match.awayTeam] = await getTeam(match.awayTeam);
+        }
+      }
+
+      setTeamData(cache);
+    }
+
+    if (past.length > 0) {
+      loadTeams();
+    }
+  }, [past]);
+
   return (
     <section>
       <h2>Spilte kamper</h2>
@@ -31,6 +57,13 @@ export default function PlayedMatches({ matches }) {
       {past.length === 0 && <p>Ingen spilte kamper ennå</p>}
 
       {past.map((m, index) => {
+        const home = teamData[m.homeTeam];
+        const away = teamData[m.awayTeam];
+
+        if (!home || !away) {
+          return <p key={index}>Laster lag...</p>;
+        }
+
         const baseDate = m.date.toDate ? m.date.toDate() : new Date(m.date);
         const datePart = baseDate.toISOString().split("T")[0];
         const kampDato = new Date(`${datePart}T${m.time}`);
@@ -49,7 +82,7 @@ export default function PlayedMatches({ matches }) {
 
             {harResultat ? (
               <p>
-                {m.homeTeam} {m.homeScore} – {m.awayScore} {m.awayTeam}
+                {home.teamName} {m.homeScore} – {m.awayScore} {away.teamName}
               </p>
             ) : (
               <p>Resultat kommer</p>

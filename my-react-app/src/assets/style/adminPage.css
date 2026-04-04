@@ -1,0 +1,30 @@
+.lagadmin-container {
+  margin-bottom: 40px;
+}
+
+.lagadmin-title {
+  margin-bottom: 20px;
+}
+
+.lagadmin-cards {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.lagadmin-card {
+  flex: 1;
+  min-width: 300px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.kampadmin-container {
+  margin-top: 40px;
+}
+
+.kampadmin-title {
+  margin-bottom: 20px;
+}

@@ -1,0 +1,313 @@
+.home-page {
+  position: relative;
+  pointer-events: auto;
+  z-index: 1;
+}
+
+/* Container */
+.calandar-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* STRIP-VISNING */
+.calandar-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 10px 0;
+  scroll-behavior: smooth;
+  white-space: nowrap;
+}
+
+.calendar-open-btn {
+  background: #e6e6e6;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.calendar-open-btn svg {
+  font-size: 20px;
+}
+
+.calendar-day {
+  min-width: 70px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #f2f2f2;
+  cursor: pointer;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.calendar-day.selected {
+  background: #007bff;
+  color: white;
+}
+
+/* FULL MÅNEDSKALENDER */
+.month-view {
+  background: #f2f2f2;
+  padding: 15px;
+  border-radius: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Toppseksjon */
+.month-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.month-header h3 {
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.month-header button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 22px;
+}
+
+/* Gå til i dag */
+.today-btn {
+  width: fit-content;
+  padding: 6px 12px;
+  background: #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+}
+
+/* Ukedager */
+.weekdays-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-weight: bold;
+  color: #555;
+}
+
+.weekday {
+  padding-bottom: 5px;
+}
+
+/* Kalender-grid */
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+/* Animasjon */
+.month-grid.fade {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.month-day {
+  padding: 12px;
+  background: white;
+  border-radius: 6px;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.month-day:hover {
+  background: #e6e6e6;
+}
+
+/* Forrige/neste måned */
+.other-month {
+  opacity: 0.35;
+}
+
+/* Valgt dato */
+.month-day.selected {
+  background: #007bff;
+  color: white;
+}
+
+/* Dagens dato */
+.month-day.today {
+  border: 2px solid #007bff;
+  font-weight: bold;
+  background: #e8f1ff;
+}
+
+/* Lukk-knapp */
+.close-month-btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #ddd;
+  cursor: pointer;
+  border: none;
+  width: fit-content;
+}
+/* Slide-animasjon */
+.month-grid {
+  position: relative;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.month-grid.animating {
+  opacity: 0;
+}
+
+.month-grid.slide-left.animating {
+  transform: translateX(-40px);
+}
+
+.month-grid.slide-right.animating {
+  transform: translateX(40px);
+}
+
+/*division-list*/
+/* --- DIVISION LIST WRAPPER --- */
+.division-list {
+  margin-top: 20px;
+}
+
+.division-block {
+  margin-bottom: 20px;
+}
+
+/* --- HEADER (midtstilt divisjonstittel) --- */
+.division-header {
+  position: relative;
+  z-index: 1;
+  cursor: default; /* headeren er ikke klikkbar */
+}
+
+.center-layout {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem 0;
+
+  border-top: 1px solid rgba(255,255,255,0.2);
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+
+  position: relative;
+}
+
+.center-layout h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+/* --- PIL-KNAPP (klikkbar) --- */
+.division-arrow-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%) rotate(0deg);
+  padding: 0;
+  z-index: 3;
+  font-size: 1.2rem;
+  transition: transform 0.25s ease;
+}
+
+.division-arrow-btn.open {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* --- MATCHLISTE ANIMASJON (smooth slide) --- */
+.division-matches-wrapper {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+
+.division-matches-wrapper.open {
+  max-height: 500px; /* nok til mange kamper */
+}
+
+/* --- MATCH LIST --- */
+.division-matches {
+  padding-top: 10px;
+}
+
+.division-match {
+  padding: 10px 0;
+  cursor: pointer;
+}
+
+.division-match:hover {
+  opacity: 0.8;
+}
+
+/* --- MATCH ROW --- */
+.match-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* --- VENSTRE SIDE (kolonne med tall/strek + lag) --- */
+.match-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Tall eller strek foran lagnavn */
+.left-col {
+  width: 20px;
+  text-align: right;
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+/* Lagnavn */
+.team {
+  font-weight: 500;
+}
+
+/* --- HØYRE SIDE (tid / live / pause) --- */
+.match-right {
+  min-width: 60px;
+  text-align: right;
+}
+
+.match-time {
+  opacity: 0.8;
+}
+
+/* LIVE */
+.match-status.live {
+  color: #ff4d4d;
+  font-weight: 700;
+}
+
+/* PAUSE */
+.match-status.pause {
+  color: #ffd966;
+  font-weight: 700;
+}

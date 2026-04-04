@@ -1,59 +1,87 @@
-import NextMatch from "../components/NextMatch";
+import NextMatch from "../components/maincomp/NextMatch";
 import MatchReport from "../components/MatchReport";
 import Tabs from "../components/Tabs";
-import MatchFilters from "../components/MatchFilters";
-import MatchList from "../components/MatchList";
+import MatchFilters from "../components/maincomp/MatchFilters";
+import MatchList from "../components/maincomp/MatchList";
 import "../assets/style/matchPage.css";
-import semifLogo from "../assets/Semif-logo.png"
 
-import { useEffect, useState, useRef} from "react"
-import { collection,  onSnapshot, query, orderBy } from "firebase/firestore";
-import {db} from "../config/Firebase"
+import { useEffect, useState, useRef } from "react";
+import { collection, onSnapshot, query, orderBy, doc, getDoc, getDocs } from "firebase/firestore";
+import { db } from "../config/Firebase";
+import { useParams } from "react-router-dom";
 
+// ⭐ Hent lag basert på ID
+import { getTeam } from "../services/TeamService";
 
-export default function MatchPage({matches}){
-    const [activeTab, setActiveTab] = useState ("rapport")
-     const [events, setEvents] = useState([]);
+export default function MatchPage() {
+  const { id } = useParams();
 
- // Filtre
+  // Kampen du klikket på
+  const [selectedMatch, setSelectedMatch] = useState(null);
+
+  // Alle kamper (for designet ditt)
+  const [allMatches, setAllMatches] = useState([]);
+
+  // Lagobjekter (hentes via ID)
+  const [homeTeam, setHomeTeam] = useState(null);
+  const [awayTeam, setAwayTeam] = useState(null);
+
+  const [events, setEvents] = useState([]);
+  const [activeTab, setActiveTab] = useState("rapport");
+
   const [selectedRound, setSelectedRound] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(null);
 
-  //Ref for scroll
-  const upcomingRef = useRef(null)
+  const upcomingRef = useRef(null);
 
-  const hasMatches = matches && matches.length > 0;
-  
+  // 🔥 Hent EN kamp basert på URL
+  useEffect(() => {
+    const fetchMatch = async () => {
+      const ref = doc(db, "matches", id);
+      const snap = await getDoc(ref);
 
-   
-    //Siste spilte kamp (for resultatvisning)
-    const played = matches.filter(m => m.homeScore != null);
-    const lastPlayed = played.length > 0 
-    ? played.sort((a, b) => b.date.toDate() - a.date.toDate())[0]
-    : null;
+      if (snap.exists()) {
+        setSelectedMatch({ id: snap.id, ...snap.data() });
+      }
+    };
 
+    fetchMatch();
+  }, [id]);
 
-    //Kamp for live rapport ( for test)
-    const selectedMatch = matches[0]
-  
+  // 🔥 Hent ALLE kamper (for designet ditt)
+  useEffect(() => {
+    const fetchAll = async () => {
+      const ref = collection(db, "matches");
+      const snap = await getDocs(ref);
+      const list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setAllMatches(list);
+    };
 
+    fetchAll();
+  }, []);
 
-  //Filtering i kamp-fanen
-  const filteredMatches = matches
-  .filter ((m) => (selectedRound ? m.round === selectedRound : true))
-  .filter((m) => 
-  selectedMonth !== null
-  ? m.date.toDate().getMonth() === selectedMonth
-  : true
-)
-.filter((m) =>
-      selectedTeam
-        ? m.homeTeam === selectedTeam || m.awayTeam === selectedTeam
-        : true
-    );
-    useEffect(() => {
+  // 🔥 Hent lagobjekter basert på ID
+  useEffect(() => {
     if (!selectedMatch) return;
+
+    async function loadTeams() {
+      const home = await getTeam(selectedMatch.homeTeam);
+      const away = await getTeam(selectedMatch.awayTeam);
+
+      setHomeTeam(home);
+      setAwayTeam(away);
+    }
+
+    loadTeams();
+  }, [selectedMatch]);
+
+  // 🔥 Hent events
+  useEffect(() => {
+    if (!selectedMatch) {
+      setEvents([]);
+      return;
+    }
 
     const q = query(
       collection(db, "matches", selectedMatch.id, "events"),
@@ -71,101 +99,92 @@ export default function MatchPage({matches}){
     return () => unsub();
   }, [selectedMatch]);
 
-if(!matches || matches.length === 0){
-        return <p>Laster kamper...</p>
-    }
-    
+  // Loading
+  if (!selectedMatch || allMatches.length === 0 || !homeTeam || !awayTeam) {
+    return <p>Laster kamp...</p>;
+  }
 
+  // 🔥 Siste spilte kamp
+  const played = allMatches.filter((m) => m.homeScore != null);
+  const lastPlayed =
+    played.length > 0
+      ? played.sort((a, b) => b.date.toDate() - a.date.toDate())[0]
+      : null;
 
+  // 🔥 Filtrering
+  const filteredMatches = allMatches
+    .filter((m) => (selectedRound ? m.round === selectedRound : true))
+    .filter((m) =>
+      selectedMonth !== null
+        ? m.date.toDate().getMonth() === selectedMonth
+        : true
+    )
+    .filter((m) =>
+      selectedTeam
+        ? m.homeTeam === selectedTeam || m.awayTeam === selectedTeam
+        : true
+    );
 
-    return(
-        <>
-        <header className="header">
-            <h1 className="SEM">SEM IF</h1>
-            <img className="semif-logo" src={semifLogo} alt="SEM IF logo" />
-            </header>
-            
-            <NextMatch matches={matches} />
-            
+  return (
+    <>
+      <header className="header">
+        <h1 className="SEM">Breddefotball Live</h1>
+      </header>
 
-            {lastPlayed && (
-                <section className="last-played-card">
-                <p className="lp-status">Slutt</p>
-                 <div className="lp-row">
-                <span className="lp-title">{lastPlayed.homeTeam}</span>
-                <p className="lp-result"> {lastPlayed.homeScore} - {lastPlayed.awayScore} </p>
-                <span className="lp-title">{lastPlayed.awayTeam}</span>
-              </div>
+      {/* 🔥 Nedtelling og neste kamp */}
+      <NextMatch matches={allMatches} />
 
-              <div className="lp-goals">
-                {lastPlayed.goals?.map((g, i) => (
-                  <p key={i} className="lp-goal-item">
-                    {g.player} {g.minute}
-                  </p>
-                ))}
-               </div>
+      {/* 🔥 Siste kamp på gressmatta */}
+      {lastPlayed && (
+        <section className="last-played-card">
+          <p className="lp-status">Slutt</p>
+          <div className="lp-row">
+            <span className="lp-title">{homeTeam.teamName}</span>
+            <p className="lp-result">
+              {lastPlayed.homeScore} - {lastPlayed.awayScore}
+            </p>
+            <span className="lp-title">{awayTeam.teamName}</span>
+          </div>
 
-            <p className="lp-date">{lastPlayed.date.toDate().toLocaleDateString("no-NO")}</p>
-            </section>
-            )}
+          <p className="lp-date">
+            {lastPlayed.date.toDate().toLocaleDateString("no-NO")}
+          </p>
+        </section>
+      )}
 
-            <Tabs activeTab={activeTab} setActiveTab={setActiveTab} upcomingRef={upcomingRef} />
+      <Tabs activeTab={activeTab} setActiveTab={setActiveTab} upcomingRef={upcomingRef} />
 
-            
-  
       <section className="content-box">
-      
         {activeTab === "rapport" && (
-            <MatchReport match={matches[0]} events={events} />
-        
+          <MatchReport
+            match={selectedMatch}
+            events={events}
+            homeTeam={homeTeam}
+            awayTeam={awayTeam}
+          />
         )}
 
         {activeTab === "kamper" && (
           <>
-           <MatchFilters
-           selectedRound={selectedRound}
+            <MatchFilters
+              selectedRound={selectedRound}
               setSelectedRound={setSelectedRound}
               selectedMonth={selectedMonth}
               setSelectedMonth={setSelectedMonth}
               selectedTeam={selectedTeam}
               setSelectedTeam={setSelectedTeam}
-              matches={matches}
+              matches={allMatches}
             />
 
-             <MatchList
+            <MatchList
               filteredMatches={filteredMatches}
-              matches={matches}
+              matches={allMatches}
               played={played}
               upcomingRef={upcomingRef}
             />
-
-             
           </>
         )}
-
-        {activeTab === "spillere" && (
-          <>
-            <h2>Spillere</h2>
-            <p>Her kommer spillerlisten.</p>
-          </>
-        )}
-
-         {activeTab === "nyheter" && (
-          <>
-            <h2>Nyheter</h2>
-            <p>Her kommer nyheter.</p>
-          </>
-        )}
-
-        {activeTab === "info" && (
-          <>
-            <h2>Info</h2>
-            <p>Her kommer klubbinfo.</p>
-          </>
-        )}
-
-            </section>
-
-        </>
-    )
+      </section>
+    </>
+  );
 }
