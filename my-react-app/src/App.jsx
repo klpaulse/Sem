@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
 import { db, auth } from './config/Firebase'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { onAuthStateChanged } from 'firebase/auth'
-import LoginPage from './pages/LoginPage'
+import LoginPage from './pages/LoginPage.jsx'
 import HomePage from './pages/HomePage'
 
 function App() {
