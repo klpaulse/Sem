@@ -3,13 +3,12 @@ import './App.css'
 
 import AdminPage from './pages/AdminPage'
 import MatchPage from './pages/MatchPage'
-import ProtectedRoute from './ProtectedRoute'
 
 import { useEffect, useState } from 'react'
 import { db, auth } from './config/Firebase'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { onAuthStateChanged } from 'firebase/auth'
-import Loginpage from './pages/LoginPage'
+import LoginPage from './pages/LoginPage'
 import HomePage from './pages/HomePage'
 
 function App() {
@@ -67,7 +66,7 @@ function App() {
 
         <Route path="/match/:id" element={<MatchPage />} />
 
-        <Route path="/login" element={<Loginpage />} />
+        <Route path="/login" element={<LoginPage />} />
 
         <Route
           path="/admin"
