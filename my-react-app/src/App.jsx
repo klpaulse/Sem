@@ -1,4 +1,3 @@
-
 import { Route, Routes } from 'react-router-dom'
 import './App.css'
 
@@ -13,14 +12,13 @@ import { onAuthStateChanged } from 'firebase/auth'
 import Loginpage from './pages/LoginPage'
 import HomePage from './pages/HomePage'
 
-
-
 function App() {
   const [matches, setMatches] = useState([])
+  const [divisions, setDivisions] = useState([])
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // Hent kamper globalt
+  // LIVE: hent kamper
   useEffect(() => {
     const matchesRef = collection(db, "matches")
 
@@ -35,38 +33,50 @@ function App() {
     return () => unsubscribe()
   }, [])
 
-   useEffect(() => {
-              const unsub = onAuthStateChanged(auth, (currentUser) => {
-                  setUser(currentUser)
-                  setLoading(false)
-              })
-              return () => unsub()
-          }, [])
-           if (loading) {
-        return <p>Laster</p>
-    }
+  // LIVE: hent divisjoner basert på lag
+  useEffect(() => {
+    const teamsRef = collection(db, "teams")
 
+    const unsubscribe = onSnapshot(teamsRef, (snapshot) => {
+      const allTeams = snapshot.docs.map((doc) => doc.data())
+      const uniqueDivs = [...new Set(allTeams.map((t) => t.division))]
+      uniqueDivs.sort()
+      setDivisions(uniqueDivs)
+    })
 
+    return () => unsubscribe()
+  }, [])
+
+  // Auth
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser)
+      setLoading(false)
+    })
+    return () => unsub()
+  }, [])
+
+  if (loading) {
+    return <p>Laster</p>
+  }
 
   return (
-    
     <>
-    
-    
-    <Routes>
-      <Route index element={<HomePage />}  />
-      <Route path="/match/:id" element={<MatchPage />} />
-      <Route path="/login" element={<Loginpage />} />
-      <Route path="/admin"
-       element={<ProtectedRoute user={user}>
-        <AdminPage /></ProtectedRoute>} />
-      
-     
+      <Routes>
+        <Route index element={<HomePage matches={matches} divisions={divisions} />} />
 
-      
-  
-    </Routes>
-   
+        <Route path="/match/:id" element={<MatchPage />} />
+
+        <Route path="/login" element={<Loginpage />} />
+
+        <Route
+          path="/admin"
+  element={
+    <AdminPage matches={matches} divisions={divisions} />
+  }
+
+        />
+      </Routes>
     </>
   )
 }

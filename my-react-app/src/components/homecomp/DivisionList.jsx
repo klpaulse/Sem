@@ -8,14 +8,21 @@ export default function DivisionList({
   const divisions = Object.keys(matchesByDivision);
   const [openDivisions, setOpenDivisions] = useState({});
 
-  // Åpne alle divisjoner som default
+  // Åpne nye divisjoner uten å trigge infinite loop
   useEffect(() => {
-    const initial = {};
-    divisions.forEach((d) => {
-      initial[d] = true;
+    setOpenDivisions((prev) => {
+      const updated = { ...prev };
+
+      // Kun legg til nye divisjoner
+      divisions.forEach((d) => {
+        if (!(d in updated)) {
+          updated[d] = true;
+        }
+      });
+
+      return updated;
     });
-    setOpenDivisions(initial);
-  }, []); // KUN én gang
+  }, [divisions.length]); // ← kun når antall divisjoner endrer seg
 
   const toggleDivision = (division) => {
     setOpenDivisions((prev) => ({
@@ -42,11 +49,13 @@ export default function DivisionList({
   return (
     <section className="division-list">
       {divisions.map((division) => {
-        // 🔥 Filtrer kamper basert på valgt dato
         const matches = (matchesByDivision[division] || []).filter((match) => {
           if (!selectedDate) return true;
 
-          const matchDate = match.date.toDate();
+          const matchDate = match.date?.toDate
+            ? match.date.toDate()
+            : new Date(match.date);
+
           return isSameDay(matchDate, selectedDate);
         });
 
@@ -56,7 +65,6 @@ export default function DivisionList({
 
         return (
           <div key={division} className="division-block">
-            {/* HEADER */}
             <div
               className="division-header"
               onClick={(e) => {
@@ -65,17 +73,17 @@ export default function DivisionList({
               }}
             >
               <h3>{division}</h3>
-
               <span className={`dropdown-arrow ${isOpen ? "open" : ""}`}>
                 ⌄
               </span>
             </div>
 
-            {/* MATCHLISTE */}
             <div className={`division-matches-wrapper ${isOpen ? "open" : ""}`}>
               <div className="division-matches">
                 {matches.map((match) => {
-                  const matchDate = match.date.toDate();
+                  const matchDate = match.date?.toDate
+                    ? match.date.toDate()
+                    : new Date(match.date);
 
                   const played =
                     match.homeScore !== null && match.awayScore !== null;
@@ -95,7 +103,6 @@ export default function DivisionList({
                       className="match-card"
                       onClick={() => navigate(`/match/${match.id}`)}
                     >
-                      {/* VENSTRE SIDE – LAG */}
                       <div className="match-card-teams">
                         <div className="row">
                           <span
@@ -110,7 +117,7 @@ export default function DivisionList({
                               homeWon ? "winner" : awayWon ? "loser" : ""
                             }`}
                           >
-                            {match.homeTeamName}
+                            {match.homeTeamName || match.homeTeam}
                           </span>
                         </div>
 
@@ -127,12 +134,11 @@ export default function DivisionList({
                               awayWon ? "winner" : homeWon ? "loser" : ""
                             }`}
                           >
-                            {match.awayTeamName}
+                            {match.awayTeamName || match.awayTeam}
                           </span>
                         </div>
                       </div>
 
-                      {/* HØYRE SIDE – STATUS / TID */}
                       <div className="match-right">
                         {endedManually || endedAutomatically ? (
                           <span className="match-status-ended">Slutt</span>

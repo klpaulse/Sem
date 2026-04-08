@@ -2,232 +2,200 @@ import { useEffect, useState } from "react";
 import { db } from "../../config/Firebase";
 import {
   collection,
-  addDoc,
+  query,
+  where,
+  onSnapshot,
   deleteDoc,
   doc,
-  onSnapshot,
-  serverTimestamp,
   updateDoc,
 } from "firebase/firestore";
 
-import MatchSelector from "./MatchSelector";
-import LiveControls from "./LiveControls";
-import EventForm from "./EventForm";
-import MatchPreview from "./MatchPreview";
-import ResultsForm from "./ResultsForm";
-import MatchListAdmin from "./MatchListAdmin";
 import CreateMatchForm from "./CreateMatchForm";
-import BulkImportMatches from "./BulkImportMatches-skjema";
 
 export default function KampAdministrasjon({ divisions }) {
+  const [selectedDivision, setSelectedDivision] = useState("");
   const [matches, setMatches] = useState([]);
-  const [selectedMatch, setSelectedMatch] = useState(null);
-  const [events, setEvents] = useState([]);
 
-  // Resultat
+  // Redigering
   const [editingMatch, setEditingMatch] = useState(null);
-  const [homeScore, setHomeScore] = useState("");
-  const [awayScore, setAwayScore] = useState("");
-  const [location, setLocation] = useState("");
+  const [editHomeTeam, setEditHomeTeam] = useState("");
+  const [editAwayTeam, setEditAwayTeam] = useState("");
+  const [editDate, setEditDate] = useState("");
+  const [editTime, setEditTime] = useState("");
+  const [editLocation, setEditLocation] = useState("");
 
-  // Bytter
-  const [subIn, setSubIn] = useState("");
-  const [subOut, setSubOut] = useState("");
-  const [subTeam, setSubTeam] = useState("");
-  const [subComment, setSubComment] = useState("");
-
-  // Hendelser
-  const [type, setType] = useState("comment");
-  const [text, setText] = useState("");
-
-  const matchesRef = collection(db, "matches");
-
-  // Hent alle kamper live
+  // LIVE: hent kamper for valgt divisjon
   useEffect(() => {
-    const unsubscribe = onSnapshot(matchesRef, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        ...doc.data(),
+    if (!selectedDivision) return;
+
+    const matchesRef = collection(db, "matches");
+    const q = query(matchesRef, where("division", "==", selectedDivision));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const list = snapshot.docs.map((doc) => ({
         id: doc.id,
+        ...doc.data(),
       }));
-      setMatches(data);
-    });
 
-    return () => unsubscribe();
-  }, []);
-
-  // Beregn minutt basert på startTime
-  const calculateMinute = () => {
-    if (!selectedMatch?.startTime) return 0;
-    const start = selectedMatch.startTime.toDate();
-    const now = new Date();
-    return Math.floor((now - start) / 60000);
-  };
-
-  // Start kamp
-  const startMatch = async () => {
-    if (!selectedMatch) return;
-
-    const matchRef = doc(db, "matches", selectedMatch.id);
-    await updateDoc(matchRef, {
-      startTime: serverTimestamp(),
-    });
-
-    await addSystemEvent("Kampen har startet");
-  };
-
-  // Systemhendelser
-  const addSystemEvent = async (systemText) => {
-    if (!selectedMatch) return;
-
-    const minute = calculateMinute();
-
-    await addDoc(collection(db, "matches", selectedMatch.id, "events"), {
-      type: "system",
-      team: systemText,
-      minute,
-      createdAt: serverTimestamp(),
-    });
-  };
-
-  // Vanlige hendelser
-  const addEvent = async () => {
-    if (!selectedMatch) return;
-
-    const minute = calculateMinute();
-
-    if (type === "sub") {
-      await addDoc(collection(db, "matches", selectedMatch.id, "events"), {
-        type: "sub",
-        team: subTeam,
-        in: subIn,
-        out: subOut,
-        comment: subComment,
-        minute,
-        createdAt: serverTimestamp(),
+      // Sorter etter dato
+      list.sort((a, b) => {
+        const da = a.date?.toDate ? a.date.toDate() : new Date(a.date);
+        const dbb = b.date?.toDate ? b.date.toDate() : new Date(b.date);
+        return da - dbb;
       });
 
-      setSubIn("");
-      setSubOut("");
-      setSubTeam("");
-      setSubComment("");
-      return;
-    }
-
-    await addDoc(collection(db, "matches", selectedMatch.id, "events"), {
-      type,
-      text,
-      minute,
-      createdAt: serverTimestamp(),
-    });
-
-    setText("");
-  };
-
-  // Hent events for valgt kamp
-  useEffect(() => {
-    if (!selectedMatch) return;
-
-    const eventsRef = collection(db, "matches", selectedMatch.id, "events");
-
-    const unsubscribe = onSnapshot(eventsRef, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      data.sort((a, b) => (a.minute ?? 0) - (b.minute ?? 0));
-
-      setEvents(data);
+      setMatches(list);
     });
 
     return () => unsubscribe();
-  }, [selectedMatch]);
+  }, [selectedDivision]);
 
-  // Lagre resultat
-  const saveResult = async () => {
-    if (!editingMatch) return;
+  const deleteMatch = async (id) => {
+    await deleteDoc(doc(db, "matches", id));
+  };
 
+  const startEditing = (match) => {
+    setEditingMatch(match);
+
+    setEditHomeTeam(match.homeTeam);
+    setEditAwayTeam(match.awayTeam);
+
+    setEditDate(
+      match.date?.toDate
+        ? match.date.toDate().toISOString().split("T")[0]
+        : match.date
+    );
+
+    setEditTime(
+      match.time?.toDate
+        ? match.time.toDate().toLocaleTimeString("nb-NO", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          })
+        : match.time
+    );
+
+    setEditLocation(match.location || "");
+  };
+
+  const saveEdit = async () => {
     const matchRef = doc(db, "matches", editingMatch.id);
+
     await updateDoc(matchRef, {
-      homeScore: Number(homeScore),
-      awayScore: Number(awayScore),
-      played: true,
-      location,
+      homeTeam: editHomeTeam,
+      awayTeam: editAwayTeam,
+      date: editDate,
+      time: editTime,
+      location: editLocation,
     });
 
     setEditingMatch(null);
-    setHomeScore("");
-    setAwayScore("");
-    setLocation("");
-  };
-
-  // Slett kamp
-  const deleteMatch = async (id) => {
-    const matchDoc = doc(db, "matches", id);
-    await deleteDoc(matchDoc);
   };
 
   return (
     <section className="kampadmin-container">
-      <h2 className="kampadmin-title">Kampadministrasjon</h2>
 
-      <MatchSelector
-        matches={matches}
-        selectedMatch={selectedMatch}
-        setSelectedMatch={setSelectedMatch}
-      />
+      {/* Velg divisjon */}
+      <div className="kampadmin-select">
+        <label>Velg divisjon:</label>
+        <select
+          value={selectedDivision}
+          onChange={(e) => setSelectedDivision(e.target.value)}
+        >
+          <option value="">-- Velg divisjon --</option>
+          {divisions.map((div) => (
+            <option key={div} value={div}>
+              {div}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      {selectedMatch && (
-        <>
-          <LiveControls
-            addSystemEvent={addSystemEvent}
-            startMatch={startMatch}
-          />
+      {/* Liste over kamper */}
+      {selectedDivision && (
+        <div className="kampadmin-list">
+          <h3>Kamper i {selectedDivision}</h3>
 
-          <EventForm
-            type={type}
-            setType={setType}
-            text={text}
-            setText={setText}
-            selectedMatch={selectedMatch}
-            subTeam={subTeam}
-            setSubTeam={setSubTeam}
-            subIn={subIn}
-            setSubIn={setSubIn}
-            subOut={subOut}
-            setSubOut={setSubOut}
-            subComment={subComment}
-            setSubComment={setSubComment}
-            addEvent={addEvent}
-          />
+          {matches.length === 0 ? (
+            <p>Ingen kamper registrert i denne divisjonen ennå.</p>
+          ) : (
+            <ul>
+              {matches.map((match) => (
+                <li key={match.id} className="kampadmin-list-item">
+                  <span>
+                    {match.homeTeam} – {match.awayTeam} (
+                    {match.date?.toDate
+                      ? match.date.toDate().toLocaleDateString("nb-NO")
+                      : match.date}
+                    {" "}
+                    kl{" "}
+                    {match.time?.toDate
+                      ? match.time.toDate().toLocaleTimeString("nb-NO", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : match.time}
+                    )
+                  </span>
 
-          <MatchPreview match={selectedMatch} events={events} />
-        </>
+                  <button onClick={() => startEditing(match)}>Rediger</button>
+                  <button onClick={() => deleteMatch(match.id)}>Slett</button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       )}
 
+      {/* Rediger kamp */}
       {editingMatch && (
-        <ResultsForm
-          editingMatch={editingMatch}
-          setEditingMatch={setEditingMatch}
-          homeScore={homeScore}
-          setHomeScore={setHomeScore}
-          awayScore={awayScore}
-          setAwayScore={setAwayScore}
-          location={location}
-          setLocation={setLocation}
-          saveResult={saveResult}
-        />
+        <div className="kampadmin-edit">
+          <h3>Rediger kamp</h3>
+
+          <label>Hjemmelag</label>
+          <input
+            value={editHomeTeam}
+            onChange={(e) => setEditHomeTeam(e.target.value)}
+          />
+
+          <label>Bortelag</label>
+          <input
+            value={editAwayTeam}
+            onChange={(e) => setEditAwayTeam(e.target.value)}
+          />
+
+          <label>Dato</label>
+          <input
+            type="date"
+            value={editDate}
+            onChange={(e) => setEditDate(e.target.value)}
+          />
+
+          <label>Tid</label>
+          <input
+            type="time"
+            value={editTime}
+            onChange={(e) => setEditTime(e.target.value)}
+          />
+
+          <label>Bane / sted</label>
+          <input
+            value={editLocation}
+            onChange={(e) => setEditLocation(e.target.value)}
+          />
+
+          <button onClick={saveEdit}>Lagre endringer</button>
+          <button onClick={() => setEditingMatch(null)}>Avbryt</button>
+        </div>
       )}
 
-      <MatchListAdmin
-        matches={matches}
-        setEditingMatch={setEditingMatch}
-        deleteMatch={deleteMatch}
-      />
+      {/* Legg til kamp */}
+      <div className="kampadmin-card">
+        <h3>Legg til kamp</h3>
+        <CreateMatchForm divisions={divisions} />
+      </div>
 
-      <CreateMatchForm divisions={divisions} />
-
-      <BulkImportMatches divisions={divisions} />
     </section>
   );
 }

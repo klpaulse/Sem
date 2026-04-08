@@ -22,10 +22,11 @@ export default function HomePage() {
         ...doc.data(),
       }));
 
-      // Sorter kampene etter dato
+      // Trygg sortering (Timestamp eller string)
       matchesData.sort((a, b) => {
-        if (!a.date || !b.date) return 0;
-        return a.date.toDate() - b.date.toDate();
+        const da = a.date?.toDate ? a.date.toDate() : new Date(a.date);
+        const db = b.date?.toDate ? b.date.toDate() : new Date(b.date);
+        return da - db;
       });
 
       setMatches(matchesData);
@@ -34,12 +35,15 @@ export default function HomePage() {
     return () => unsubscribe();
   }, []);
 
-  // Filtrer dagens kamper
+  // Filtrer dagens kamper (trygg dato)
   const todaysMatches = matches.filter((m) => {
     if (!m.date) return false;
-    const matchDate = m.date.toDate().toDateString();
-    const selected = selectedDate.toDateString();
-    return matchDate === selected;
+
+    const matchDate = m.date?.toDate
+      ? m.date.toDate()
+      : new Date(m.date);
+
+    return matchDate.toDateString() === selectedDate.toDateString();
   });
 
   // Gruppér kamper etter divisjon
@@ -55,8 +59,8 @@ export default function HomePage() {
   return (
     <main className="page">
       <h1 className="live-header">
-     Breddefotball Live
-     </h1>
+        Breddefotball Live
+      </h1>
 
       <section className="calandar-section">
         <Calandar

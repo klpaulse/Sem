@@ -28,3 +28,10 @@
 .kampadmin-title {
   margin-bottom: 20px;
 }
+
+.adminpage-title,
+.admin-section-title,
+.lagadmin-title,
+.kampadmin-title {
+  color: white;
+}
