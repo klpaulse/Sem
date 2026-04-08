@@ -1,6 +1,5 @@
 :root{
     --background: #0D1117;
-    --logo : #ffff; 
     --nextmatch-text: #ffff;
     --countdown-text: #E63946; 
     --countdown-bottom: #E63946;
@@ -19,6 +18,7 @@
       var(--status-light)
     );
     --card-bg: #ffffff0d ; 
+    --calandar-style: ; 
   
 }
 
@@ -34,17 +34,6 @@ body{
     margin-bottom: 1.5rem; 
  
   }
-
-  .SEM{
-    color: var(--logo);
-   font-size: 2rem;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-
-    }
-
- 
 
    .next-match * {
     text-align: center; 
@@ -75,22 +64,60 @@ body{
     align-items: center; 
     justify-content: center; 
     gap: 0.6rem;  
+    animation: fadeIn 0.4s ease;
+
   
   }
 
   .knapp-kampdetaljer{
-    color: var(--nextmatch-text);
-    background-color: var(--countdown-bottom);
-    padding: 0.6rem 1.2rem;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    margin-top: 0.5rem;
-    transition: 0.2s ease;
-    text-align: center;
-   
+ background: none;
+  border: none;
+  color: var(--countdown-bottom);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  padding: 0.3rem 0; 
+ margin-top: -0.2rem;
+ margin-bottom: -1.5rem; 
+
+
+  .knapp-kampdetaljer::after{
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 2px;
+  background: #d62828;
+  opacity: 0.6;
+  transform: scaleX(0.35);
+  transform-origin: left;
+  transition: 0.18s ease;
+
+  }
+
+
+.knapp-kampdetaljer:hover{
+   color: #ff3b3b;
+}
+
+.knapp-kampdetaljer:hover::after{
+  opacity: 1;
+  transform: scaleX(1);
+
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
    
   }
 
@@ -133,6 +160,13 @@ body{
   color: var(--nextmatch-text);
   margin: 0.6rem 0 0.8rem 0;
  
+}
+
+.dato {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--nextmatch-text);
+  margin: 0.6rem 0 0.8rem 0;
 }
 
 .lp-status{
@@ -274,6 +308,16 @@ display: inline-block;
 
 }
 
+.match-clickable {
+  cursor: pointer;
+  padding: 6px 0;
+}
+
+.match-clickable:hover {
+  opacity: 0.7;
+}
+
+
 
 
 
@@ -289,3 +333,5 @@ display: inline-block;
     }
     
   }
+
+

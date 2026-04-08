@@ -6,13 +6,10 @@ export default function Countdown({date, time}){
  const [timeRemaining, setTimeRemaining] = useState(0)
 
         useEffect(() => {
-            if(!date || !time) return;
+            if(!date) return;
 
             const interval = setInterval(() => {
-                const kampTid = new Date(date.toDate())
-                const [hours, minutes] = time.split(":")
-                kampTid.setHours(hours)
-                kampTid.setMinutes(minutes)
+                const kampTid = date instanceof Date ? date : date.toDate()
 
                 const now= new Date().getTime()
                 const eventTime = kampTid.getTime()
@@ -26,7 +23,7 @@ export default function Countdown({date, time}){
                 setTimeRemaining(remaining)
             }, 1000)
             return () => clearInterval(interval)
-        },[date, time])
+        },[date])
 
         const formatTime = (time) => {
             const seconds = Math.floor((time / 1000) % 60)

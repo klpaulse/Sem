@@ -1,25 +1,99 @@
-.home-page {
+:root {
+  /* Colors */
+  --cal-bg-dark: #111;
+  --cal-bg-strip: rgba(255, 255, 255, 0.04);
+  --cal-bg-day: #f2f2f2;
+  --cal-bg-hover: rgba(255, 90, 90, 0.14);
+  --cal-bg-selected: rgba(255, 90, 90, 0.22);
+  --cal-border-selected: rgba(255, 90, 90, 0.38);
+  --cal-today-border: rgba(255, 90, 90, 0.6);
+  --cal-text-light: #fff;
+  --cal-text-muted: #aaa;
+  --cal-text-other-month: #555;
+
+  /* Layout */
+  --cal-radius-small: 6px;
+  --cal-radius-medium: 10px;
+  --cal-radius-large: 14px;
+
+  --cal-padding-small: 0.5rem;
+  --cal-padding-medium: 0.6rem;
+  --cal-padding-large: 1rem;
+
+  /* Effects */
+  --cal-shadow: 0 0 25px rgba(0,0,0,0.4);
+  --cal-blur: blur(4px);
+  --cal-transition: 0.2s ease;
+}
+
+
+
+
+
+/* ---------------------------------------------------
+   GLOBAL LAYOUT
+--------------------------------------------------- */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+/* ---------------------------------------------------
+   KALENDER-SEKSJON
+--------------------------------------------------- */
+
+.calendar-section {
   position: relative;
-  pointer-events: auto;
   z-index: 1;
 }
 
-/* Container */
-.calandar-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* STRIP-VISNING */
+/* STRIP-VISNING (Dagsliste) */
 .calandar-strip {
-  display: flex;
+   display: flex;
   align-items: center;
   gap: 8px;
   overflow-x: auto;
-  padding: 10px 0;
-  scroll-behavior: smooth;
+  overflow-y: hidden;
   white-space: nowrap;
+  height: 60px;
+  flex-shrink: 0;
+
+  padding: var(--cal-padding-medium);
+  background: var(--cal-bg-strip);
+  border-radius: var(--cal-radius-medium);
+  backdrop-filter: var(--cal-blur);
+  scroll-behavior: smooth;
+
+
+}
+
+.calendar-day {
+min-width: 70px;
+  padding: 0.5rem 0.7rem;
+  border-radius: var(--cal-radius-small);
+  background: var(--cal-bg-day);
+  cursor: pointer;
+  text-align: center;
+  flex-shrink: 0;
+  transition: background var(--cal-transition), color var(--cal-transition), transform var(--cal-transition);
+}
+
+
+.calendar-day:hover {
+background: var(--cal-bg-hover);
+}
+
+
+.calendar-day.selected {
+ background: var(--cal-bg-selected);
+  border: 1px solid var(--cal-border-selected);
+  color: var(--cal-text-light);
+  transform: translateY(-2px);
+
 }
 
 .calendar-open-btn {
@@ -30,134 +104,125 @@
   flex-shrink: 0;
 }
 
-.calendar-open-btn svg {
-  font-size: 20px;
+/*Strip-visning-shadows*/
+.calendar-slide {
+ position: relative;
+  background: var(--cal-bg-strip);
+  padding: var(--cal-padding-medium);
+  border-radius: var(--cal-radius-medium);
+  backdrop-filter: var(--cal-blur);
+  display: flex;
+  gap: 0.4rem;
 }
 
-.calendar-day {
-  min-width: 70px;
-  padding: 8px 12px;
-  border-radius: 6px;
-  background: #f2f2f2;
-  cursor: pointer;
-  text-align: center;
-  flex-shrink: 0;
+.calendar-slide::before,
+.calendar-slide::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  pointer-events: none;
 }
 
-.calendar-day.selected {
-  background: #007bff;
-  color: white;
+.calendar-slide::before {
+  left: 0;
+  background: linear-gradient(to right, rgba(0,0,0,0.4), transparent);
+}
+
+.calendar-slide::after {
+  right: 0;
+  background: linear-gradient(to left, rgba(0,0,0,0.4), transparent);
 }
 
 /* FULL MÅNEDSKALENDER */
 .month-view {
-  background: #f2f2f2;
-  padding: 15px;
-  border-radius: 8px;
+  position: relative;
+background: var(--cal-bg-dark);
+  padding: var(--cal-padding-large);
+  border-radius: var(--cal-radius-large);
   width: 100%;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  max-width: 340px;
+  margin: 0 auto;
+  box-shadow: var(--cal-shadow);
 }
 
-/* Toppseksjon */
+/*MÅNEDSKALENDER - HEADER*/
 .month-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
 }
 
-.month-header h3 {
-  margin: 0;
-  text-transform: capitalize;
+.calendar-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.month-header button {
+
+.calendar-title {
+   font-weight: 600;
+  color: var(--cal-text-light);
+  font-size: 1.05rem;
+}
+
+.nav-btn {
+ background: none;
+  border: none;
+  color: var(--cal-text-light);
+  font-size: 1.3rem;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity var(--cal-transition);
+}
+
+.nav-btn:hover {
+  opacity: 1;
+}
+
+.close-month-btn {
+position: absolute;
+  top: 10px;
+  right: 20px;
   background: none;
   border: none;
+  color: var(--cal-text-light);
+  font-size: 1.2rem;
   cursor: pointer;
-  font-size: 22px;
+  opacity: 0.7;
+  padding: 0;
+  line-height: 1;
+  transition: opacity var(--cal-transition);
+
 }
 
-/* Gå til i dag */
-.today-btn {
-  width: fit-content;
-  padding: 6px 12px;
-  background: #ddd;
-  border-radius: 6px;
-  cursor: pointer;
-  border: none;
+.calendar-close:hover {
+  opacity: 1;
+  color: var(--cal-border-selected)
 }
 
-/* Ukedager */
+/*UKEDAGER*/
 .weekdays-row {
-  display: grid;
+   display: grid;
   grid-template-columns: repeat(7, 1fr);
   text-align: center;
   font-weight: bold;
-  color: #555;
+  color: var(--cal-text-other-month);
+
 }
 
 .weekday {
   padding-bottom: 5px;
 }
 
-/* Kalender-grid */
+/*DAGSRUTENETT (MÅNED)*/
 .month-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 8px;
-}
-
-/* Animasjon */
-.month-grid.fade {
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-.month-day {
-  padding: 12px;
-  background: white;
-  border-radius: 6px;
-  text-align: center;
-  cursor: pointer;
-  transition: 0.15s ease;
-}
-
-.month-day:hover {
-  background: #e6e6e6;
-}
-
-/* Forrige/neste måned */
-.other-month {
-  opacity: 0.35;
-}
-
-/* Valgt dato */
-.month-day.selected {
-  background: #007bff;
-  color: white;
-}
-
-/* Dagens dato */
-.month-day.today {
-  border: 2px solid #007bff;
-  font-weight: bold;
-  background: #e8f1ff;
-}
-
-/* Lukk-knapp */
-.close-month-btn {
-  padding: 8px 12px;
-  border-radius: 6px;
-  background: #ddd;
-  cursor: pointer;
-  border: none;
-  width: fit-content;
-}
-/* Slide-animasjon */
-.month-grid {
   position: relative;
   transition: transform 0.25s ease, opacity 0.25s ease;
 }
@@ -174,8 +239,48 @@
   transform: translateX(40px);
 }
 
-/*division-list*/
-/* --- DIVISION LIST WRAPPER --- */
+/*dager i månedskalenderen*/
+.month-day {
+  padding: 12px;
+  background: var(--cal-bg-day);
+  border-radius: var(--cal-radius-small);
+  text-align: center;
+  cursor: pointer;
+  transition: var(--cal-transition);
+}
+
+.month-day:hover {
+  background: #e6e6e6;
+}
+
+.other-month {
+  opacity: 0.35;
+}
+
+.month-day.selected {
+  background: var(--cal-bg-selected);
+  color: var(--cal-text-light);
+  border: 1px solid var(--cal-border-selected);
+}
+
+.month-day.today {
+ border: 1px solid var(--cal-today-border);
+  font-weight: bold;
+  background: rgba(255, 90, 90, 0.12);
+}
+
+
+
+/* ---------------------------------------------------
+   DIVISJONSLISTE (dropdown)
+--------------------------------------------------- */
+
+/* WRAPPER */
+.division-section {
+  position: relative;
+  z-index: 1;
+}
+
 .division-list {
   margin-top: 20px;
 }
@@ -184,55 +289,49 @@
   margin-bottom: 20px;
 }
 
-/* --- HEADER (midtstilt divisjonstittel) --- */
+/* HEADER (dropdown-knapp) */
 .division-header {
-  position: relative;
-  z-index: 1;
-  cursor: default; /* headeren er ikke klikkbar */
-}
-
-.center-layout {
-  display: flex;
-  justify-content: center;
+ display: flex;
+  justify-content: space-between;
   align-items: center;
-  padding: 1rem 0;
-
-  border-top: 1px solid rgba(255,255,255,0.2);
-  border-bottom: 1px solid rgba(255,255,255,0.2);
-
-  position: relative;
-}
-
-.center-layout h3 {
-  margin: 0;
-  font-size: 1.1rem;
-}
-
-/* --- PIL-KNAPP (klikkbar) --- */
-.division-arrow-btn {
-  background: none;
-  border: none;
+  padding: 0.8rem 1rem;
   cursor: pointer;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%) rotate(0deg);
-  padding: 0;
-  z-index: 3;
-  font-size: 1.2rem;
-  transition: transform 0.25s ease;
+  background: transparent;
+ border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+transition: background 0.2s ease, opacity 0.2s ease;
 }
 
-.division-arrow-btn.open {
-  transform: translateY(-50%) rotate(180deg);
+.division-header:hover {
+  background: rgba(255, 255, 255, 0.05); /* subtil lysning */
+  opacity: 1;
 }
 
-/* --- MATCHLISTE ANIMASJON (smooth slide) --- */
+
+.division-header h3 {
+   margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff; /* hvit tekst */
+  letter-spacing: 0.5px;
+
+}
+
+/* PIL */
+.dropdown-arrow {
+  font-size: 0.9rem;
+  color: #fff;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  opacity: 0.7;
+
+}
+
+.dropdown-arrow.open {
+ transform: rotate(180deg);
+  opacity: 1;
+
+}
+
+/* DROPDOWN-INNHOLD */
 .division-matches-wrapper {
   max-height: 0;
   overflow: hidden;
@@ -240,74 +339,184 @@
 }
 
 .division-matches-wrapper.open {
-  max-height: 500px; /* nok til mange kamper */
+  max-height: 500px;
 }
 
-/* --- MATCH LIST --- */
 .division-matches {
   padding-top: 10px;
 }
 
-.division-match {
-  padding: 10px 0;
+/* -------------------------------------------------- */
+/* NY MATCH-CARD STIL (MATCHER MATCHPAGE .event)      */
+/* -------------------------------------------------- */
+
+.match-card {
+  background: var(--card-bg);
+  padding: 12px 14px;
+  border-top: 1px solid #FFFFFF0F;
+  border-bottom: 1px solid #FFFFFF0F;
+  border-radius: 6px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center; 
+  gap: 10px;
+  margin: 6px 0;
   cursor: pointer;
+  transition: background 0.15s ease;
 }
 
-.division-match:hover {
+.match-card:hover {
+  background: #ffffff14;
+}
+
+/* Venstre side: lagene */
+.match-card-teams {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; 
+  gap: 4px;
+  color: var(--nextmatch-text)
+}
+
+.match-card-team {
+  color: var(--nextmatch-text);
+  font-size: 0.95rem;
+  font-weight: 600;
+  opacity: 0.95;
+}
+
+/* Høyre side: tid / resultat / live */
+.match-card-right {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.match-card-time {
+  color: #ffffffcc;
+  font-size: 0.85rem;
   opacity: 0.8;
 }
 
-/* --- MATCH ROW --- */
-.match-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* --- VENSTRE SIDE (kolonne med tall/strek + lag) --- */
-.match-left {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.match-card-live {
+  background: var(--status-gradient);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  border-left: 4px solid var(--countdown-text);
+  opacity: 0.9;
 }
 
 .row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px; /* perfekt avstand */
 }
 
-/* Tall eller strek foran lagnavn */
 .left-col {
-  width: 20px;
+  width: auto;
+  min-width: 12px; /* nok plass til 1–2 siffer */
+  padding-right: 4px; /* gir fin luft */
   text-align: right;
   font-weight: 700;
   opacity: 0.8;
 }
 
-/* Lagnavn */
-.team {
-  font-weight: 500;
-}
-
-/* --- HØYRE SIDE (tid / live / pause) --- */
-.match-right {
-  min-width: 60px;
-  text-align: right;
-}
-
-.match-time {
-  opacity: 0.8;
-}
-
-/* LIVE */
-.match-status.live {
-  color: #ff4d4d;
+.match-minute-live {
+  background: #1f8a3b;              /* mørk grønn */
+  background: linear-gradient(
+    180deg,
+    #2fbf5f,                        /* lys grønn top */
+    #1f8a3b                         /* mørkere grønn bunn */
+  );
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.8rem;
   font-weight: 700;
+  color: #ffffff;
+  display: inline-block;
+  min-width: 38px;
+  text-align: center;
+  border: 1px solid #3ddc84;        /* lys grønn kant */
+  box-shadow: 0 0 6px #3ddc8444;    /* subtil glow */
 }
 
-/* PAUSE */
-.match-status.pause {
-  color: #ffd966;
+.match-time-box {
+  display: inline-block;
+  background: var(--status-gradient);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.60rem;
   font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  border-left: 4px solid var(--countdown-text);
+  opacity: 0.9;
 }
+
+
+.match-status-ended {
+  display: inline-block;
+  background: var(--status-gradient);
+  padding: 0.25rem 1rem;
+  border-radius: 4px;
+  font-size: 0.60rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  border-left: 4px solid var(--countdown-text);
+  opacity: 0.9;
+}
+
+.winner {
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.loser {
+  opacity: 0.55;
+}
+
+.live-header {
+  position: relative;
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.2rem;
+
+  /* Subtil rød glow */
+  text-shadow: 0 0 8px rgba(255, 0, 0, 0.35);
+}
+
+
+/* Underline reveal – AUTOMATISK */
+.live-header::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: linear-gradient(90deg, #ff3b3b, #ff7b3b);
+  border-radius: 2px;
+
+  /* Spill animasjonen når elementet rendres */
+  animation: underlineReveal 0.6s ease forwards;
+}
+
+@keyframes underlineReveal {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+
+  

@@ -7,13 +7,17 @@ export default function MatchFilters({
   setSelectedTeam,
   matches
 }) {
-  // Unike runder
-  const uniqueRounds = [...new Set(matches.map((m) => m.round).filter(Boolean))];
+  // 🔥 Unike runder
+  const uniqueRounds = [
+    ...new Set(matches.map((m) => m.round).filter(Boolean))
+  ];
 
-  // Unike lag
+  // 🔥 Unike lag (ID-er)
   const uniqueTeams = [
     ...new Set(
-      matches.flatMap((m) => [m.homeTeam, m.awayTeam]).filter(Boolean)
+      matches
+        .flatMap((m) => [m.homeTeam, m.awayTeam])
+        .filter(Boolean)
     ),
   ];
 

@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
-import { getTeam } from "../services/TeamService";
+import { useNavigate } from "react-router-dom";
 
 export default function PlayedMatches({ matches }) {
-  const [teamData, setTeamData] = useState({}); // cache for lag
+  const navigate = useNavigate();
   const now = new Date();
 
   // Filtrer ferdigspilte kamper
@@ -28,28 +27,6 @@ export default function PlayedMatches({ matches }) {
       return bDate - aDate; // nyeste først
     });
 
-  // Hent lag basert på ID
-  useEffect(() => {
-    async function loadTeams() {
-      const cache = {};
-
-      for (const match of past) {
-        if (!cache[match.homeTeam]) {
-          cache[match.homeTeam] = await getTeam(match.homeTeam);
-        }
-        if (!cache[match.awayTeam]) {
-          cache[match.awayTeam] = await getTeam(match.awayTeam);
-        }
-      }
-
-      setTeamData(cache);
-    }
-
-    if (past.length > 0) {
-      loadTeams();
-    }
-  }, [past]);
-
   return (
     <section>
       <h2>Spilte kamper</h2>
@@ -57,13 +34,6 @@ export default function PlayedMatches({ matches }) {
       {past.length === 0 && <p>Ingen spilte kamper ennå</p>}
 
       {past.map((m, index) => {
-        const home = teamData[m.homeTeam];
-        const away = teamData[m.awayTeam];
-
-        if (!home || !away) {
-          return <p key={index}>Laster lag...</p>;
-        }
-
         const baseDate = m.date.toDate ? m.date.toDate() : new Date(m.date);
         const datePart = baseDate.toISOString().split("T")[0];
         const kampDato = new Date(`${datePart}T${m.time}`);
@@ -75,14 +45,18 @@ export default function PlayedMatches({ matches }) {
           m.awayScore !== undefined;
 
         return (
-          <div key={index} style={{ marginBottom: "1rem" }}>
+          <div
+            key={index}
+            className="match-clickable"
+            onClick={() => navigate(`/match/${m.id}`, { state: { match: m } })}
+          >
             <p>
               {m.day} {kampDato.toLocaleDateString("no-NO")} – Ferdig
             </p>
 
             {harResultat ? (
               <p>
-                {home.teamName} {m.homeScore} – {m.awayScore} {away.teamName}
+                {m.homeTeamName} {m.homeScore} – {m.awayScore} {m.awayTeamName}
               </p>
             ) : (
               <p>Resultat kommer</p>

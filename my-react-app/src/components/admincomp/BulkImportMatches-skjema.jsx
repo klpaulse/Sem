@@ -10,7 +10,7 @@ export default function BulkImportMatches() {
 
   const importMatches = async () => {
     if (!division) {
-      setMessage("Du må skrive inn en divisjon (FIKS-ID)");
+      setMessage("Du må skrive inn en divisjon");
       return;
     }
 

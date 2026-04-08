@@ -6,26 +6,16 @@ import MatchList from "../components/maincomp/MatchList";
 import "../assets/style/matchPage.css";
 
 import { useEffect, useState, useRef } from "react";
-import { collection, onSnapshot, query, orderBy, doc, getDoc, getDocs } from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy, getDocs } from "firebase/firestore";
 import { db } from "../config/Firebase";
-import { useParams } from "react-router-dom";
 
-// ⭐ Hent lag basert på ID
-import { getTeam } from "../services/TeamService";
+import { useParams } from "react-router-dom";
+import BeforeMatch from "../components/maincomp/BeforeMatch";
 
 export default function MatchPage() {
   const { id } = useParams();
 
-  // Kampen du klikket på
-  const [selectedMatch, setSelectedMatch] = useState(null);
-
-  // Alle kamper (for designet ditt)
   const [allMatches, setAllMatches] = useState([]);
-
-  // Lagobjekter (hentes via ID)
-  const [homeTeam, setHomeTeam] = useState(null);
-  const [awayTeam, setAwayTeam] = useState(null);
-
   const [events, setEvents] = useState([]);
   const [activeTab, setActiveTab] = useState("rapport");
 
@@ -35,21 +25,7 @@ export default function MatchPage() {
 
   const upcomingRef = useRef(null);
 
-  // 🔥 Hent EN kamp basert på URL
-  useEffect(() => {
-    const fetchMatch = async () => {
-      const ref = doc(db, "matches", id);
-      const snap = await getDoc(ref);
-
-      if (snap.exists()) {
-        setSelectedMatch({ id: snap.id, ...snap.data() });
-      }
-    };
-
-    fetchMatch();
-  }, [id]);
-
-  // 🔥 Hent ALLE kamper (for designet ditt)
+  // 🔥 Hent ALLE kamper
   useEffect(() => {
     const fetchAll = async () => {
       const ref = collection(db, "matches");
@@ -61,27 +37,12 @@ export default function MatchPage() {
     fetchAll();
   }, []);
 
-  // 🔥 Hent lagobjekter basert på ID
-  useEffect(() => {
-    if (!selectedMatch) return;
-
-    async function loadTeams() {
-      const home = await getTeam(selectedMatch.homeTeam);
-      const away = await getTeam(selectedMatch.awayTeam);
-
-      setHomeTeam(home);
-      setAwayTeam(away);
-    }
-
-    loadTeams();
-  }, [selectedMatch]);
+  // 🔥 Finn kampen basert på ID
+  const selectedMatch = allMatches.find(m => m.id === id);
 
   // 🔥 Hent events
   useEffect(() => {
-    if (!selectedMatch) {
-      setEvents([]);
-      return;
-    }
+    if (!selectedMatch) return;
 
     const q = query(
       collection(db, "matches", selectedMatch.id, "events"),
@@ -99,13 +60,8 @@ export default function MatchPage() {
     return () => unsub();
   }, [selectedMatch]);
 
-  // Loading
-  if (!selectedMatch || allMatches.length === 0 || !homeTeam || !awayTeam) {
-    return <p>Laster kamp...</p>;
-  }
-
   // 🔥 Siste spilte kamp
-  const played = allMatches.filter((m) => m.homeScore != null);
+  const played = allMatches.filter((m) => m.homeScore !== null);
   const lastPlayed =
     played.length > 0
       ? played.sort((a, b) => b.date.toDate() - a.date.toDate())[0]
@@ -125,25 +81,35 @@ export default function MatchPage() {
         : true
     );
 
+  // 🔥 Kampstatus
+  if (!selectedMatch) {
+    return <p>Laster kamp...</p>;
+  }
+
+  const matchDate = selectedMatch.date.toDate();
+  const isFuture = matchDate > new Date();
+
+  if (isFuture) {
+    return <BeforeMatch match={selectedMatch} allMatches={allMatches} />;
+  }
+
   return (
     <>
       <header className="header">
         <h1 className="SEM">Breddefotball Live</h1>
       </header>
 
-      {/* 🔥 Nedtelling og neste kamp */}
       <NextMatch matches={allMatches} />
 
-      {/* 🔥 Siste kamp på gressmatta */}
       {lastPlayed && (
         <section className="last-played-card">
           <p className="lp-status">Slutt</p>
           <div className="lp-row">
-            <span className="lp-title">{homeTeam.teamName}</span>
+            <span className="lp-title">{lastPlayed.homeTeamName}</span>
             <p className="lp-result">
               {lastPlayed.homeScore} - {lastPlayed.awayScore}
             </p>
-            <span className="lp-title">{awayTeam.teamName}</span>
+            <span className="lp-title">{lastPlayed.awayTeamName}</span>
           </div>
 
           <p className="lp-date">
@@ -156,12 +122,7 @@ export default function MatchPage() {
 
       <section className="content-box">
         {activeTab === "rapport" && (
-          <MatchReport
-            match={selectedMatch}
-            events={events}
-            homeTeam={homeTeam}
-            awayTeam={awayTeam}
-          />
+          <MatchReport match={selectedMatch} events={events} />
         )}
 
         {activeTab === "kamper" && (

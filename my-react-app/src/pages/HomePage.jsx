@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { db } from "../config/Firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
 import Calandar from "../components/homecomp/Calandar";
@@ -12,15 +12,14 @@ export default function HomePage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const navigate = useNavigate();
 
-  // Hent ALLE kamper fra Firestore
+  // LIVE-OPPDATERING AV KAMPER
   useEffect(() => {
-    const fetchMatches = async () => {
-      const matchesRef = collection(db, "matches");
-      const matchesSnap = await getDocs(matchesRef);
+    const matchesRef = collection(db, "matches");
 
-      const matchesData = matchesSnap.docs.map(doc => ({
+    const unsubscribe = onSnapshot(matchesRef, (snapshot) => {
+      const matchesData = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       }));
 
       // Sorter kampene etter dato
@@ -30,21 +29,21 @@ export default function HomePage() {
       });
 
       setMatches(matchesData);
-    };
+    });
 
-    fetchMatches();
+    return () => unsubscribe();
   }, []);
 
   // Filtrer dagens kamper
-  const todaysMatches = matches.filter(m => {
+  const todaysMatches = matches.filter((m) => {
     if (!m.date) return false;
     const matchDate = m.date.toDate().toDateString();
     const selected = selectedDate.toDateString();
     return matchDate === selected;
   });
 
-  // Gruppér kamper etter divisjon (GENERELT)
-  const matchesByDivision = matches.reduce((acc, match) => {
+  // Gruppér kamper etter divisjon
+  const matchesByDivision = todaysMatches.reduce((acc, match) => {
     const division = match.division || "Ukjent divisjon";
 
     if (!acc[division]) acc[division] = [];
@@ -54,23 +53,25 @@ export default function HomePage() {
   }, {});
 
   return (
-    <section className="home-page">
-    
-      <h1>Breddefotball live</h1>
+    <main className="page">
+      <h1 className="live-header">
+  Breddefotball Live
+</h1>
 
-      {/* Kalender */}
-      <Calandar
-        selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
-      />
+      <section className="calandar-section">
+        <Calandar
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+        />
+      </section>
 
-
-      {/* Divisjonsliste (GENERELL) */}
-      <DivisionList
-        matchesByDivision={matchesByDivision}
-        navigate={navigate}
-        selectedDate={selectedDate}
-      />
-    </section>
+      <section className="division-section">
+        <DivisionList
+          matchesByDivision={matchesByDivision}
+          navigate={navigate}
+          selectedDate={selectedDate}
+        />
+      </section>
+    </main>
   );
 }

@@ -1,33 +1,9 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import PlayedMatches from "../PlayedMatches";
-import { getTeam } from "../../services/TeamService";
-import Upcoming from "../Upcoming"
+import Upcoming from "../Upcoming";
 
 export default function MatchList({ filteredMatches, matches, played, upcomingRef }) {
-  const [teamData, setTeamData] = useState({}); // Cache for team-objekter
-
-  // Hent ALLE lag som trengs for listen
-  useEffect(() => {
-    async function loadTeams() {
-      const cache = {};
-
-      for (const match of filteredMatches) {
-        if (!cache[match.homeTeam]) {
-          cache[match.homeTeam] = await getTeam(match.homeTeam);
-        }
-        if (!cache[match.awayTeam]) {
-          cache[match.awayTeam] = await getTeam(match.awayTeam);
-        }
-      }
-
-      setTeamData(cache);
-    }
-
-    if (filteredMatches.length > 0) {
-      loadTeams();
-    }
-  }, [filteredMatches]);
+  const navigate = useNavigate();
 
   if (!filteredMatches || filteredMatches.length === 0) {
     return <p>Ingen kamper funnet.</p>;
@@ -37,17 +13,18 @@ export default function MatchList({ filteredMatches, matches, played, upcomingRe
     <section>
       {/* 🔥 LISTE OVER FILTRERTE KAMPER */}
       {filteredMatches.map((m) => {
-        const home = teamData[m.homeTeam];
-        const away = teamData[m.awayTeam];
-
-        if (!home || !away) {
-          return <p key={m.id}>Laster lag...</p>;
-        }
+        const matchDate = m.date.toDate(); // 🔥 full datetime
 
         return (
-          <p key={m.id}>
-            <strong>{home.teamName}</strong> {m.homeScore} - {m.awayScore}{" "}
-            <strong>{away.teamName}</strong>
+          <p
+            key={m.id}
+            onClick={() => navigate(`/match/${m.id}`)}
+            className="match-clickable"
+          >
+            <strong>{m.homeTeamName}</strong> {m.homeScore} - {m.awayScore}{" "}
+            <strong>{m.awayTeamName}</strong>
+            {" — "}
+            {matchDate.toLocaleDateString("no-NO")}
           </p>
         );
       })}
@@ -61,17 +38,18 @@ export default function MatchList({ filteredMatches, matches, played, upcomingRe
       <PlayedMatches matches={matches} />
 
       {played.map((m) => {
-        const home = teamData[m.homeTeam];
-        const away = teamData[m.awayTeam];
-
-        if (!home || !away) {
-          return <p key={m.id}>Laster lag...</p>;
-        }
+        const matchDate = m.date.toDate(); // 🔥 full datetime
 
         return (
-          <p key={m.id}>
-            <strong>{home.teamName}</strong> {m.homeScore} - {m.awayScore}{" "}
-            <strong>{away.teamName}</strong>
+          <p
+            key={m.id}
+            onClick={() => navigate(`/match/${m.id}`)}
+            className="match-clickable"
+          >
+            <strong>{m.homeTeamName}</strong> {m.homeScore} - {m.awayScore}{" "}
+            <strong>{m.awayTeamName}</strong>
+            {" — "}
+            {matchDate.toLocaleDateString("no-NO")}
           </p>
         );
       })}

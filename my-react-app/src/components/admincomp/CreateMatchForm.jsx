@@ -74,8 +74,8 @@ export default function CreateMatchForm() {
         awayTeamName: awayTeamObj.name,
 
         date: Timestamp.fromDate(fullDate),
-        venue,
-
+        time: time,                                  // klokkeslett
+    
         homeScore: null,
         awayScore: null,
         played: false,

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCalendar,
@@ -15,11 +15,13 @@ export default function Calandar({ selectedDate, setSelectedDate }) {
   const stripRef = useRef(null);
 
   // 15-dagers strip
-  const days = [...Array(15)].map((_, i) => {
+ const days = useMemo(() => {
+  return [...Array(15)].map((_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + (i - 7));
     return d;
   });
+}, []);
 
   const handleSelectDate = (day) => {
     setSelectedDate(day);
@@ -146,26 +148,32 @@ export default function Calandar({ selectedDate, setSelectedDate }) {
 
           {/* Toppseksjon */}
           <div className="month-header">
-            <button onClick={goPrevMonth}>
+            
+            <button className="nav-btn" onClick={goPrevMonth}>
               <FontAwesomeIcon icon={faChevronLeft} />
             </button>
-
-            <h3>
+<div className="calandar-title-wrapper">
+  
+            <h3 className="calendar-title">
               {currentMonth.toLocaleDateString("no-NO", {
                 month: "long",
                 year: "numeric",
               })}
             </h3>
 
-            <button onClick={goNextMonth}>
+            <button
+            className="close-month-btn"
+            onClick={() => setShowFullCalandar(false)}
+          >
+            X
+          </button>
+          </div>
+
+            <button className="nav-btn" onClick={goNextMonth}>
               <FontAwesomeIcon icon={faChevronRight} />
             </button>
           </div>
 
-          {/* Gå til i dag */}
-          <button className="today-btn" onClick={goToToday}>
-            Gå til i dag
-          </button>
 
           {/* Ukedager */}
           <div className="weekdays-row">
@@ -200,12 +208,7 @@ export default function Calandar({ selectedDate, setSelectedDate }) {
             })}
           </div>
 
-          <button
-            className="close-month-btn"
-            onClick={() => setShowFullCalandar(false)}
-          >
-            Lukk kalender
-          </button>
+          
         </div>
       )}
     </div>
