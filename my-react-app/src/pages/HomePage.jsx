@@ -55,8 +55,8 @@ export default function HomePage() {
   return (
     <main className="page">
       <h1 className="live-header">
-  Breddefotball Live
-</h1>
+     Breddefotball Live
+     </h1>
 
       <section className="calandar-section">
         <Calandar
