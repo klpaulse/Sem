@@ -2,21 +2,24 @@ import { useEffect, useState } from "react";
 import Countdown from "../Countdown";
 import "../../assets/style/matchPage.css";
 import BeforeMatchInfo from "./BeforeMatchInfo";
-import SeasonTimeline from "./SeasonsTimeline";
 import { getSeasonMatches } from "../../services/MatchService";
 
-
+// 🔥 Felles dato-normalisering
+function normalizeDate(d) {
+  if (!d) return null;
+  if (d instanceof Date) return d;
+  if (d.toDate) return d.toDate(); // Firestore Timestamp
+  return new Date(d); // ISO string
+}
 
 export default function BeforeMatch({ match, allMatches }) {
   if (!match) return null;
 
-  const matchDate =
-    match.date instanceof Date ? match.date : match.date.toDate();
+  const matchDate = normalizeDate(match.date);
 
   const [homeSeason, setHomeSeason] = useState([]);
   const [awaySeason, setAwaySeason] = useState([]);
 
-  // Hent sesongens kamper for begge lag
   useEffect(() => {
     async function loadSeason() {
       if (!match) return;
@@ -37,7 +40,7 @@ export default function BeforeMatch({ match, allMatches }) {
 
       {/* Countdown */}
       <div className="countdown">
-        <Countdown date={new Date(matchDate)} />
+        <Countdown date={matchDate} />
       </div>
 
       {/* Kampkort */}
@@ -56,24 +59,13 @@ export default function BeforeMatch({ match, allMatches }) {
         </p>
       </div>
 
-      {/* Timeline for hjemmelaget */}
-      <h3 className="timeline-header">{match.homeTeamName} – sesongen 2026</h3>
-      <SeasonTimeline
-        matches={homeSeason}
-        teamId={match.homeTeamId}
-        currentMatchId={match.id}
+      {/* Info-boksene (inkl. timeline) */}
+      <BeforeMatchInfo
+        match={match}
+        allMatches={allMatches}
+        homeSeason={homeSeason}
+        awaySeason={awaySeason}
       />
-
-      {/* Timeline for bortelaget */}
-      <h3 className="timeline-header">{match.awayTeamName} – sesongen 2026</h3>
-      <SeasonTimeline
-        matches={awaySeason}
-        teamId={match.awayTeamId}
-        currentMatchId={match.id}
-      />
-
-      {/* Info-boksene dine */}
-      <BeforeMatchInfo match={match} allMatches={allMatches} />
     </section>
   );
 }

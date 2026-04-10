@@ -1,74 +1,117 @@
-export default function BeforeMatchInfo({match, allMatches}){
-if (!match) return null
+import SeasonTimeline from "./SeasonsTimeline";
 
-const home = match.homeTeam
-const away = match.awayTeam
+// 🔥 Felles dato-normalisering
+function normalizeDate(d) {
+  if (!d) return null;
+  if (d instanceof Date) return d;
+  if (d.toDate) return d.toDate(); // Firestore Timestamp
+  return new Date(d); // ISO string
+}
 
-const headToHead = allMatches.filter(m => 
-(m.homeTeam === home && m.awayTeam === away) ||
-(m.homeTeam === away && m.awayTeam === home)
-)
-.filter(m => m.homeScore !== null)
-.sort((a, b) => b.date.toDate() - a.date.toDate())
-.slice(0, 3)
+export default function BeforeMatchInfo({
+  match,
+  allMatches,
+  homeSeason,
+  awaySeason,
+}) {
+  if (!match) return null;
+  console.log("MATCH DATA:", match);
+  const matchDate = normalizeDate(match.date);
 
-const lastHome = allMatches
-.filter(m => 
-     (m.homeTeam === home || m.awayTeam === home) &&
-      m.homeScore !== null
+  const homeId = match.homeTeamId;
+  const awayId = match.awayTeamId;
+
+  // ⭐ Head-to-head (siste 3 oppgjør)
+  const headToHead = allMatches
+    .filter(
+      (m) =>
+        (m.homeTeamId === homeId && m.awayTeamId === awayId) ||
+        (m.homeTeamId === awayId && m.awayTeamId === homeId)
     )
-    .sort((a, b) => b.date.toDate() - a.date.toDate())
+    .filter((m) => m.homeScore !== null && m.awayScore !== null)
+    .sort((a, b) => normalizeDate(b.date) - normalizeDate(a.date))
     .slice(0, 3);
 
-     const lastAway = allMatches
-    .filter(m =>
-      (m.homeTeam === away || m.awayTeam === away) &&
-      m.homeScore !== null
-    )
-    .sort((a, b) => b.date.toDate() - a.date.toDate())
-    .slice(0, 3);
+  return (
+    <section className="before-match-info">
+      <h2 className="beforematch">Før kampen</h2>
 
-    return ( 
-        <section>
-            <h2>Før kampen</h2>
-            <div className="info-block">
-                <h3>{match.homeTeamName} - siste kamper</h3>
-                {lastHome.map(m => (
-                    <p key={m.id}> 
-                    {m.homeTeamName} {m.homeScore}-{m.awayScore} {m.awayTeamName}
-                 </p>
-                ))}
-            </div>
+      {/* ⭐ TIMELINE */}
+      <div className="info-block">
+        <h3 className="timeline-header">{match.homeTeamName}</h3>
+        <SeasonTimeline
+          matches={homeSeason}
+          teamId={homeId}
+          currentMatchId={match.id}
+        />
 
-            <div className="info-block">
-        <h3>{match.awayTeamName} – siste kamper</h3>
-        {lastAway.map(m => (
-          <p key={m.id}>
-            {m.homeTeamName} {m.homeScore}–{m.awayScore} {m.awayTeamName}
-          </p>
-        ))}
+        <h3 className="timeline-header">{match.awayTeamName}</h3>
+        <SeasonTimeline
+          matches={awaySeason}
+          teamId={awayId}
+          currentMatchId={match.id}
+        />
       </div>
 
-            <div className="info-block">
-                <h3>Siste møter</h3>
-                {headToHead.length === 0 && <p>Ingen tidligere kamper</p>}
-                {headToHead.map(m => (
-                    <p key={m.id}>
-                        {m.homeTeamName} {m.homeScore}-{m.awayScore} {m.awayTeamName}
-                    </p>
-                ))}
-            </div>
+      {/* ⭐ HEAD TO HEAD */}
+      <div className="info-block">
+        <h3>Siste møter</h3>
+        {headToHead.map((m) => {
+  const date = normalizeDate(m.date).toLocaleDateString("no-NO");
+  const division = m.division || "Div. 6 2026"; // fallback hvis du ikke har feltet
 
-            <div className="info-block">
-                <h3>Kampinfo</h3>
-                <p>{match.arena}</p>
-                <p>{match.date.toDate().toLocaleDateString("no-NO")}</p>
-                <p>Runde {match.round}</p>
-            </div>
+  return (
+    <div key={m.id} className="h2h-match">
+      <div className="h2h-left">
+        <span className="h2h-date">{date}</span>
+        <span className="h2h-teams">
+          {m.homeTeamName} {m.homeScore}-{m.awayScore} {m.awayTeamName}
+        </span>
+      </div>
 
-        </section>
-    )
+      <span className="h2h-division">{division}</span>
+    </div>
+  );
+})}
+      </div>
 
+      {/* ⭐ KAMPINFO */}
+<div className="info-block">
+  <h3>Kampinfo</h3>
 
+  <div className="kampinfo-row">
+    <span className="kampinfo-label">Arena:</span>
+    <span className="kampinfo-value">{match.arena || "ukjent"} </span>
+  </div>
 
+  <div className="kampinfo-row">
+    <span className="kampinfo-label">Dato:</span>
+    <span className="kampinfo-value">
+      {matchDate.toLocaleDateString("no-NO")}
+    </span>
+  </div>
+
+  <div className="kampinfo-row">
+    <span className="kampinfo-label">Tid:</span>
+    <span className="kampinfo-value">
+      {match.time ||
+        matchDate.toLocaleTimeString("no-NO", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })}
+    </span>
+  </div>
+
+  <div className="kampinfo-row">
+    <span className="kampinfo-label">Runde:</span>
+    <span className="kampinfo-value">{match.round}</span>
+  </div>
+
+  <div className="kampinfo-row">
+    <span className="kampinfo-label">Sesong:</span>
+    <span className="kampinfo-value">2026</span>
+  </div>
+</div>
+    </section>
+  );
 }

@@ -355,7 +355,101 @@ display: inline-block;
 }
 
 
+.beforematch {
+  color: #ffffffcc;
+  font-size: 1.4rem;
+  font-weight: 700;
+  position: relative;
+  padding-bottom: 4px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
 
+.beforematch::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0%;
+  height: 2px;
+  background: #ffffff;
+  transition: width 0.25s ease;
+}
+
+.beforematch:hover {
+  color: #ffffff;
+}
+
+.beforematch:hover::after {
+  width: 100%;
+}
+
+.timeline-header {
+  color: #ffffffdd;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  margin-top: 20px;
+}
+
+.h2h-card {
+  background: #111;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+.h2h-date {
+  font-size: 0.85rem;
+  color: #ffffff88;
+  margin-bottom: 6px;
+}
+
+.h2h-team {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.h2h-bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.h2h-result {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffffdd;
+}
+
+.h2h-division {
+  font-size: 0.8rem;
+  color: #ffffff55;
+  margin-top: 4px;
+}
+
+.kampinfo-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid #ffffff22;
+  color: #ffffffcc;
+  font-size: 0.95rem;
+}
+
+.kampinfo-label {
+  color: #ffffff88;
+  font-weight: 500;
+}
+
+.kampinfo-value {
+  font-weight: 600;
+  color: #ffffffdd;
+}
 
 
 
