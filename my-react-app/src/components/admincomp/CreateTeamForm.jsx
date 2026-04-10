@@ -12,7 +12,7 @@ export default function CreateTeamForm() {
     if (!name || !division) return alert("Fyll inn alle feltene");
 
     try {
-      await addDoc(teamsRef, {
+        const docRef = await addDoc(teamsRef,{ 
         name,
         division
       });

@@ -308,6 +308,52 @@ display: inline-block;
   opacity: 0.7;
 }
 
+.timeline-container {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 10px 0;
+  scroll-snap-type: x mandatory;
+}
+
+.timeline-box {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  color: white;
+  flex-shrink: 0;
+  scroll-snap-align: center;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.timeline-box:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.35);
+}
+
+.form-W {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+}
+
+.form-D {
+  background: linear-gradient(135deg, #bdc3c7, #95a5a6);
+}
+
+.form-L {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.timeline-current {
+  border: 3px solid #3498db;
+  box-shadow: 0 0 12px rgba(52,152,219,0.7);
+}
+
 
 
 

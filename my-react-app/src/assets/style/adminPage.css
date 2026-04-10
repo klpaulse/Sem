@@ -35,3 +35,37 @@
 .kampadmin-title {
   color: white;
 }
+
+/* Gjør overskrifter hvite */
+.adminpage-container h1,
+.adminpage-container h2,
+.adminpage-container h3 {
+  color: #fff;
+}
+
+/* Gjør vanlig tekst hvit */
+.adminpage-container p,
+.adminpage-container summary,
+.adminpage-container .admin-match-row {
+  color: #fff;
+}
+
+/* Sørg for at summary‑pilen også blir hvit */
+.adminpage-container summary::-webkit-details-marker {
+  color: #fff;
+}
+
+/* Resultat-kortet skal være lesbart (svart tekst på hvitt kort) */
+.result-card {
+  background: #fff;
+  padding: 16px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  margin-top: 10px;
+  color: #000; /* viktig */
+}
+
+/* Input-felter i kortet */
+.result-card input {
+  color: #000;
+}

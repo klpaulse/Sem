@@ -66,9 +66,12 @@ export default function CreateMatchForm() {
     try {
       await addDoc(matchesRef, {
         division: selectedDivision,
+        
+        homeTeamId: homeTeamObj.id,
+        awayTeamId: awayTeamObj.id,
 
-        homeTeam: homeTeamObj.name,
-        awayTeam: awayTeamObj.name,
+        homeTeamName: homeTeamObj.name,
+        awayTeamName: awayTeamObj.name,
 
         date: Timestamp.fromDate(fullDate),
         time: time,                                  // klokkeslett

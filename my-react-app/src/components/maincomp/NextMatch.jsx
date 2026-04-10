@@ -10,41 +10,71 @@ export default function NextMatch({ matches }) {
 
   const now = new Date();
 
-  // 🔥 Finn kommende kamper basert på FULL datetime i `date`
+  // Finn kommende kamper
   const upcoming = matches
-    .filter((m) => {
-      if (!m.date) return false;
-      const matchDate = m.date.toDate();
-      return matchDate >= now;
-    })
-    .sort((a, b) => a.date.toDate() - b.date.toDate());
+    .filter((m) => m.date && m.date >= now)
+    .sort((a, b) => a.date - b.date);
 
-  if (upcoming.length === 0) {
-    return <p>Ingen kommende kamper</p>;
+  // Finn ferdige kamper (med resultat)
+  const finished = matches
+    .filter((m) => m.homeScore !== null && m.awayScore !== null)
+    .sort((a, b) => b.date - a.date); // nyeste først
+
+  // Hvis det finnes en kommende kamp → vis den
+  if (upcoming.length > 0) {
+    const next = upcoming[0];
+    const nextDate = next.date;
+
+    return (
+      <section
+        className="next-match"
+        onClick={() => navigate(`/match/${next.id}`)}
+      >
+        <h2 className="match-title">
+          {next.homeTeamName} - {next.awayTeamName}
+        </h2>
+
+        <p className="dato">
+          {nextDate.toLocaleDateString("no-NO")} – kl {next.time}
+        </p>
+
+        <Countdown date={nextDate} />
+
+        <div className="knapp-linje">
+          <button className="knapp-kampdetaljer">Se kampdetaljer</button>
+        </div>
+      </section>
+    );
   }
 
-  const next = upcoming[0];
-  const nextDate = next.date.toDate();
+  // Hvis ingen kommende kamper → vis SISTE SPILTE kamp med resultat
+  if (finished.length > 0) {
+    const last = finished[0];
+    const lastDate = last.date;
 
-  return (
-    <section
-      className="next-match"
-      onClick={() => navigate(`/match/${next.id}`)}
-    >
-      <h2 className="match-title">
-        {next.homeTeamName} - {next.awayTeamName}
-      </h2>
+    return (
+      <section
+        className="next-match"
+        onClick={() => navigate(`/match/${last.id}`)}
+      >
+        <h2 className="match-title">
+          {last.homeTeamName} - {last.awayTeamName}
+        </h2>
 
-      <p className="dato">
-        {nextDate.toLocaleDateString("no-NO")} – kl {next.time}
-      </p>
+        <p className="dato">
+          {lastDate.toLocaleDateString("no-NO")} – kl {last.time}
+        </p>
 
-      {/* 🔥 Countdown får full datetime */}
-      <Countdown date={nextDate} />
+        <p className="resultat">
+          Resultat: {last.homeScore}–{last.awayScore}
+        </p>
 
-      <div className="knapp-linje">
-        <button className="knapp-kampdetaljer">Se kampdetaljer</button>
-      </div>
-    </section>
-  );
+        <div className="knapp-linje">
+          <button className="knapp-kampdetaljer">Se kampdetaljer</button>
+        </div>
+      </section>
+    );
+  }
+
+  return <p>Ingen kamper tilgjengelig</p>;
 }

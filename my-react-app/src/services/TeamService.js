@@ -17,9 +17,10 @@ export async function getTeam(teamId) {
   if (!snap.exists()) return null;
 
   const data = snap.data();
+  const team = { id: teamId, ...data}
 
   // Lagre i cache
-  teamCache[teamId] = data;
+  teamCache[teamId] = team;
 
-  return data;
+  return team;
 }

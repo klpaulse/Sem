@@ -5,6 +5,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 
 import LagAdministrasjon from "../components/admincomp/LagAdministrasjon";
 import KampAdministrasjon from "../components/admincomp/KampAdministrasjon";
+import AdminMatches from "../components/admincomp/AdminMatches";   // ⬅️ NY
 
 import "../assets/style/adminPage.css";
 
@@ -69,6 +70,12 @@ export default function AdminPage() {
           <section className="admin-section">
             <h2 className="admin-section-title">Kampadministrasjon</h2>
             <KampAdministrasjon divisions={divisions} />
+          </section>
+
+          {/* ⬅️ NY — kampresultat-administrasjon */}
+          <section className="admin-section">
+            <h2 className="admin-section-title">Resultatadministrasjon</h2>
+            <AdminMatches />   {/* ⬅️ NY */}
           </section>
         </>
       )}

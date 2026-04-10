@@ -19,10 +19,11 @@ export default function BulkImportTeams() {
       .filter((name) => name.length > 0);
 
     for (const name of teamNames) {
-      await addDoc(teamsRef, {
+      const docRef = await addDoc(teamsRef, {
         name,
         division,
       });
+     
     }
 
     setTeamText("");

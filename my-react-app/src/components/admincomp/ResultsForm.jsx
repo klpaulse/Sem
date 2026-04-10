@@ -20,8 +20,8 @@ export default function ResultsForm({
     if (!editingMatch) return;
 
     async function loadTeams() {
-      const home = await getTeam(editingMatch.homeTeam);
-      const away = await getTeam(editingMatch.awayTeam);
+      const home = await getTeam(editingMatch.homeTeamId);
+      const away = await getTeam(editingMatch.awayTeamId);
 
       setHomeTeam(home);
       setAwayTeam(away);
@@ -39,7 +39,7 @@ export default function ResultsForm({
       <h2>Legg inn resultat</h2>
 
       <p>
-        {homeTeam.teamName} vs {awayTeam.teamName}
+        {editingMatch.homeTeamName} vs {editingMatch.awayTeamName}
       </p>
 
       <input
@@ -56,12 +56,7 @@ export default function ResultsForm({
         onChange={(e) => setAwayScore(e.target.value)}
       />
 
-      {/* Lokasjon */}
-      <input
-        placeholder="Sted"
-        value={location}
-        onChange={(e) => setLocation(e.target.value)}
-      />
+  
 
       <button onClick={saveResult}>Lagre resultat</button>
       <button onClick={() => setEditingMatch(null)}>Avbryt</button>

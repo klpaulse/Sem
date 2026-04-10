@@ -21,8 +21,8 @@ export default function MatchReport({ match, events }) {
     if (!match) return;
 
     async function loadTeams() {
-      const home = await getTeam(match.homeTeam);
-      const away = await getTeam(match.awayTeam);
+      const home = await getTeam(match.homeTeamId);
+      const away = await getTeam(match.awayTeamId);
 
       setHomeTeam(home);
       setAwayTeam(away);
@@ -81,7 +81,7 @@ export default function MatchReport({ match, events }) {
       {/* Toppseksjon */}
       <div className="report-header">
         <h2>
-          {homeTeam.teamName} – {awayTeam.teamName}
+          {homeTeam.name} – {awayTeam.name}
         </h2>
       </div>
 
