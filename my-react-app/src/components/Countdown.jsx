@@ -1,4 +1,10 @@
 import { useEffect, useState } from "react";
+function normalizeDate(d) {
+  if (!d) return null;
+  if (d instanceof Date) return d;
+  if (d.toDate) return d.toDate(); // Firestore Timestamp
+  return new Date(d); // ISO string
+}
 
 export default function Countdown({date, time}){
 
@@ -8,20 +14,22 @@ export default function Countdown({date, time}){
         useEffect(() => {
             if(!date) return;
 
-            const interval = setInterval(() => {
-                const kampTid = date instanceof Date ? date : date.toDate()
+        const interval = setInterval(() => {
+  const kampTid = normalizeDate(date)
+  if (!kampTid) return
 
-                const now= new Date().getTime()
-                const eventTime = kampTid.getTime()
+  const now = new Date().getTime()
+  const eventTime = kampTid.getTime()
 
-                let remaining = eventTime - now;
+  let remaining = eventTime - now
 
-                if (remaining < 0) {
-                    remaining = 0
-                    clearInterval(interval)
-                }
-                setTimeRemaining(remaining)
-            }, 1000)
+  if (remaining < 0) {
+    remaining = 0
+    clearInterval(interval)
+  }
+
+  setTimeRemaining(remaining)
+}, 1000)
             return () => clearInterval(interval)
         },[date])
 

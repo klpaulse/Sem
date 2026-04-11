@@ -8,10 +8,12 @@ import KampAdministrasjon from "../components/admincomp/KampAdministrasjon";
 import AdminMatches from "../components/admincomp/AdminMatches";   // ⬅️ NY
 
 import "../assets/style/adminPage.css";
+import LiveControls from "../components/admincomp/LiveControls";
 
 export default function AdminPage() {
   const [divisions, setDivisions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedMatch, setSelectedMatch] = useState(null)
 
   // 🔐 Admin-sjekk
   const [user] = useAuthState(auth);
@@ -75,8 +77,20 @@ export default function AdminPage() {
           {/* ⬅️ NY — kampresultat-administrasjon */}
           <section className="admin-section">
             <h2 className="admin-section-title">Resultatadministrasjon</h2>
-            <AdminMatches />   {/* ⬅️ NY */}
+            <AdminMatches onSelectMatch={(id) => setSelectedMatch(id)} />   {/* ⬅️ NY */}
           </section>
+          <section className="admin-section">
+  <h2 className="admin-section-title">Livekontroll</h2>
+
+  {!selectedMatch && <p>Velg en kamp fra listen over for å starte livekontroll.</p>}
+
+  {selectedMatch && (
+    <>
+      <button onClick={() => setSelectedMatch(null)}>← Tilbake</button>
+      <LiveControls matchId={selectedMatch} />
+    </>
+  )}
+</section>
         </>
       )}
     </main>

@@ -10,7 +10,8 @@ import { collection, onSnapshot } from 'firebase/firestore'
 import { onAuthStateChanged } from 'firebase/auth'
 import LoginPage from './pages/LoginPage.jsx'
 import HomePage from './pages/HomePage'
-import MigrateMatchFields from './components/admincomp/MigrateMatchFields.jsx'
+import LiveControls from './components/admincomp/LiveControls.jsx'
+
 
 function App() {
   const [matches, setMatches] = useState([])
@@ -75,7 +76,9 @@ function App() {
     <AdminPage matches={matches} divisions={divisions} />
   }
         />
-        <Route path="/admin/migrate-fields" element={<MigrateMatchFields />} />
+      
+       
+
       </Routes>
     </>
   )

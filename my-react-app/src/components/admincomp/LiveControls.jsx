@@ -1,11 +1,182 @@
-export default function LiveControls({addSystemEvent, startMatch}){
-    return(
-        <section>
-        <h3>Live kontroll</h3>
-        <button onClick={startMatch}>Start kamp</button>
-        <button onClick={() => addSystemEvent("pause")}>Pause</button>
-        <button onClick={() => addSystemEvent ("2.omgang har startet")}>2. omgang</button>
-        <button onClick={() => addSystemEvent("kampen er slutt")}>Kampslutt</button>
-        </section>
-    )
+import { useEffect, useState } from "react";
+import {
+  collection,
+  addDoc,
+  doc,
+  updateDoc,
+  serverTimestamp,
+  onSnapshot
+} from "firebase/firestore";
+import { db } from "../../config/Firebase";
+import EventForm from "./EventForm";
+
+export default function LiveControls({ matchId }) {
+  const matchRef = doc(db, "matches", matchId);
+  const eventsRef = collection(db, "matches", matchId, "events");
+
+  const [match, setMatch] = useState(null);
+
+  // Felles state for EventForm
+  const [type, setType] = useState("goal");
+  const [text, setText] = useState("");
+  const [eventTeam, setEventTeam] = useState("");
+
+  // Bytte-state
+  const [subTeam, setSubTeam] = useState("");
+  const [subIn, setSubIn] = useState("");
+  const [subOut, setSubOut] = useState("");
+  const [subComment, setSubComment] = useState("");
+
+  // Hent kampdata live
+  useEffect(() => {
+    if (!matchId) return;
+
+    const unsub = onSnapshot(matchRef, (snap) => {
+      setMatch({ id: snap.id, ...snap.data() });
+    });
+
+    return () => unsub();
+  }, [matchId]);
+
+  // Minuttberegning
+  function getMinute() {
+    if (!match?.startTime) return 0;
+    const start = new Date(match.startTime);
+    const now = new Date();
+    return Math.floor((now - start) / 60000);
+  }
+
+  // ⭐ Legg til hendelse (håndterer ALT)
+  async function addEvent() {
+    if (!match) return;
+
+    const minute = getMinute();
+
+    // -------------------------
+    // ⭐ BYTTE
+    // -------------------------
+    if (type === "sub") {
+      await addDoc(eventsRef, {
+        id: crypto.randomUUID(),
+        type: "sub",
+        team: subTeam,
+        in: subIn,
+        out: subOut,
+        comment: subComment,
+        minute,
+        createdAt: serverTimestamp()
+      });
+
+      setSubTeam("");
+      setSubIn("");
+      setSubOut("");
+      setSubComment("");
+      return;
+    }
+
+    // -------------------------
+    // ⭐ MÅL
+    // -------------------------
+    if (type === "goal") {
+      await updateDoc(matchRef, {
+        homeScore:
+          eventTeam === match.homeTeam
+            ? (match.homeScore || 0) + 1
+            : match.homeScore,
+        awayScore:
+          eventTeam === match.awayTeam
+            ? (match.awayScore || 0) + 1
+            : match.awayScore
+      });
+
+      await addDoc(eventsRef, {
+        id: crypto.randomUUID(),
+        type: "goal",
+        team: eventTeam,
+        text,
+        minute,
+        createdAt: serverTimestamp()
+      });
+
+      setEventTeam("");
+      setText("");
+      return;
+    }
+
+    // -------------------------
+    // ⭐ ALLE ANDRE HENDELSER
+    // -------------------------
+    await addDoc(eventsRef, {
+      id: crypto.randomUUID(),
+      type,
+      team: eventTeam || null,
+      text,
+      minute,
+      createdAt: serverTimestamp()
+    });
+
+    setEventTeam("");
+    setText("");
+  }
+
+  // ⭐ Start kamp
+  async function startMatch() {
+    await updateDoc(matchRef, {
+      status: "live",
+      startTime: new Date().toISOString()
+    });
+
+    await addDoc(eventsRef, {
+      id: crypto.randomUUID(),
+      type: "system",
+      text: "Kampen har startet",
+      minute: 0,
+      createdAt: serverTimestamp()
+    });
+  }
+
+  // ⭐ Slutt kamp
+  async function endMatch() {
+    await updateDoc(matchRef, { status: "finished" });
+
+    await addDoc(eventsRef, {
+      id: crypto.randomUUID(),
+      type: "system",
+      text: "Kampen er slutt",
+      minute: 90,
+      createdAt: serverTimestamp()
+    });
+  }
+
+  return (
+    <section>
+      <h3>Live kontroll</h3>
+
+      <button onClick={startMatch}>Start kamp</button>
+      <button onClick={() => addEvent("pause")}>Pause</button>
+      <button onClick={() => addEvent("2omgang")}>2. omgang</button>
+      <button onClick={endMatch}>Kampslutt</button>
+
+      <hr />
+
+      <EventForm
+        type={type}
+        setType={setType}
+        text={text}
+        setText={setText}
+        selectedMatch={match}
+        subTeam={subTeam}
+        setSubTeam={setSubTeam}
+        subIn={subIn}
+        setSubIn={setSubIn}
+        subOut={subOut}
+        setSubOut={setSubOut}
+        subComment={subComment}
+        setSubComment={setSubComment}
+        addEvent={addEvent}
+        eventTeam={eventTeam}
+        setEventTeam={setEventTeam}
+      />
+    </section>
+  );
 }

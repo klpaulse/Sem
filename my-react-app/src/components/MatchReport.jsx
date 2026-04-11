@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faFutbol,
@@ -10,37 +9,19 @@ import {
   faRightLeft,
 } from "@fortawesome/free-solid-svg-icons";
 
-import { getTeam } from "../services/TeamService";
-
 export default function MatchReport({ match, events }) {
-  const [homeTeam, setHomeTeam] = useState(null);
-  const [awayTeam, setAwayTeam] = useState(null);
+  if (!match) return null;
 
-  // Hent lag basert på ID
-  useEffect(() => {
-    if (!match) return;
-
-    async function loadTeams() {
-      const home = await getTeam(match.homeTeamId);
-      const away = await getTeam(match.awayTeamId);
-
-      setHomeTeam(home);
-      setAwayTeam(away);
-    }
-
-    loadTeams();
-  }, [match]);
-
-  if (!match || !homeTeam || !awayTeam) {
-    return <p>Laster kamp...</p>;
-  }
+  // Finn målscorere
+  const goalEvents = events
+    ?.filter((e) => e.type === "goal")
+    .sort((a, b) => a.minute - b.minute) || [];
 
   // Sjekk om vi er i 2. omgang
   const isSecondHalf = events.some(
-    (e) => e.type === "system" && (e.text || "").toLowerCase().includes("2.omgang")
+    (e) => e.type === "system" && (e.text || "").toLowerCase().includes("2. omgang")
   );
 
-  // Formatér minutt
   const formatMinute = (minute) => {
     if (!isSecondHalf) {
       if (minute <= 45) return minute;
@@ -50,15 +31,14 @@ export default function MatchReport({ match, events }) {
     return `90+${minute - 90}`;
   };
 
-  // Ikoner
   const getIcon = (type) => {
     switch (type) {
       case "goal":
         return <FontAwesomeIcon icon={faFutbol} />;
       case "yellow":
-        return <FontAwesomeIcon icon={faSquare} />;
+        return <FontAwesomeIcon icon={faSquare} style={{ color: "#f4d03f" }} />;
       case "red":
-        return <FontAwesomeIcon icon={faSquare} />;
+        return <FontAwesomeIcon icon={faSquare} style={{ color: "#e74c3c" }} />;
       case "injury":
         return <FontAwesomeIcon icon={faUserInjured} />;
       case "comment":
@@ -69,30 +49,30 @@ export default function MatchReport({ match, events }) {
         return <FontAwesomeIcon icon={faBell} />;
       case "sub":
         return <FontAwesomeIcon icon={faRightLeft} />;
-      case "system":
-        return null;
       default:
         return null;
     }
   };
 
+  // ⭐ INGEN HENDELSER → vis ferdig‑melding
+  if (!events || events.length === 0) {
+    return (
+      <div className="report-container">
+        <div className="report-feed">
+          <h3>Kampen er ferdig</h3>
+          <p>Det ble ikke ført live‑rapport for denne kampen.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ⭐ HOVEDVISNING (live eller ferdig kamp med hendelser)
   return (
     <div className="report-container">
-      {/* Toppseksjon */}
-      <div className="report-header">
-        <h2>
-          {homeTeam.name} – {awayTeam.name}
-        </h2>
-      </div>
-
-      {/* Live feed */}
       <div className="report-feed">
-        <h3>Live oppdatering</h3>
-
-        {events.length === 0 && <p>Ingen hendelser ennå.</p>}
+        <h3>{match.status === "finished" ? "Kampreferat" : "Live oppdatering"}</h3>
 
         {events.map((e) => {
-          // Systemmeldinger (pause, slutt, 2.omgang osv.)
           if (e.type === "system") {
             return (
               <div key={e.id} className="event event-system">
@@ -101,7 +81,6 @@ export default function MatchReport({ match, events }) {
             );
           }
 
-          // Bytter
           if (e.type === "sub") {
             return (
               <div key={e.id} className="event event-sub">
@@ -119,7 +98,6 @@ export default function MatchReport({ match, events }) {
             );
           }
 
-          // Vanlige hendelser
           return (
             <div key={e.id} className={`event event-${e.type}`}>
               <span className="event-icon">{getIcon(e.type)}</span>

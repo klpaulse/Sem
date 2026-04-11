@@ -1,6 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import Countdown from "../Countdown";
 
+function normalizeDate(d) {
+  if (!d) return null;
+  if (d instanceof Date) return d;
+  if (d.toDate) return d.toDate(); // Firestore Timestamp
+  return new Date(d); // ISO string
+}
+
 export default function NextMatch({ matches }) {
   const navigate = useNavigate();
 
@@ -12,18 +19,20 @@ export default function NextMatch({ matches }) {
 
   // Finn kommende kamper
   const upcoming = matches
-    .filter((m) => m.date && m.date >= now)
-    .sort((a, b) => a.date - b.date);
+  .map((m) => ({ ...m, dateObj: normalizeDate(m.date) }))
+  .filter((m) => m.dateObj && m.dateObj >= now)
+  .sort((a, b) => a.dateObj - b.dateObj);
 
   // Finn ferdige kamper (med resultat)
-  const finished = matches
-    .filter((m) => m.homeScore !== null && m.awayScore !== null)
-    .sort((a, b) => b.date - a.date); // nyeste først
+const finished = matches
+  .map((m) => ({ ...m, dateObj: normalizeDate(m.date) }))
+  .filter((m) => m.homeScore !== null && m.awayScore !== null)
+  .sort((a, b) => b.dateObj - a.dateObj);
 
   // Hvis det finnes en kommende kamp → vis den
   if (upcoming.length > 0) {
     const next = upcoming[0];
-    const nextDate = next.date;
+    const nextDate = next.dateObj;
 
     return (
       <section
@@ -50,7 +59,7 @@ export default function NextMatch({ matches }) {
   // Hvis ingen kommende kamper → vis SISTE SPILTE kamp med resultat
   if (finished.length > 0) {
     const last = finished[0];
-    const lastDate = last.date;
+    const lastDate = last.dateObj;
 
     return (
       <section

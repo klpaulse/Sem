@@ -12,6 +12,7 @@ import { db } from "../config/Firebase";
 import { useParams } from "react-router-dom";
 import BeforeMatch from "../components/maincomp/BeforeMatch";
 
+
 export default function MatchPage() {
   const { id } = useParams();
 
@@ -86,66 +87,67 @@ export default function MatchPage() {
     return <p>Laster kamp...</p>;
   }
 
-  const matchDate = selectedMatch.date.toDate();
-  const isFuture = matchDate > new Date();
-
-  if (isFuture) {
-    return <BeforeMatch match={selectedMatch} allMatches={allMatches} />;
+  // ⭐ FØR KAMP
+  if (selectedMatch.status === "not_started") {
+    return (
+        <BeforeMatch match={selectedMatch} allMatches={allMatches} />
+    );
   }
 
+  // ⭐ UNDER / ETTER KAMP
   return (
     <>
       <header className="header">
-        <h1 className="SEM">Breddefotball Live</h1>
+        <h1 className="live-header">Breddefotball live</h1>
       </header>
 
-      <NextMatch matches={allMatches} />
+      {/* Kampkort – samme stil som BeforeMatch */}
+      <div className="last-played-card">
+        <p className="lp-status">
+          {selectedMatch.status === "finished"
+            ? "Slutt"
+            : selectedMatch.status === "live"
+            ? "Live"
+            : "Kamp"}
+        </p>
 
-      {lastPlayed && (
-        <section className="last-played-card">
-          <p className="lp-status">Slutt</p>
-          <div className="lp-row">
-            <span className="lp-title">{lastPlayed.homeTeamName}</span>
-            <p className="lp-result">
-              {lastPlayed.homeScore} - {lastPlayed.awayScore}
-            </p>
-            <span className="lp-title">{lastPlayed.awayTeamName}</span>
-          </div>
+        <div className="lp-row">
+          <span className="lp-title">{selectedMatch.homeTeamName}</span>
 
-          <p className="lp-date">
-            {lastPlayed.date.toDate().toLocaleDateString("no-NO")}
+          <p className="lp-result">
+            {selectedMatch.status === "not_started"
+              ? `Kl ${selectedMatch.time}`
+              : `${selectedMatch.homeScore} - ${selectedMatch.awayScore}`}
           </p>
+
+          <span className="lp-title">{selectedMatch.awayTeamName}</span>
+        </div>
+
+        <p className="lp-date">
+          {selectedMatch.date.toDate().toLocaleDateString("no-NO")}
+        </p>
+      </div>
+
+      {/* Rapport + Admin */}
+      <main className="page">
+        <Tabs activeTab={activeTab} setActiveTab={setActiveTab} upcomingRef={upcomingRef} />
+
+        <section className="content-box">
+          {activeTab === "rapport" && (
+            <MatchReport match={selectedMatch} events={events} />
+          )}
+
+          {activeTab === "tabell" && (
+  <TabellComponent match={selectedMatch} />
+)}
+
+{activeTab === "lag" && (
+  <LagComponent match={selectedMatch} />
+)}
+
+           
         </section>
-      )}
-
-      <Tabs activeTab={activeTab} setActiveTab={setActiveTab} upcomingRef={upcomingRef} />
-
-      <section className="content-box">
-        {activeTab === "rapport" && (
-          <MatchReport match={selectedMatch} events={events} />
-        )}
-
-        {activeTab === "kamper" && (
-          <>
-            <MatchFilters
-              selectedRound={selectedRound}
-              setSelectedRound={setSelectedRound}
-              selectedMonth={selectedMonth}
-              setSelectedMonth={setSelectedMonth}
-              selectedTeam={selectedTeam}
-              setSelectedTeam={setSelectedTeam}
-              matches={allMatches}
-            />
-
-            <MatchList
-              filteredMatches={filteredMatches}
-              matches={allMatches}
-              played={played}
-              upcomingRef={upcomingRef}
-            />
-          </>
-        )}
-      </section>
+      </main>
     </>
   );
 }

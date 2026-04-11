@@ -75,7 +75,9 @@ export default function CreateMatchForm() {
 
         date: Timestamp.fromDate(fullDate),
         time: time,   
-        arena: venue,                               // klokkeslett
+        arena: venue,  
+        status: "not_started",
+        events: [],                             // klokkeslett
     
         homeScore: null,
         awayScore: null,

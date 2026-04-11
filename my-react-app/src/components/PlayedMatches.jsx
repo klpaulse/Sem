@@ -1,31 +1,28 @@
 import { useNavigate } from "react-router-dom";
 
+function normalizeDate(d) {
+  if (!d) return null;
+  if (d instanceof Date) return d;
+  if (d.toDate) return d.toDate();
+  return new Date(d);
+}
+
 export default function PlayedMatches({ matches }) {
   const navigate = useNavigate();
   const now = new Date();
 
-  // Filtrer ferdigspilte kamper
   const past = matches
-    .filter((m) => {
-      if (!m.date) return false;
-
-      const baseDate = m.date.toDate ? m.date.toDate() : new Date(m.date);
-      if (isNaN(baseDate)) return false;
+    .map((m) => {
+      const baseDate = normalizeDate(m.date);
+      if (!baseDate || isNaN(baseDate)) return null;
 
       const datePart = baseDate.toISOString().split("T")[0];
       const matchDateTime = new Date(`${datePart}T${m.time}`);
 
-      return matchDateTime < now;
+      return { ...m, matchDateTime };
     })
-    .sort((a, b) => {
-      const aBase = a.date.toDate ? a.date.toDate() : new Date(a.date);
-      const bBase = b.date.toDate ? b.date.toDate() : new Date(b.date);
-
-      const aDate = new Date(`${aBase.toISOString().split("T")[0]}T${a.time}`);
-      const bDate = new Date(`${bBase.toISOString().split("T")[0]}T${b.time}`);
-
-      return bDate - aDate; // nyeste først
-    });
+    .filter((m) => m && m.matchDateTime < now)
+    .sort((a, b) => b.matchDateTime - a.matchDateTime);
 
   return (
     <section>
@@ -34,9 +31,7 @@ export default function PlayedMatches({ matches }) {
       {past.length === 0 && <p>Ingen spilte kamper ennå</p>}
 
       {past.map((m, index) => {
-        const baseDate = m.date.toDate ? m.date.toDate() : new Date(m.date);
-        const datePart = baseDate.toISOString().split("T")[0];
-        const kampDato = new Date(`${datePart}T${m.time}`);
+        const kampDato = m.matchDateTime;
 
         const harResultat =
           m.homeScore !== null &&
@@ -51,7 +46,7 @@ export default function PlayedMatches({ matches }) {
             onClick={() => navigate(`/match/${m.id}`, { state: { match: m } })}
           >
             <p>
-              {m.day} {kampDato.toLocaleDateString("no-NO")} – Ferdig
+              {kampDato.toLocaleDateString("no-NO")} – Ferdig
             </p>
 
             {harResultat ? (

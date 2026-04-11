@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getAllMatches, updateMatchResult } from "../../services/MatchService";
 import ResultsForm from "./ResultsForm";
 
-export default function AdminMatches() {
+export default function AdminMatches({ onSelectMatch }) {
   const [matches, setMatches] = useState([]);
   const [editingMatch, setEditingMatch] = useState(null);
 
@@ -71,7 +71,7 @@ export default function AdminMatches() {
         <div
           key={m.id}
           className="admin-match-row"
-          onClick={() => startEditing(m)}
+          onClick={() => onSelectMatch(m.id)}  
         >
           {m.homeTeamName} – {m.awayTeamName}
         </div>
@@ -82,7 +82,10 @@ export default function AdminMatches() {
 
       {missingResults.map(m => (
         <details key={m.id} open={editingMatch?.id === m.id}>
-          <summary>
+          <summary
+            onClick={() => onSelectMatch(m.id)}   
+            style={{ cursor: "pointer" }}
+          >
             {m.date.toLocaleDateString("no-NO")} – {m.homeTeamName} vs {m.awayTeamName}
           </summary>
 
@@ -116,13 +119,16 @@ export default function AdminMatches() {
         </details>
       ))}
 
-      {/* Endre resultat – NY SEKSJON */}
+      {/* Endre resultat */}
       <h2>Endre resultat</h2>
 
       {completedMatches.map(m => (
         <details key={m.id} open={editingMatch?.id === m.id}>
-          <summary>
-            {m.date.toLocaleDateString("no-NO")} – {m.homeTeamName} vs {m.awayTeamName}  
+          <summary
+            onClick={() => onSelectMatch(m.id)}   
+            style={{ cursor: "pointer" }}
+          >
+            {m.date.toLocaleDateString("no-NO")} – {m.homeTeamName} vs {m.awayTeamName}
             {" "}({m.homeScore}–{m.awayScore})
           </summary>
 

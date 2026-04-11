@@ -57,41 +57,39 @@ export default function KampAdministrasjon({ divisions }) {
   const startEditing = (match) => {
     setEditingMatch(match);
 
-    setEditHomeTeam(match.homeTeam);
-    setEditAwayTeam(match.awayTeam);
+    // Lag-navn (gamle og nye kamper)
+    setEditHomeTeam(match.homeTeamName || match.homeTeam || "");
+    setEditAwayTeam(match.awayTeamName || match.awayTeam || "");
 
-    setEditDate(
-      match.date?.toDate
-        ? match.date.toDate().toISOString().split("T")[0]
-        : match.date
-    );
+    // Dato
+    const d = match.date?.toDate ? match.date.toDate() : new Date(match.date);
+    setEditDate(d.toISOString().split("T")[0]);
 
-    setEditTime(
-      match.time?.toDate
-        ? match.time.toDate().toLocaleTimeString("nb-NO", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-          })
-        : match.time
-    );
+    // Tid
+    setEditTime(match.time || "");
 
-    setEditLocation(match.location || "");
+    // Arena
+    setEditLocation(match.arena || "");
   };
 
   const saveEdit = async () => {
-    const matchRef = doc(db, "matches", editingMatch.id);
+  const matchRef = doc(db, "matches", editingMatch.id);
 
-    await updateDoc(matchRef, {
-      homeTeam: editHomeTeam,
-      awayTeam: editAwayTeam,
-      date: editDate,
-      time: editTime,
-      location: editLocation,
-    });
+  // Kombiner dato + tid
+  const combinedDate = new Date(`${editDate}T${editTime}:00`);
 
-    setEditingMatch(null);
-  };
+  await updateDoc(matchRef, {
+    homeTeamName: editHomeTeam || "",
+    awayTeamName: editAwayTeam || "",
+    date: combinedDate,   // ← riktig navn
+    time: editTime || "",
+    arena: editLocation || "",
+    division: editingMatch.division || "",
+    season: editingMatch.season || "",
+  });
+
+  setEditingMatch(null);
+};
 
   return (
     <section className="kampadmin-container">
@@ -124,19 +122,13 @@ export default function KampAdministrasjon({ divisions }) {
               {matches.map((match) => (
                 <li key={match.id} className="kampadmin-list-item">
                   <span>
-                    {match.homeTeam} – {match.awayTeam} (
+                    {match.homeTeamName || match.homeTeam} –{" "}
+                    {match.awayTeamName || match.awayTeam} (
                     {match.date?.toDate
                       ? match.date.toDate().toLocaleDateString("nb-NO")
-                      : match.date}
-                    {" "}
+                      : match.date}{" "}
                     kl{" "}
-                    {match.time?.toDate
-                      ? match.time.toDate().toLocaleTimeString("nb-NO", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })
-                      : match.time}
-                    )
+                    {match.time})
                   </span>
 
                   <button onClick={() => startEditing(match)}>Rediger</button>
