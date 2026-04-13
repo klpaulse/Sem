@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Substitution from "./Substitution";
+import { getTeam } from "../../services/TeamService";
 
 export default function EventForm({
   type,
@@ -9,6 +10,7 @@ export default function EventForm({
   selectedMatch,
   homeTeamId,
   awayTeamId,
+
   subTeam,
   setSubTeam,
   subIn,
@@ -17,9 +19,12 @@ export default function EventForm({
   setSubOut,
   subComment,
   setSubComment,
+
   addEvent,
+
   eventTeam,
   setEventTeam,
+
   fkTeam,
   setFkTeam,
   fkPlayer,
@@ -29,13 +34,27 @@ export default function EventForm({
 }) {
   if (!selectedMatch) return <p>Laster kamp...</p>;
 
-  // Hent spillere basert på valgt lag
-  const players =
-    fkTeam === homeTeamId
-      ? selectedMatch.homePlayers || []
-      : fkTeam === awayTeamId
-      ? selectedMatch.awayPlayers || []
-      : [];
+  const [homeTeam, setHomeTeam] = useState(null);
+  const [awayTeam, setAwayTeam] = useState(null);
+
+  useEffect(() => {
+    async function loadTeams() {
+      const home = await getTeam(homeTeamId);
+      const away = await getTeam(awayTeamId);
+
+      setHomeTeam(home);
+      setAwayTeam(away);
+    }
+    loadTeams();
+  }, [homeTeamId, awayTeamId]);
+
+  const getPlayersForTeam = (teamId) => {
+    const team = teamId === homeTeamId ? homeTeam : awayTeam;
+    if (!team) return [];
+    return Array.isArray(team.players)
+      ? team.players
+      : Object.values(team.players || {});
+  };
 
   return (
     <div style={{ marginTop: "20px" }}>
@@ -54,6 +73,78 @@ export default function EventForm({
         <option value="sub">Spillerbytte</option>
       </select>
 
+      {/* ⭐ MÅL */}
+      {type === "goal" && (
+        <>
+          <label>Lag som scorer</label>
+          <select value={eventTeam} onChange={(e) => setEventTeam(e.target.value)}>
+            <option value="">Velg lag</option>
+            <option value={homeTeamId}>{selectedMatch.homeTeamName}</option>
+            <option value={awayTeamId}>{selectedMatch.awayTeamName}</option>
+          </select>
+
+          {eventTeam && (
+            <>
+              <label>Målscorer</label>
+              <select value={subIn} onChange={(e) => setSubIn(e.target.value)}>
+                <option value="">Velg spiller</option>
+                {getPlayersForTeam(eventTeam).map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+
+              <label>Målgivende (valgfritt)</label>
+              <select value={subOut} onChange={(e) => setSubOut(e.target.value)}>
+                <option value="">Ingen</option>
+                {getPlayersForTeam(eventTeam).map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </>
+          )}
+
+          <label>Kommentar (valgfritt)</label>
+          <input
+            type="text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Eks: langskudd, heading, straffe..."
+          />
+        </>
+      )}
+
+      {/* ⭐ GULT / RØDT KORT */}
+      {(type === "yellow" || type === "red") && (
+        <>
+          <label>Lag</label>
+          <select value={eventTeam} onChange={(e) => setEventTeam(e.target.value)}>
+            <option value="">Velg lag</option>
+            <option value={homeTeamId}>{selectedMatch.homeTeamName}</option>
+            <option value={awayTeamId}>{selectedMatch.awayTeamName}</option>
+          </select>
+
+          {eventTeam && (
+            <>
+              <label>Spiller som får kortet</label>
+              <select value={subIn} onChange={(e) => setSubIn(e.target.value)}>
+                <option value="">Velg spiller</option>
+                {getPlayersForTeam(eventTeam).map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </>
+          )}
+
+          <label>Kommentar (valgfritt)</label>
+          <input
+            type="text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Valgfri kommentar"
+          />
+        </>
+      )}
+
       {/* ⭐ FRISPARK */}
       {type === "whistle" && (
         <>
@@ -67,15 +158,10 @@ export default function EventForm({
           {fkTeam && (
             <>
               <label>Spiller som tar frisparket</label>
-              <select
-                value={fkPlayer}
-                onChange={(e) => setFkPlayer(e.target.value)}
-              >
+              <select value={fkPlayer} onChange={(e) => setFkPlayer(e.target.value)}>
                 <option value="">Velg spiller</option>
-                {players.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
+                {getPlayersForTeam(fkTeam).map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </select>
             </>
@@ -91,30 +177,34 @@ export default function EventForm({
         </>
       )}
 
-      {/* ⭐ LAGVALG (for mål, kort, corner) */}
-      {type !== "comment" && type !== "sub" && type !== "whistle" && (
+      {/* ⭐ CORNER, SKADE */}
+      {(type === "corner" || type === "injury") && (
         <>
           <label>Lag</label>
-          <select
-            value={eventTeam}
-            onChange={(e) => setEventTeam(e.target.value)}
-          >
+          <select value={eventTeam} onChange={(e) => setEventTeam(e.target.value)}>
             <option value="">Velg lag</option>
             <option value={homeTeamId}>{selectedMatch.homeTeamName}</option>
             <option value={awayTeamId}>{selectedMatch.awayTeamName}</option>
           </select>
-        </>
-      )}
 
-      {/* ⭐ TEKSTFELT (ikke for bytte eller frispark) */}
-      {type !== "sub" && type !== "whistle" && (
-        <>
-          <label>Tekst</label>
+          <label>Kommentar (valgfritt)</label>
           <input
             type="text"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Valgfri kommentar"
+          />
+        </>
+      )}
+
+      {/* ⭐ KOMMENTAR */}
+      {type === "comment" && (
+        <>
+          <label>Kommentar</label>
+          <input
+            type="text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Skriv kommentar"
           />
         </>
       )}

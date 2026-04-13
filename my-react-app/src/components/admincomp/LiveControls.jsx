@@ -25,11 +25,11 @@ export default function LiveControls({ match }) {
 
   // Bytte-state
   const [subTeam, setSubTeam] = useState("");
-  const [subIn, setSubIn] = useState("");
-  const [subOut, setSubOut] = useState("");
+  const [subIn, setSubIn] = useState("");     // brukes også for målscorer og kort-spiller
+  const [subOut, setSubOut] = useState("");   // brukes også for assist
   const [subComment, setSubComment] = useState("");
 
-  // Frispark-state ⭐
+  // Frispark-state
   const [fkTeam, setFkTeam] = useState("");
   const [fkPlayer, setFkPlayer] = useState("");
   const [fkComment, setFkComment] = useState("");
@@ -57,7 +57,8 @@ export default function LiveControls({ match }) {
   async function addPause() {
     await addDoc(eventsRef, {
       id: crypto.randomUUID(),
-      type: "pause",
+      type: "system",
+      text: "Pause",
       minute: getMinute(),
       createdAt: serverTimestamp()
     });
@@ -67,7 +68,8 @@ export default function LiveControls({ match }) {
   async function addSecondHalf() {
     await addDoc(eventsRef, {
       id: crypto.randomUUID(),
-      type: "2omgang",
+      type: "system",
+      text: "2. omgang har startet",
       minute: getMinute(),
       createdAt: serverTimestamp()
     });
@@ -78,7 +80,7 @@ export default function LiveControls({ match }) {
     const minute = getMinute();
 
     // -------------------------
-    // ⭐ BYTTE
+    // ⭐ SPILLERBYTTE
     // -------------------------
     if (type === "sub") {
       await addDoc(eventsRef, {
@@ -103,33 +105,65 @@ export default function LiveControls({ match }) {
     // ⭐ MÅL
     // -------------------------
     if (type === "goal") {
+      const newHomeScore =
+        eventTeam === liveMatch.homeTeamId
+          ? (liveMatch.homeScore || 0) + 1
+          : liveMatch.homeScore;
+
+      const newAwayScore =
+        eventTeam === liveMatch.awayTeamId
+          ? (liveMatch.awayScore || 0) + 1
+          : liveMatch.awayScore;
+
+      // Oppdater stillingen i match-dokumentet
       await updateDoc(matchRef, {
-        homeScore:
-          eventTeam === liveMatch.homeTeamId
-            ? (liveMatch.homeScore || 0) + 1
-            : liveMatch.homeScore,
-        awayScore:
-          eventTeam === liveMatch.awayTeamId
-            ? (liveMatch.awayScore || 0) + 1
-            : liveMatch.awayScore
+        homeScore: newHomeScore,
+        awayScore: newAwayScore
       });
 
+      // Lagre mål-hendelsen
       await addDoc(eventsRef, {
         id: crypto.randomUUID(),
         type: "goal",
         team: eventTeam,
+        player: subIn,          // målscorer
+        assist: subOut || null, // målgivende
+        homeScore: newHomeScore,
+        awayScore: newAwayScore,
         text,
         minute,
         createdAt: serverTimestamp()
       });
 
       setEventTeam("");
+      setSubIn("");
+      setSubOut("");
       setText("");
       return;
     }
 
     // -------------------------
-    // ⭐ FRISPARK (whistle)
+    // ⭐ GULT / RØDT KORT
+    // -------------------------
+    if (type === "yellow" || type === "red") {
+      await addDoc(eventsRef, {
+        id: crypto.randomUUID(),
+        type,
+        team: eventTeam,
+        player: subIn, // spiller som får kortet
+        text,
+        minute,
+        createdAt: serverTimestamp()
+      });
+
+      setEventTeam("");
+      setSubIn("");
+      setText("");
+      return;
+    }
+
+    // -------------------------
+    // ⭐ FRISPARK
     // -------------------------
     if (type === "whistle") {
       await addDoc(eventsRef, {
@@ -205,35 +239,31 @@ export default function LiveControls({ match }) {
       <hr />
 
       <EventForm
-  type={type}
-  setType={setType}
-  text={text}
-  setText={setText}
-  selectedMatch={liveMatch}
-  homeTeamId={liveMatch?.homeTeamId}
-  awayTeamId={liveMatch?.awayTeamId}
-
-  subTeam={subTeam}
-  setSubTeam={setSubTeam}
-  subIn={subIn}
-  setSubIn={setSubIn}
-  subOut={subOut}
-  setSubOut={setSubOut}
-  subComment={subComment}
-  setSubComment={setSubComment}
-
-  addEvent={addEvent}
-
-  eventTeam={eventTeam}
-  setEventTeam={setEventTeam}
-
-  fkTeam={fkTeam}
-  setFkTeam={setFkTeam}
-  fkPlayer={fkPlayer}
-  setFkPlayer={setFkPlayer}
-  fkComment={fkComment}
-  setFkComment={setFkComment}
-/>
+        type={type}
+        setType={setType}
+        text={text}
+        setText={setText}
+        selectedMatch={liveMatch}
+        homeTeamId={liveMatch?.homeTeamId}
+        awayTeamId={liveMatch?.awayTeamId}
+        subTeam={subTeam}
+        setSubTeam={setSubTeam}
+        subIn={subIn}
+        setSubIn={setSubIn}
+        subOut={subOut}
+        setSubOut={setSubOut}
+        subComment={subComment}
+        setSubComment={setSubComment}
+        addEvent={addEvent}
+        eventTeam={eventTeam}
+        setEventTeam={setEventTeam}
+        fkTeam={fkTeam}
+        setFkTeam={setFkTeam}
+        fkPlayer={fkPlayer}
+        setFkPlayer={setFkPlayer}
+        fkComment={fkComment}
+        setFkComment={setFkComment}
+      />
     </section>
   );
 }

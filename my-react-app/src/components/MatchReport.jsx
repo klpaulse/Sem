@@ -6,8 +6,9 @@ import {
   faUserInjured,
   faComment,
   faFlag,
-  faBell,
-  faRightLeft,
+  faBullhorn,
+  faArrowUp,
+  faArrowDown
 } from "@fortawesome/free-solid-svg-icons";
 import { getTeam } from "../services/TeamService";
 
@@ -67,40 +68,6 @@ export default function MatchReport({ match, events }) {
     return `90+${minute - 90}`;
   };
 
-  const getIcon = (type) => {
-    switch (type) {
-      case "goal":
-        return <FontAwesomeIcon icon={faFutbol} />;
-      case "yellow":
-        return <FontAwesomeIcon icon={faSquare} style={{ color: "#f4d03f" }} />;
-      case "red":
-        return <FontAwesomeIcon icon={faSquare} style={{ color: "#e74c3c" }} />;
-      case "injury":
-        return <FontAwesomeIcon icon={faUserInjured} />;
-      case "comment":
-        return <FontAwesomeIcon icon={faComment} />;
-      case "corner":
-        return <FontAwesomeIcon icon={faFlag} />;
-      case "whistle":
-        return <FontAwesomeIcon icon={faBell} />;
-      case "sub":
-        return <FontAwesomeIcon icon={faRightLeft} />;
-      default:
-        return null;
-    }
-  };
-
-  if (!events || events.length === 0) {
-    return (
-      <div className="report-container">
-        <div className="report-feed">
-          <h3>Kampen er ferdig</h3>
-          <p>Det ble ikke ført live‑rapport for denne kampen.</p>
-        </div>
-      </div>
-    );
-  }
-
   const sortedEvents = [...events].sort((a, b) => a.minute - b.minute);
 
   return (
@@ -119,28 +86,102 @@ export default function MatchReport({ match, events }) {
             );
           }
 
+      // ⭐ MÅL
+if (e.type === "goal") {
+  return (
+    <div key={e.id} className="event event-goal">
+
+      {/* IKON I VENSTRE KOLONNE */}
+      <span className="event-icon">
+        <FontAwesomeIcon icon={faFutbol} />
+      </span>
+
+      {/* TEKST */}
+      <div className="event-text">
+
+        {/* TITTEL */}
+        <p className="goal-title">
+          {getTeamName(e.team)} SCORER!
+        </p>
+
+        {/* STILLING */}
+        <p className="goal-score">
+          {e.homeScore}-{e.awayScore}
+        </p>
+
+        {/* MÅLSCORER */}
+        <p className="goal-detail">
+          Mål: {getPlayerName(e.team, e.player)}
+        </p>
+
+        {/* ASSIST */}
+        {e.assist && (
+          <p className="goal-detail">
+            Målgivende: {getPlayerName(e.team, e.assist)}
+          </p>
+        )}
+
+        {/* KOMMENTAR */}
+        {e.text && (
+          <p className="goal-comment">{e.text}</p>
+        )}
+      </div>
+
+      {/* MINUTT */}
+      <span className="event-minute">
+        {formatMinute(e.minute)}'
+      </span>
+    </div>
+  );
+}
+
           // ⭐ SPILLERBYTTE
-          if (e.type === "sub") {
+if (e.type === "sub") {
+  return (
+    <div key={e.id} className="event event-sub">
+
+      {/* IKON I VENSTRE KOLONNE */}
+      <span className="event-icon">
+        <FontAwesomeIcon icon={faArrowUp} className="sub-in-icon" />
+      </span>
+
+      <div className="event-text">
+        <p className="sub-title">
+          Spillerbytte – {getTeamName(e.team)}
+        </p>
+
+        <p className="sub-in">
+          <FontAwesomeIcon icon={faArrowUp} className="sub-in-icon" />
+          Inn: {getPlayerName(e.team, e.in)}
+        </p>
+
+        <p className="sub-out">
+          <FontAwesomeIcon icon={faArrowDown} className="sub-out-icon" />
+          Ut: {getPlayerName(e.team, e.out)}
+        </p>
+
+        {e.comment && (
+          <p className="sub-comment">{e.comment}</p>
+        )}
+      </div>
+
+      <span className="event-minute">{formatMinute(e.minute)}'</span>
+    </div>
+  );
+}
+
+          // ⭐ GULT KORT
+          if (e.type === "yellow") {
             return (
-              <div key={e.id} className="event event-sub">
-                <span className="event-icon">{getIcon("sub")}</span>
+              <div key={e.id} className="event event-yellow">
+                <span className="event-icon">
+                  <FontAwesomeIcon icon={faSquare} className="yellow-card" />
+                </span>
 
                 <div className="event-text">
-                  <p className="sub-title">
-                    Spillerbytte – {getTeamName(e.team)}
-                  </p>
-
-                  <p className="sub-in">
-                    Inn: {getPlayerName(e.team, e.in)}
-                  </p>
-
-                  <p className="sub-out">
-                    Ut: {getPlayerName(e.team, e.out)}
-                  </p>
-
-                  {e.comment && (
-                    <p className="sub-comment">{e.comment}</p>
-                  )}
+                  <p>Gult kort til {getTeamName(e.team)}</p>
+                  <p>{getPlayerName(e.team, e.player)}</p>
+                  {e.text && <p>{e.text}</p>}
                 </div>
 
                 <span className="event-minute">{formatMinute(e.minute)}'</span>
@@ -148,24 +189,76 @@ export default function MatchReport({ match, events }) {
             );
           }
 
-          // ⭐ FRISPARK (whistle)
+          // ⭐ RØDT KORT
+          if (e.type === "red") {
+            return (
+              <div key={e.id} className="event event-red">
+                <span className="event-icon">
+                  <FontAwesomeIcon icon={faSquare} className="red-card" />
+                </span>
+
+                <div className="event-text">
+                  <p>Rødt kort til {getTeamName(e.team)}</p>
+                  <p>{getPlayerName(e.team, e.player)}</p>
+                  {e.text && <p>{e.text}</p>}
+                </div>
+
+                <span className="event-minute">{formatMinute(e.minute)}'</span>
+              </div>
+            );
+          }
+
+          // ⭐ SKADE
+          if (e.type === "injury") {
+            return (
+              <div key={e.id} className="event event-injury">
+                <span className="event-icon">
+                  <FontAwesomeIcon icon={faUserInjured} />
+                </span>
+
+                <div className="event-text">
+                  <p>Skade – {getTeamName(e.team)}</p>
+                  {e.text && <p>{e.text}</p>}
+                </div>
+
+                <span className="event-minute">{formatMinute(e.minute)}'</span>
+              </div>
+            );
+          }
+
+          // ⭐ CORNER
+          if (e.type === "corner") {
+            return (
+              <div key={e.id} className="event event-corner">
+                <span className="event-icon">
+                  <FontAwesomeIcon icon={faFlag} />
+                </span>
+
+                <div className="event-text">
+                  <p>Hjørnespark til {getTeamName(e.team)}</p>
+                  {e.player && (
+                    <p>{getPlayerName(e.team, e.player)} tar corneren</p>
+                  )}
+                  {e.text && <p>{e.text}</p>}
+                </div>
+
+                <span className="event-minute">{formatMinute(e.minute)}'</span>
+              </div>
+            );
+          }
+
+          // ⭐ FRISPARK
           if (e.type === "whistle") {
             return (
               <div key={e.id} className="event event-whistle">
-                <span className="event-icon">{getIcon("whistle")}</span>
+                <span className="event-icon">
+                  <FontAwesomeIcon icon={faBullhorn} />
+                </span>
 
                 <div className="event-text">
                   <p>Frispark til {getTeamName(e.team)}</p>
-
-                  {e.player && (
-                    <p className="sub-in">
-                    {getPlayerName(e.team, e.player)}
-                    </p>
-                  )}
-
-                  {e.comment && (
-                    <p className="sub-comment">{e.comment}</p>
-                  )}
+                  {e.player && <p>{getPlayerName(e.team, e.player)}</p>}
+                  {e.comment && <p>{e.comment}</p>}
                 </div>
 
                 <span className="event-minute">{formatMinute(e.minute)}'</span>
@@ -173,18 +266,24 @@ export default function MatchReport({ match, events }) {
             );
           }
 
-          // ⭐ STANDARD-EVENTER (mål, kort, corner, kommentar)
-          return (
-            <div key={e.id} className={`event event-${e.type}`}>
-              <span className="event-icon">{getIcon(e.type)}</span>
+          // ⭐ KOMMENTAR
+          if (e.type === "comment") {
+            return (
+              <div key={e.id} className="event event-comment">
+                <span className="event-icon">
+                  <FontAwesomeIcon icon={faComment} />
+                </span>
 
-              <div className="event-text">
-                <p>{e.text}</p>
+                <div className="event-text">
+                  <p>{e.text}</p>
+                </div>
+
+                <span className="event-minute">{formatMinute(e.minute)}'</span>
               </div>
+            );
+          }
 
-              <span className="event-minute">{formatMinute(e.minute)}'</span>
-            </div>
-          );
+          return null;
         })}
       </div>
     </div>

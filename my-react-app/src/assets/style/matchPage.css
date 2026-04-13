@@ -299,6 +299,128 @@ display: inline-block;
 
 }
 
+/* Generell tittel for alle eventtyper */
+.event-text p:first-child {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.event-text p:not(:first-child) {
+ color: #d0d0d0;
+  font-weight: 400;
+  font-size: 14px;
+  opacity: 0.85;
+
+}
+
+
+/* ================================
+   MÅL
+================================ */
+.event-goal {
+  background: #d4f8d4 !important;
+  border-top: 1px solid #b6e8b6 !important;
+  border-bottom: 1px solid #b6e8b6 !important;
+}
+
+.event-goal .event-icon {
+  color: #0f2f0f; /* mørk grønn */
+  font-size: 20px;
+}
+
+/* TITTEL */
+.event-goal .event-text .goal-title {
+  color: #0f2f0f;
+}
+
+/* STILLING */
+.event-goal .event-text .goal-score {
+  color: #0f2f0f;
+}
+
+/* DETALJER */
+.event-goal .event-text .goal-detail {
+  color: #1a3d1a;
+}
+
+/* KOMMENTAR */
+.event-goal .event-text .goal-comment {
+  color: #2a4d2a;
+}
+
+
+/* ================================
+   SPILLERBYTTE
+================================ */
+
+.sub-in-icon {
+  color: #2ecc71;
+  margin-right: 6px;
+}
+
+.sub-out-icon {
+  color: #e74c3c;
+  margin-right: 6px;
+}
+
+/* ================================
+   GULT KORT
+================================ */
+
+.yellow-card {
+  color: #f4d03f;
+}
+
+/* ================================
+   RØDT KORT
+================================ */
+
+.red-card {
+  color: #e74c3c;
+}
+
+/* ================================
+   SKADE
+================================ */
+.event-injury {
+  background: #ffcccc !important;
+  border-top: 1px solid #ff9e9e !important;
+  border-bottom: 1px solid #ff9e9e !important;
+}
+
+.event-injury .event-icon {
+  color: #c0392b;
+}
+.event-injury .event-text p:first-child {
+  color: #2a002a;
+}
+
+.event-injury .event-text p:not(:first-child) {
+  color: #4d003d; /* mørkere lilla */
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+
+/* ================================
+   CORNER
+================================ */
+
+.event-corner .event-icon {
+  color: #3498db;
+}
+
+/* ================================
+   FRISPARK
+================================ */
+
+
+.event-whistle .event-icon {
+  color: #e67e22;
+}
+
 .match-clickable {
   cursor: pointer;
   padding: 6px 0;
