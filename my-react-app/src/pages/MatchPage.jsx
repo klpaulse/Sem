@@ -5,18 +5,18 @@ import MatchFilters from "../components/maincomp/MatchFilters";
 import MatchList from "../components/maincomp/MatchList";
 import "../assets/style/matchPage.css";
 
-import { useEffect, useState, useRef } from "react";
-import { collection, onSnapshot, query, orderBy, getDocs } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { collection, onSnapshot, query, orderBy, getDocs, doc } from "firebase/firestore";
 import { db } from "../config/Firebase";
 
 import { useParams } from "react-router-dom";
 import BeforeMatch from "../components/maincomp/BeforeMatch";
 
-
 export default function MatchPage() {
   const { id } = useParams();
 
   const [allMatches, setAllMatches] = useState([]);
+  const [selectedMatch, setSelectedMatch] = useState(null);
   const [events, setEvents] = useState([]);
   const [activeTab, setActiveTab] = useState("rapport");
 
@@ -24,9 +24,7 @@ export default function MatchPage() {
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(null);
 
-  const upcomingRef = useRef(null);
-
-  // 🔥 Hent ALLE kamper
+  // 🔥 Hent ALLE kamper (ikke live)
   useEffect(() => {
     const fetchAll = async () => {
       const ref = collection(db, "matches");
@@ -38,10 +36,22 @@ export default function MatchPage() {
     fetchAll();
   }, []);
 
-  // 🔥 Finn kampen basert på ID
-  const selectedMatch = allMatches.find(m => m.id === id);
+  // ⭐ Hent DENNE kampen live
+  useEffect(() => {
+    if (!id) return;
 
-  // 🔥 Hent events
+    const ref = doc(db, "matches", id);
+
+    const unsub = onSnapshot(ref, (snap) => {
+      if (snap.exists()) {
+        setSelectedMatch({ id: snap.id, ...snap.data() });
+      }
+    });
+
+    return () => unsub();
+  }, [id]);
+
+  // 🔥 Hent events live
   useEffect(() => {
     if (!selectedMatch) return;
 
@@ -61,27 +71,6 @@ export default function MatchPage() {
     return () => unsub();
   }, [selectedMatch]);
 
-  // 🔥 Siste spilte kamp
-  const played = allMatches.filter((m) => m.homeScore !== null);
-  const lastPlayed =
-    played.length > 0
-      ? played.sort((a, b) => b.date.toDate() - a.date.toDate())[0]
-      : null;
-
-  // 🔥 Filtrering
-  const filteredMatches = allMatches
-    .filter((m) => (selectedRound ? m.round === selectedRound : true))
-    .filter((m) =>
-      selectedMonth !== null
-        ? m.date.toDate().getMonth() === selectedMonth
-        : true
-    )
-    .filter((m) =>
-      selectedTeam
-        ? m.homeTeam === selectedTeam || m.awayTeam === selectedTeam
-        : true
-    );
-
   // 🔥 Kampstatus
   if (!selectedMatch) {
     return <p>Laster kamp...</p>;
@@ -90,7 +79,7 @@ export default function MatchPage() {
   // ⭐ FØR KAMP
   if (selectedMatch.status === "not_started") {
     return (
-        <BeforeMatch match={selectedMatch} allMatches={allMatches} />
+      <BeforeMatch match={selectedMatch} allMatches={allMatches} />
     );
   }
 
@@ -101,7 +90,7 @@ export default function MatchPage() {
         <h1 className="live-header">Breddefotball live</h1>
       </header>
 
-      {/* Kampkort – samme stil som BeforeMatch */}
+      {/* Kampkort */}
       <div className="last-played-card">
         <p className="lp-status">
           {selectedMatch.status === "finished"
@@ -128,9 +117,9 @@ export default function MatchPage() {
         </p>
       </div>
 
-      {/* Rapport + Admin */}
+      {/* Rapport */}
       <main className="page">
-        <Tabs activeTab={activeTab} setActiveTab={setActiveTab} upcomingRef={upcomingRef} />
+        <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
         <section className="content-box">
           {activeTab === "rapport" && (
@@ -138,14 +127,12 @@ export default function MatchPage() {
           )}
 
           {activeTab === "tabell" && (
-  <TabellComponent match={selectedMatch} />
-)}
+            <TabellComponent match={selectedMatch} />
+          )}
 
-{activeTab === "lag" && (
-  <LagComponent match={selectedMatch} />
-)}
-
-           
+          {activeTab === "lag" && (
+            <LagComponent match={selectedMatch} />
+          )}
         </section>
       </main>
     </>

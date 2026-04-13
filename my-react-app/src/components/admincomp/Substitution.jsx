@@ -3,6 +3,8 @@ import { getTeam } from "../../services/TeamService";
 
 export default function Substitution({
   selectedMatch,
+  homeTeamId,
+  awayTeamId,
   subTeam,
   setSubTeam,
   subIn,
@@ -15,63 +17,76 @@ export default function Substitution({
   const [homeTeam, setHomeTeam] = useState(null);
   const [awayTeam, setAwayTeam] = useState(null);
 
-  // Hent lagnavn basert på ID
   useEffect(() => {
-    if (!selectedMatch) return;
+    if (!homeTeamId || !awayTeamId) return;
 
     async function loadTeams() {
-      const home = await getTeam(selectedMatch.homeTeam);
-      const away = await getTeam(selectedMatch.awayTeam);
+      const home = await getTeam(homeTeamId);
+      const away = await getTeam(awayTeamId);
 
       setHomeTeam(home);
       setAwayTeam(away);
     }
 
     loadTeams();
-  }, [selectedMatch]);
+  }, [homeTeamId, awayTeamId]);
+
+  // ⭐ HINDRER at dropdownene forsvinner
+  if (!homeTeam || !awayTeam) {
+    return <div>Laster lag...</div>;
+  }
+
+  const currentPlayers =
+    subTeam === homeTeamId
+      ? homeTeam.players || []
+      : subTeam === awayTeamId
+      ? awayTeam.players || []
+      : [];
 
   return (
     <div>
-      {/* Lagvalg */}
+      <label>Lag</label>
       <select
         value={subTeam || ""}
-        onChange={(e) => setSubTeam(e.target.value)}
+        onChange={(e) => {
+          setSubTeam(e.target.value);
+          setSubIn("");
+          setSubOut("");
+        }}
       >
         <option value="">Velg lag</option>
 
-        {homeTeam && (
-          <option value={selectedMatch.homeTeam}>
-            {homeTeam.teamName}
-          </option>
-        )}
-
-        {awayTeam && (
-          <option value={selectedMatch.awayTeam}>
-            {awayTeam.teamName}
-          </option>
-        )}
+        <option value={homeTeamId}>{homeTeam.name}</option>
+        <option value={awayTeamId}>{awayTeam.name}</option>
       </select>
 
-      {/* Spiller inn */}
-      <input
-        type="text"
-        placeholder="Spiller inn"
+      <label>Spiller inn</label>
+      <select
         value={subIn}
         onChange={(e) => setSubIn(e.target.value)}
-      />
+        disabled={!subTeam}
+      >
+        <option value="">Velg spiller</option>
+        {currentPlayers.map((p) => (
+          <option key={p.id} value={p.id}>{p.name}</option>
+        ))}
+      </select>
 
-      {/* Spiller ut */}
-      <input
-        type="text"
-        placeholder="Spiller ut"
+      <label>Spiller ut</label>
+      <select
         value={subOut}
         onChange={(e) => setSubOut(e.target.value)}
-      />
+        disabled={!subTeam}
+      >
+        <option value="">Velg spiller</option>
+        {currentPlayers.map((p) => (
+          <option key={p.id} value={p.id}>{p.name}</option>
+        ))}
+      </select>
 
-      {/* Kommentar */}
+      <label>Kommentar</label>
       <input
         type="text"
-        placeholder="Kommentar (valgfritt)"
         value={subComment}
         onChange={(e) => setSubComment(e.target.value)}
       />

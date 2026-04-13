@@ -10,13 +10,15 @@ import {
 import { db } from "../../config/Firebase";
 import EventForm from "./EventForm";
 
-export default function LiveControls({ matchId }) {
-  const matchRef = doc(db, "matches", matchId);
-  const eventsRef = collection(db, "matches", matchId, "events");
+export default function LiveControls({ match }) {
+  if (!match) return <p>Laster kamp...</p>;
 
-  const [match, setMatch] = useState(null);
+  const matchRef = doc(db, "matches", match.id);
+  const eventsRef = collection(db, "matches", match.id, "events");
 
-  // Felles state for EventForm
+  const [liveMatch, setLiveMatch] = useState(match);
+
+  // Felles state
   const [type, setType] = useState("goal");
   const [text, setText] = useState("");
   const [eventTeam, setEventTeam] = useState("");
@@ -27,29 +29,52 @@ export default function LiveControls({ matchId }) {
   const [subOut, setSubOut] = useState("");
   const [subComment, setSubComment] = useState("");
 
-  // Hent kampdata live
+  // Frispark-state ⭐
+  const [fkTeam, setFkTeam] = useState("");
+  const [fkPlayer, setFkPlayer] = useState("");
+  const [fkComment, setFkComment] = useState("");
+
+  // 🔥 Live kampdata
   useEffect(() => {
-    if (!matchId) return;
+    if (!match?.id) return;
 
     const unsub = onSnapshot(matchRef, (snap) => {
-      setMatch({ id: snap.id, ...snap.data() });
+      setLiveMatch({ id: snap.id, ...snap.data() });
     });
 
     return () => unsub();
-  }, [matchId]);
+  }, [match]);
 
-  // Minuttberegning
+  // Minutt
   function getMinute() {
-    if (!match?.startTime) return 0;
-    const start = new Date(match.startTime);
+    if (!liveMatch?.startTime) return 0;
+    const start = new Date(liveMatch.startTime);
     const now = new Date();
     return Math.floor((now - start) / 60000);
   }
 
-  // ⭐ Legg til hendelse (håndterer ALT)
-  async function addEvent() {
-    if (!match) return;
+  // ⭐ Pause
+  async function addPause() {
+    await addDoc(eventsRef, {
+      id: crypto.randomUUID(),
+      type: "pause",
+      minute: getMinute(),
+      createdAt: serverTimestamp()
+    });
+  }
 
+  // ⭐ 2. omgang
+  async function addSecondHalf() {
+    await addDoc(eventsRef, {
+      id: crypto.randomUUID(),
+      type: "2omgang",
+      minute: getMinute(),
+      createdAt: serverTimestamp()
+    });
+  }
+
+  // ⭐ Legg til hendelse
+  async function addEvent() {
     const minute = getMinute();
 
     // -------------------------
@@ -80,13 +105,13 @@ export default function LiveControls({ matchId }) {
     if (type === "goal") {
       await updateDoc(matchRef, {
         homeScore:
-          eventTeam === match.homeTeam
-            ? (match.homeScore || 0) + 1
-            : match.homeScore,
+          eventTeam === liveMatch.homeTeamId
+            ? (liveMatch.homeScore || 0) + 1
+            : liveMatch.homeScore,
         awayScore:
-          eventTeam === match.awayTeam
-            ? (match.awayScore || 0) + 1
-            : match.awayScore
+          eventTeam === liveMatch.awayTeamId
+            ? (liveMatch.awayScore || 0) + 1
+            : liveMatch.awayScore
       });
 
       await addDoc(eventsRef, {
@@ -104,7 +129,27 @@ export default function LiveControls({ matchId }) {
     }
 
     // -------------------------
-    // ⭐ ALLE ANDRE HENDELSER
+    // ⭐ FRISPARK (whistle)
+    // -------------------------
+    if (type === "whistle") {
+      await addDoc(eventsRef, {
+        id: crypto.randomUUID(),
+        type: "whistle",
+        team: fkTeam,
+        player: fkPlayer,
+        comment: fkComment,
+        minute,
+        createdAt: serverTimestamp()
+      });
+
+      setFkTeam("");
+      setFkPlayer("");
+      setFkComment("");
+      return;
+    }
+
+    // -------------------------
+    // ⭐ ANDRE HENDELSER
     // -------------------------
     await addDoc(eventsRef, {
       id: crypto.randomUUID(),
@@ -153,30 +198,42 @@ export default function LiveControls({ matchId }) {
       <h3>Live kontroll</h3>
 
       <button onClick={startMatch}>Start kamp</button>
-      <button onClick={() => addEvent("pause")}>Pause</button>
-      <button onClick={() => addEvent("2omgang")}>2. omgang</button>
+      <button onClick={addPause}>Pause</button>
+      <button onClick={addSecondHalf}>2. omgang</button>
       <button onClick={endMatch}>Kampslutt</button>
 
       <hr />
 
       <EventForm
-        type={type}
-        setType={setType}
-        text={text}
-        setText={setText}
-        selectedMatch={match}
-        subTeam={subTeam}
-        setSubTeam={setSubTeam}
-        subIn={subIn}
-        setSubIn={setSubIn}
-        subOut={subOut}
-        setSubOut={setSubOut}
-        subComment={subComment}
-        setSubComment={setSubComment}
-        addEvent={addEvent}
-        eventTeam={eventTeam}
-        setEventTeam={setEventTeam}
-      />
+  type={type}
+  setType={setType}
+  text={text}
+  setText={setText}
+  selectedMatch={liveMatch}
+  homeTeamId={liveMatch?.homeTeamId}
+  awayTeamId={liveMatch?.awayTeamId}
+
+  subTeam={subTeam}
+  setSubTeam={setSubTeam}
+  subIn={subIn}
+  setSubIn={setSubIn}
+  subOut={subOut}
+  setSubOut={setSubOut}
+  subComment={subComment}
+  setSubComment={setSubComment}
+
+  addEvent={addEvent}
+
+  eventTeam={eventTeam}
+  setEventTeam={setEventTeam}
+
+  fkTeam={fkTeam}
+  setFkTeam={setFkTeam}
+  fkPlayer={fkPlayer}
+  setFkPlayer={setFkPlayer}
+  fkComment={fkComment}
+  setFkComment={setFkComment}
+/>
     </section>
   );
 }

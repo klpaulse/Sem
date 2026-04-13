@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faFutbol,
@@ -8,18 +9,53 @@ import {
   faBell,
   faRightLeft,
 } from "@fortawesome/free-solid-svg-icons";
+import { getTeam } from "../services/TeamService";
 
 export default function MatchReport({ match, events }) {
   if (!match) return null;
 
-  // Finn målscorere
-  const goalEvents = events
-    ?.filter((e) => e.type === "goal")
-    .sort((a, b) => a.minute - b.minute) || [];
+  const [homeTeam, setHomeTeam] = useState(null);
+  const [awayTeam, setAwayTeam] = useState(null);
 
-  // Sjekk om vi er i 2. omgang
+  // Hent lagene
+  useEffect(() => {
+    async function loadTeams() {
+      const home = await getTeam(match.homeTeamId);
+      const away = await getTeam(match.awayTeamId);
+
+      setHomeTeam(home);
+      setAwayTeam(away);
+    }
+    loadTeams();
+  }, [match]);
+
+  if (!homeTeam || !awayTeam) {
+    return <div>Laster kampdata...</div>;
+  }
+
+  // Robust spilleroppslag
+  function getPlayerName(teamId, playerId) {
+    const team = teamId === match.homeTeamId ? homeTeam : awayTeam;
+
+    const players = Array.isArray(team?.players)
+      ? team.players
+      : Object.values(team?.players || {});
+
+    const found = players.find((p) => p.id === playerId);
+
+    return found?.name || playerId;
+  }
+
+  function getTeamName(teamId) {
+    if (teamId === match.homeTeamId) return homeTeam?.name;
+    if (teamId === match.awayTeamId) return awayTeam?.name;
+    return "Ukjent lag";
+  }
+
   const isSecondHalf = events.some(
-    (e) => e.type === "system" && (e.text || "").toLowerCase().includes("2. omgang")
+    (e) =>
+      e.type === "system" &&
+      (e.text || "").toLowerCase().includes("2. omgang")
   );
 
   const formatMinute = (minute) => {
@@ -54,7 +90,6 @@ export default function MatchReport({ match, events }) {
     }
   };
 
-  // ⭐ INGEN HENDELSER → vis ferdig‑melding
   if (!events || events.length === 0) {
     return (
       <div className="report-container">
@@ -66,13 +101,16 @@ export default function MatchReport({ match, events }) {
     );
   }
 
-  // ⭐ HOVEDVISNING (live eller ferdig kamp med hendelser)
+  const sortedEvents = [...events].sort((a, b) => a.minute - b.minute);
+
   return (
     <div className="report-container">
       <div className="report-feed">
         <h3>{match.status === "finished" ? "Kampreferat" : "Live oppdatering"}</h3>
 
-        {events.map((e) => {
+        {sortedEvents.map((e) => {
+
+          // ⭐ SYSTEM
           if (e.type === "system") {
             return (
               <div key={e.id} className="event event-system">
@@ -81,16 +119,28 @@ export default function MatchReport({ match, events }) {
             );
           }
 
+          // ⭐ SPILLERBYTTE
           if (e.type === "sub") {
             return (
               <div key={e.id} className="event event-sub">
                 <span className="event-icon">{getIcon("sub")}</span>
 
                 <div className="event-text">
-                  <p className="sub-title">Spillerbytte – {e.team}</p>
-                  <p className="sub-in">Inn: {e.in}</p>
-                  <p className="sub-out">Ut: {e.out}</p>
-                  {e.comment && <p className="sub-comment">{e.comment}</p>}
+                  <p className="sub-title">
+                    Spillerbytte – {getTeamName(e.team)}
+                  </p>
+
+                  <p className="sub-in">
+                    Inn: {getPlayerName(e.team, e.in)}
+                  </p>
+
+                  <p className="sub-out">
+                    Ut: {getPlayerName(e.team, e.out)}
+                  </p>
+
+                  {e.comment && (
+                    <p className="sub-comment">{e.comment}</p>
+                  )}
                 </div>
 
                 <span className="event-minute">{formatMinute(e.minute)}'</span>
@@ -98,6 +148,32 @@ export default function MatchReport({ match, events }) {
             );
           }
 
+          // ⭐ FRISPARK (whistle)
+          if (e.type === "whistle") {
+            return (
+              <div key={e.id} className="event event-whistle">
+                <span className="event-icon">{getIcon("whistle")}</span>
+
+                <div className="event-text">
+                  <p>Frispark til {getTeamName(e.team)}</p>
+
+                  {e.player && (
+                    <p className="sub-in">
+                    {getPlayerName(e.team, e.player)}
+                    </p>
+                  )}
+
+                  {e.comment && (
+                    <p className="sub-comment">{e.comment}</p>
+                  )}
+                </div>
+
+                <span className="event-minute">{formatMinute(e.minute)}'</span>
+              </div>
+            );
+          }
+
+          // ⭐ STANDARD-EVENTER (mål, kort, corner, kommentar)
           return (
             <div key={e.id} className={`event event-${e.type}`}>
               <span className="event-icon">{getIcon(e.type)}</span>

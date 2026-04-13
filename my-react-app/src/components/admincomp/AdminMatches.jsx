@@ -64,26 +64,24 @@ export default function AdminMatches({ onSelectMatch }) {
     <section className="admin-page">
       <h1>Admin – Kamper</h1>
 
-      {/* Dagens kamper */}
       <h2>Dagens kamper</h2>
       {todaysMatches.length === 0 && <p>Ingen kamper i dag.</p>}
       {todaysMatches.map(m => (
         <div
           key={m.id}
           className="admin-match-row"
-          onClick={() => onSelectMatch(m.id)}  
+          onClick={() => onSelectMatch({ id: m.id })}  
         >
           {m.homeTeamName} – {m.awayTeamName}
         </div>
       ))}
 
-      {/* Kamper uten resultat */}
       <h2>Tidligere kamper uten resultat</h2>
 
       {missingResults.map(m => (
         <details key={m.id} open={editingMatch?.id === m.id}>
           <summary
-            onClick={() => onSelectMatch(m.id)}   
+            onClick={() => onSelectMatch({ id: m.id })}   
             style={{ cursor: "pointer" }}
           >
             {m.date.toLocaleDateString("no-NO")} – {m.homeTeamName} vs {m.awayTeamName}
@@ -119,13 +117,12 @@ export default function AdminMatches({ onSelectMatch }) {
         </details>
       ))}
 
-      {/* Endre resultat */}
       <h2>Endre resultat</h2>
 
       {completedMatches.map(m => (
         <details key={m.id} open={editingMatch?.id === m.id}>
           <summary
-            onClick={() => onSelectMatch(m.id)}   
+            onClick={() => onSelectMatch({ id: m.id })}   
             style={{ cursor: "pointer" }}
           >
             {m.date.toLocaleDateString("no-NO")} – {m.homeTeamName} vs {m.awayTeamName}
@@ -150,7 +147,7 @@ export default function AdminMatches({ onSelectMatch }) {
                   setEditingMatch={setEditingMatch}
                   homeScore={homeScore}
                   setHomeScore={setHomeScore}
-                  awayScore={awayScore}
+                  awayScore={awayScore} 
                   setAwayScore={setAwayScore}
                   location={location}
                   setLocation={setLocation}
