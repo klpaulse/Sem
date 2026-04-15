@@ -14,7 +14,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../../config/Firebase";
 
-import EventForm from "./Eventform/EventForm";
+import EventForm from "./eventform/EventForm";
 import EventList from "./EventList";
 
 import { getTeam } from "../../services/TeamService";
