@@ -31,6 +31,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function LiveControls({ match }) {
+  console.log("LIVE CONTROLS MATCH:", match);
+console.log("homeTeamId type:", typeof match?.homeTeamId, match?.homeTeamId);
+console.log("awayTeamId type:", typeof match?.awayTeamId, match?.awayTeamId);
   if (!match) return <p>Laster kamp...</p>;
 
   const matchRef = doc(db, "matches", match.id);
@@ -93,14 +96,25 @@ export default function LiveControls({ match }) {
     return () => unsub();
   }, [match]);
 
-  // ⭐ Nullstill skjema når type endres
+  // ⭐ Nullstill skjema når type endres (FIXED)
   useEffect(() => {
     setText("");
 
-    setGoalData({ team: "", player: "", assist: "" });
-    setCardData({ team: "", player: "" });
-    setSubData({ team: "", in: "", out: "", comment: "" });
-    setFkData({ team: "", player: "", comment: "" });
+    if (type === "goal") {
+      setGoalData({ team: "", player: "", assist: "" });
+    }
+
+    if (type === "yellow" || type === "red") {
+      setCardData({ team: "", player: "" });
+    }
+
+    if (type === "sub") {
+      setSubData({ team: "", in: "", out: "", comment: "" });
+    }
+
+    if (type === "whistle") {
+      setFkData({ team: "", player: "", comment: "" });
+    }
   }, [type]);
 
   // ⭐ Minutt
@@ -172,6 +186,7 @@ export default function LiveControls({ match }) {
 
   // ⭐ Legg til hendelse
   async function addEvent() {
+     console.log("ADDEVENT: cardData =", cardData);
     const minute = getMinute();
 
     // ⭐ MÅL
@@ -288,7 +303,8 @@ export default function LiveControls({ match }) {
           <FontAwesomeIcon icon={faFutbol} /> Mål
         </button>
 
-        <button onClick={() => setType("yellow")}>
+        <button onClick={() =>{ console.log("TRYKKET: GULT KORT");
+ setType("yellow")}}>
           <FontAwesomeIcon icon={faSquare} className="yellow-card" /> Gult kort
         </button>
 

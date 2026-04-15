@@ -3,14 +3,27 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../../config/Firebase";
 import { getTeam } from "../../services/TeamService";
 
+import {
+  faFutbol,
+  faSquare,
+  faUserInjured,
+  faArrowsRotate,
+  faComment,
+  faFlag,
+  faBullhorn,
+  faCog
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 export default function EventList({ match }) {
   const [events, setEvents] = useState([]);
   const [homeTeam, setHomeTeam] = useState(null);
   const [awayTeam, setAwayTeam] = useState(null);
 
-  // ⭐ Hent lag basert på ID (ren og riktig)
+  // ⭐ Hent lag
   useEffect(() => {
     if (!match) return;
+
 
     async function loadTeams() {
       const home = await getTeam(match.homeTeamId);
@@ -23,7 +36,7 @@ export default function EventList({ match }) {
     loadTeams();
   }, [match]);
 
-  // Hent events live
+  // ⭐ Hent hendelser live
   useEffect(() => {
     if (!match) return;
 
@@ -38,7 +51,7 @@ export default function EventList({ match }) {
     return () => unsub();
   }, [match]);
 
-  // ⭐ Spilleroppslag basert på ID
+  // ⭐ Hent spillernavn
   function getPlayerName(teamId, playerId) {
     const team =
       teamId === match.homeTeamId
@@ -47,14 +60,16 @@ export default function EventList({ match }) {
         ? awayTeam
         : null;
 
-    const players = Array.isArray(team?.players)
+    if (!team) return playerId;
+
+    const players = Array.isArray(team.players)
       ? team.players
-      : Object.values(team?.players || {});
+      : Object.values(team.players || {});
 
     return players.find((p) => p.id === playerId)?.name || playerId;
   }
 
-  // ⭐ Lagnavn basert på ID
+  // ⭐ Hent lagnavn
   function getTeamName(teamId) {
     if (teamId === match.homeTeamId) return homeTeam?.name;
     if (teamId === match.awayTeamId) return awayTeam?.name;
@@ -63,6 +78,36 @@ export default function EventList({ match }) {
 
   if (!homeTeam || !awayTeam) {
     return <div>Laster hendelser...</div>;
+    // ⭐ GLOBAL DEBUG
+console.log("EVENTLIST – EVENTS:", events);
+console.log("HOME TEAM PLAYERS:", homeTeam?.players);
+console.log("AWAY TEAM PLAYERS:", awayTeam?.players);
+  }
+
+  // ⭐ Ikoner
+  function getIcon(ev) {
+    switch (ev.type) {
+      case "goal":
+        return <FontAwesomeIcon icon={faFutbol} className="event-icon" />;
+      case "yellow":
+        return <FontAwesomeIcon icon={faSquare} className="event-icon yellow-card" />;
+      case "red":
+        return <FontAwesomeIcon icon={faSquare} className="event-icon red-card" />;
+      case "injury":
+        return <FontAwesomeIcon icon={faUserInjured} className="event-icon" />;
+      case "sub":
+        return <FontAwesomeIcon icon={faArrowsRotate} className="event-icon" />;
+      case "comment":
+        return <FontAwesomeIcon icon={faComment} className="event-icon" />;
+      case "corner":
+        return <FontAwesomeIcon icon={faFlag} className="event-icon" />;
+      case "whistle":
+        return <FontAwesomeIcon icon={faBullhorn} className="event-icon" />;
+      case "system":
+        return <FontAwesomeIcon icon={faCog} className="event-icon" />;
+      default:
+        return null;
+    }
   }
 
   return (
@@ -70,59 +115,61 @@ export default function EventList({ match }) {
       <h3>Hendelser</h3>
 
       {events.map((ev) => (
-        <div
-          key={ev.id}
-          style={{
-            padding: "10px",
-            marginBottom: "10px",
-            border: "1px solid #444",
-            borderRadius: "6px",
-            background: "#1c1c1c"
-          }}
-        >
-          {/* TYPE + MINUTT */}
-          <strong>
-            {ev.type === "goal" && "⚽ Mål"}
-            {ev.type === "yellow" && "🟨 Gult kort"}
-            {ev.type === "red" && "🟥 Rødt kort"}
-            {ev.type === "injury" && "🤕 Skade"}
-            {ev.type === "comment" && "💬 Kommentar"}
-            {ev.type === "corner" && "🏳️ Corner"}
-            {ev.type === "whistle" && "🎺 Frispark"}
-            {ev.type === "sub" && "🔄 Spillerbytte"}
-            {ev.type === "system" && "⚙️ System"}
-          </strong>
+        
+        <div key={ev.id} className={`event event-${ev.type}`}>
+          {/* Ikon */}
+          <div className="event-icon">{getIcon(ev)}</div>
 
-          <span style={{ marginLeft: "10px", opacity: 0.7 }}>
-            {ev.minute}'
-          </span>
+          {/* Tekst */}
+          <div className="event-text">
+            {/* Tittel */}
+            <p>
+              {ev.type === "goal" && `${getTeamName(ev.team)} SCORER!`}
+              {ev.type === "yellow" && `Gult kort – ${getTeamName(ev.team)}`}
+              {ev.type === "red" && `Rødt kort – ${getTeamName(ev.team)}`}
+              {ev.type === "injury" && `Skade – ${getTeamName(ev.team)}`}
+              {ev.type === "sub" && `Bytte – ${getTeamName(ev.team)}`}
+              {ev.type === "corner" && `Corner – ${getTeamName(ev.team)}`}
+              {ev.type === "whistle" && `Frispark – ${getTeamName(ev.team)}`}
+              {ev.type === "comment" && `Kommentar`}
+              {ev.type === "system" && `${ev.text}`}
+            </p>
 
-          {/* LAG */}
-          {ev.team && (
-            <div style={{ marginTop: "4px", opacity: 0.8 }}>
-              Lag: {getTeamName(ev.team)}
-            </div>
-          )}
+            {/* ⭐ MÅL */}
+            {ev.type === "goal" && (
+              <>
+                <p className="goal-detail">
+                  Mål: <strong>{getPlayerName(ev.team, ev.player)}</strong>
+                </p>
 
-          {/* BYTTE */}
-          {ev.type === "sub" && (
-            <div style={{ marginTop: "6px" }}>
-              Inn: <strong>{getPlayerName(ev.team, ev.in)}</strong>
-              <br />
-              Ut: <strong>{getPlayerName(ev.team, ev.out)}</strong>
+                {ev.assist && (
+                  <p className="goal-detail">
+                    Assist: <strong>{getPlayerName(ev.team, ev.assist)}</strong>
+                  </p>
+                )}
+              </>
+            )}
 
-              {ev.comment && (
-                <div style={{ marginTop: "4px", opacity: 0.8 }}>
-                  {ev.comment}
-                </div>
-              )}
-            </div>
-          )}
+            {/* ⭐ BYTTE */}
+            {ev.type === "sub" && (
+              <>
+                <p>
+                  Inn: <strong>{getPlayerName(ev.team, ev.in)}</strong>
+                </p>
+                <p>
+                  Ut: <strong>{getPlayerName(ev.team, ev.out)}</strong>
+                </p>
+              </>
+            )}
 
-          {/* TEKST */}
-          {ev.type !== "sub" && ev.text && (
-            <div style={{ marginTop: "6px" }}>{ev.text}</div>
-          )}
+            {/* ⭐ Kommentar */}
+            {ev.text && ev.type !== "system" && ev.type !== "sub" && (
+              <p>{ev.text}</p>
+            )}
+          </div>
+
+          {/* Minutt */}
+          <div className="event-minute">{ev.minute}'</div>
         </div>
       ))}
     </section>

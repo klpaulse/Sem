@@ -32,6 +32,7 @@ export default function EventForm({
   awayTeam,
   addEvent
 }) {
+console.log("EVENTFORM RENDERS, TYPE:", type);
   const titles = {
     goal: { icon: faFutbol, label: "Mål" },
     yellow: { icon: faSquare, label: "Gult kort", className: "yellow-card" },
@@ -48,6 +49,7 @@ export default function EventForm({
   // ⭐ FIXEN SOM STOPPER KRASJ
   if (!homeTeam || !awayTeam) {
     return <div>Laster lag...</div>;
+    
   }
 
   return (
@@ -66,7 +68,7 @@ export default function EventForm({
           awayTeam={awayTeam}
         />
       )}
-
+console.log("EVENTFORM: Viser CardForm nå");
       {(type === "yellow" || type === "red") && (
         <CardForm
           data={cardData}

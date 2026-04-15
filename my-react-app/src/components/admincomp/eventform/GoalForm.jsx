@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 export default function GoalForm({ data, setData, homeTeam, awayTeam }) {
+  
   const [selectedTeam, setSelectedTeam] = useState(data.team || homeTeam.id);
 
   // Hent spillere fra valgt lag
