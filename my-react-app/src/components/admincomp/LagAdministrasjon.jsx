@@ -39,15 +39,21 @@ export default function LagAdministrasjon({ divisions }) {
     return () => unsubscribe();
   }, [selectedDivision]);
 
+  // ⭐ Bekreftelse før sletting
   const handleDelete = async (teamId) => {
+    const ok = window.confirm("Er du sikker på at du vil slette dette laget?");
+    if (!ok) return;
+
     await deleteDoc(doc(db, "teams", teamId));
   };
 
+  // ⭐ Start redigering (kun navn)
   const startEdit = (team) => {
     setEditingTeam(team.id);
     setEditName(team.name);
   };
 
+  // ⭐ Lagre nytt navn
   const saveEdit = async () => {
     await updateDoc(doc(db, "teams", editingTeam), {
       name: editName,
@@ -90,6 +96,7 @@ export default function LagAdministrasjon({ divisions }) {
                       <input
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
+                        placeholder="Nytt navn"
                       />
                       <button onClick={saveEdit}>Lagre</button>
                       <button onClick={() => setEditingTeam(null)}>

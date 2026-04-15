@@ -8,23 +8,39 @@ import {
   deleteDoc,
   doc,
   updateDoc,
+  getDocs
 } from "firebase/firestore";
 
+import { getTeam } from "../../services/TeamService";
 import CreateMatchForm from "./CreateMatchForm";
 
 export default function KampAdministrasjon({ divisions }) {
   const [selectedDivision, setSelectedDivision] = useState("");
   const [matches, setMatches] = useState([]);
 
+  const [teams, setTeams] = useState([]);
+
   // Redigering
   const [editingMatch, setEditingMatch] = useState(null);
-  const [editHomeTeam, setEditHomeTeam] = useState("");
-  const [editAwayTeam, setEditAwayTeam] = useState("");
+  const [editHomeTeamId, setEditHomeTeamId] = useState("");
+  const [editAwayTeamId, setEditAwayTeamId] = useState("");
   const [editDate, setEditDate] = useState("");
   const [editTime, setEditTime] = useState("");
   const [editLocation, setEditLocation] = useState("");
 
-  // LIVE: hent kamper for valgt divisjon
+  const [teamNames, setTeamNames] = useState({});
+
+  // Hent alle lag (for dropdown)
+  useEffect(() => {
+    async function loadTeams() {
+      const snap = await getDocs(collection(db, "teams"));
+      const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      setTeams(list);
+    }
+    loadTeams();
+  }, []);
+
+  // Hent kamper for valgt divisjon
   useEffect(() => {
     if (!selectedDivision) return;
 
@@ -50,46 +66,66 @@ export default function KampAdministrasjon({ divisions }) {
     return () => unsubscribe();
   }, [selectedDivision]);
 
+  // Hent lagnavn for alle kamper i listen
+  useEffect(() => {
+    async function loadNames() {
+      const map = {};
+
+      for (const m of matches) {
+        if (!map[m.homeTeamId]) {
+          map[m.homeTeamId] = await getTeam(m.homeTeamId);
+        }
+        if (!map[m.awayTeamId]) {
+          map[m.awayTeamId] = await getTeam(m.awayTeamId);
+        }
+      }
+
+      setTeamNames(map);
+    }
+
+    if (matches.length > 0) {
+      loadNames();
+    }
+  }, [matches]);
+
+  // ⭐ Bekreft sletting
   const deleteMatch = async (id) => {
+    const ok = window.confirm("Er du sikker på at du vil slette denne kampen?");
+    if (!ok) return;
+
     await deleteDoc(doc(db, "matches", id));
   };
 
   const startEditing = (match) => {
     setEditingMatch(match);
 
-    // Lag-navn (gamle og nye kamper)
-    setEditHomeTeam(match.homeTeamName || match.homeTeam || "");
-    setEditAwayTeam(match.awayTeamName || match.awayTeam || "");
+    setEditHomeTeamId(match.homeTeamId || "");
+    setEditAwayTeamId(match.awayTeamId || "");
 
-    // Dato
     const d = match.date?.toDate ? match.date.toDate() : new Date(match.date);
     setEditDate(d.toISOString().split("T")[0]);
 
-    // Tid
     setEditTime(match.time || "");
-
-    // Arena
     setEditLocation(match.arena || "");
   };
 
   const saveEdit = async () => {
-  const matchRef = doc(db, "matches", editingMatch.id);
+    const matchRef = doc(db, "matches", editingMatch.id);
 
-  // Kombiner dato + tid
-  const combinedDate = new Date(`${editDate}T${editTime}:00`);
+    const combinedDate = new Date(`${editDate}T${editTime}:00`);
 
-  await updateDoc(matchRef, {
-    homeTeamName: editHomeTeam || "",
-    awayTeamName: editAwayTeam || "",
-    date: combinedDate,   // ← riktig navn
-    time: editTime || "",
-    arena: editLocation || "",
-    division: editingMatch.division || "",
-    season: editingMatch.season || "",
-  });
+    await updateDoc(matchRef, {
+      homeTeamId: editHomeTeamId,
+      awayTeamId: editAwayTeamId,
+      date: combinedDate,
+      time: editTime || "",
+      arena: editLocation || "",
+      division: editingMatch.division || "",
+      season: editingMatch.season || "",
+    });
 
-  setEditingMatch(null);
-};
+    setEditingMatch(null);
+  };
 
   return (
     <section className="kampadmin-container">
@@ -119,22 +155,24 @@ export default function KampAdministrasjon({ divisions }) {
             <p>Ingen kamper registrert i denne divisjonen ennå.</p>
           ) : (
             <ul>
-              {matches.map((match) => (
-                <li key={match.id} className="kampadmin-list-item">
-                  <span>
-                    {match.homeTeamName || match.homeTeam} –{" "}
-                    {match.awayTeamName || match.awayTeam} (
-                    {match.date?.toDate
-                      ? match.date.toDate().toLocaleDateString("nb-NO")
-                      : match.date}{" "}
-                    kl{" "}
-                    {match.time})
-                  </span>
+              {matches.map((match) => {
+                const dateObj = match.date?.toDate
+                  ? match.date.toDate()
+                  : new Date(match.date);
 
-                  <button onClick={() => startEditing(match)}>Rediger</button>
-                  <button onClick={() => deleteMatch(match.id)}>Slett</button>
-                </li>
-              ))}
+                return (
+                  <li key={match.id} className="kampadmin-list-item">
+                    <span>
+                      {teamNames[match.homeTeamId]?.name || match.homeTeamId} –{" "}
+                      {teamNames[match.awayTeamId]?.name || match.awayTeamId} (
+                      {dateObj.toLocaleDateString("nb-NO")} kl {match.time})
+                    </span>
+
+                    <button onClick={() => startEditing(match)}>Rediger</button>
+                    <button onClick={() => deleteMatch(match.id)}>Slett</button>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
@@ -146,16 +184,28 @@ export default function KampAdministrasjon({ divisions }) {
           <h3>Rediger kamp</h3>
 
           <label>Hjemmelag</label>
-          <input
-            value={editHomeTeam}
-            onChange={(e) => setEditHomeTeam(e.target.value)}
-          />
+          <select
+            value={editHomeTeamId}
+            onChange={(e) => setEditHomeTeamId(e.target.value)}
+          >
+            {teams.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </select>
 
           <label>Bortelag</label>
-          <input
-            value={editAwayTeam}
-            onChange={(e) => setEditAwayTeam(e.target.value)}
-          />
+          <select
+            value={editAwayTeamId}
+            onChange={(e) => setEditAwayTeamId(e.target.value)}
+          >
+            {teams.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </select>
 
           <label>Dato</label>
           <input

@@ -1,71 +1,144 @@
-.lagadmin-container {
-  margin-bottom: 40px;
-}
+/* === ADMIN LAYOUT === */
 
-.lagadmin-title {
-  margin-bottom: 20px;
-}
-
-.lagadmin-cards {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.lagadmin-card {
-  flex: 1;
-  min-width: 300px;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: #fafafa;
-}
-
-.kampadmin-container {
-  margin-top: 40px;
-}
-
-.kampadmin-title {
-  margin-bottom: 20px;
-}
-
-.adminpage-title,
-.admin-section-title,
-.lagadmin-title,
-.kampadmin-title {
+.admin-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  height: 100vh;
+  background: #0d0d0d;
   color: white;
 }
 
-/* Gjør overskrifter hvite */
-.adminpage-container h1,
-.adminpage-container h2,
-.adminpage-container h3 {
-  color: #fff;
+.admin-sidebar {
+  background: #111;
+  border-right: 1px solid #222;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-/* Gjør vanlig tekst hvit */
-.adminpage-container p,
-.adminpage-container summary,
-.adminpage-container .admin-match-row {
-  color: #fff;
+.admin-sidebar button {
+  background: #151414;
+  border: 1px solid #333;
+  padding: 10px 14px;
+  border-radius: 6px;
+  color: white;
+  text-align: left;
+  font-size: 15px;
+  cursor: pointer;
 }
 
-/* Sørg for at summary‑pilen også blir hvit */
-.adminpage-container summary::-webkit-details-marker {
-  color: #fff;
+.admin-sidebar button:hover {
+  background: #222;
 }
 
-/* Resultat-kortet skal være lesbart (svart tekst på hvitt kort) */
-.result-card {
-  background: #fff;
-  padding: 16px;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+.admin-main {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* === LIVE CONTROLS LAYOUT === */
+
+.live-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
   margin-top: 10px;
-  color: #000; /* viktig */
 }
 
-/* Input-felter i kortet */
-.result-card input {
+.match-status-bar {
+  display: flex;
+  gap: 8px;
+}
+
+.match-status-bar button {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.match-status-bar button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.event-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.event-selector button {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 15px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.event-selector button:hover {
+  background: #222;
+}
+
+.event-input-area {
+  background: var(--card-bg);
+  border: 1px solid #FFFFFF0F;
+  padding: 16px;
+  border-radius: 6px;
+}
+
+.form-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.event-form select,
+.event-form input,
+.event-form textarea {
+  width: 100%;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.event-form textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+.submit-event {
+  width: 100%;
+  background: #2ecc71;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  font-weight: 600;
   color: #000;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.submit-event:hover {
+  background: #27ae60;
+}
+
+.form-section {
+  margin-bottom: 16px;
 }

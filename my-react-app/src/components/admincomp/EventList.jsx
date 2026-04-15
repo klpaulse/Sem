@@ -8,7 +8,7 @@ export default function EventList({ match }) {
   const [homeTeam, setHomeTeam] = useState(null);
   const [awayTeam, setAwayTeam] = useState(null);
 
-  // Hent lagene basert på homeTeamId og awayTeamId
+  // ⭐ Hent lag basert på ID (ren og riktig)
   useEffect(() => {
     if (!match) return;
 
@@ -38,11 +38,15 @@ export default function EventList({ match }) {
     return () => unsub();
   }, [match]);
 
-  // ⭐ Robust spilleroppslag (fungerer for både array og map)
+  // ⭐ Spilleroppslag basert på ID
   function getPlayerName(teamId, playerId) {
-    const team = teamId === match.homeTeamId ? homeTeam : awayTeam;
+    const team =
+      teamId === match.homeTeamId
+        ? homeTeam
+        : teamId === match.awayTeamId
+        ? awayTeam
+        : null;
 
-    // Spillere kan være array eller map → gjør det alltid til array
     const players = Array.isArray(team?.players)
       ? team.players
       : Object.values(team?.players || {});
@@ -50,7 +54,7 @@ export default function EventList({ match }) {
     return players.find((p) => p.id === playerId)?.name || playerId;
   }
 
-  // Slå opp lagnavn
+  // ⭐ Lagnavn basert på ID
   function getTeamName(teamId) {
     if (teamId === match.homeTeamId) return homeTeam?.name;
     if (teamId === match.awayTeamId) return awayTeam?.name;
@@ -61,8 +65,6 @@ export default function EventList({ match }) {
     return <div>Laster hendelser...</div>;
   }
 
-console.log("HOME TEAM:", homeTeam);
-console.log("AWAY TEAM:", awayTeam);
   return (
     <section>
       <h3>Hendelser</h3>
@@ -86,11 +88,9 @@ console.log("AWAY TEAM:", awayTeam);
             {ev.type === "injury" && "🤕 Skade"}
             {ev.type === "comment" && "💬 Kommentar"}
             {ev.type === "corner" && "🏳️ Corner"}
-            {ev.type === "whistle" && "🎺 Fløyte"}
+            {ev.type === "whistle" && "🎺 Frispark"}
             {ev.type === "sub" && "🔄 Spillerbytte"}
             {ev.type === "system" && "⚙️ System"}
-            {ev.type === "pause" && "⏸️ Pause"}
-            {ev.type === "2omgang" && "▶️ 2. omgang"}
           </strong>
 
           <span style={{ marginLeft: "10px", opacity: 0.7 }}>
@@ -104,18 +104,12 @@ console.log("AWAY TEAM:", awayTeam);
             </div>
           )}
 
-          {/* SPILLERBYTTE */}
+          {/* BYTTE */}
           {ev.type === "sub" && (
             <div style={{ marginTop: "6px" }}>
-              Inn:{" "}
-              <strong>
-                {getPlayerName(ev.team, ev.in)}
-              </strong>
+              Inn: <strong>{getPlayerName(ev.team, ev.in)}</strong>
               <br />
-              Ut:{" "}
-              <strong>
-                {getPlayerName(ev.team, ev.out)}
-              </strong>
+              Ut: <strong>{getPlayerName(ev.team, ev.out)}</strong>
 
               {ev.comment && (
                 <div style={{ marginTop: "4px", opacity: 0.8 }}>
@@ -125,7 +119,7 @@ console.log("AWAY TEAM:", awayTeam);
             </div>
           )}
 
-          {/* MÅL / ANDRE HENDELSER */}
+          {/* TEKST */}
           {ev.type !== "sub" && ev.text && (
             <div style={{ marginTop: "6px" }}>{ev.text}</div>
           )}

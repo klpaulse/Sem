@@ -1,20 +1,24 @@
-import { collection, getDocs } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
-export async function getAllMatches() {
-  const matchesRef = collection(db, "matches");
-  const snapshot = await getDocs(matchesRef);
+export async function getMatchById(matchId) {
+  if (!matchId) return null;
 
-  return snapshot.docs.map(doc => {
-    const data = doc.data();
+  try {
+    const ref = doc(db, "matches", matchId);
+    const snap = await getDoc(ref);
 
-    // Konverter dato hvis nødvendig
+    if (!snap.exists()) return null;
+
+    const data = snap.data();
+
+    // Normaliser dato
     const date = data.date?.toDate
       ? data.date.toDate()
       : new Date(data.date);
 
     return {
-      id: doc.id,
+      id: matchId,
       ...data,
       date, // alltid Date-objekt
       homeTeamId: data.homeTeamId || null,
@@ -26,5 +30,8 @@ export async function getAllMatches() {
       homeScore: data.homeScore ?? null,
       awayScore: data.awayScore ?? null,
     };
-  });
+  } catch (err) {
+    console.error("Feil ved henting av kamp:", err);
+    return null;
+  }
 }

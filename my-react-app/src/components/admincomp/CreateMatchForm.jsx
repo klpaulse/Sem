@@ -66,19 +66,17 @@ export default function CreateMatchForm() {
     try {
       await addDoc(matchesRef, {
         division: selectedDivision,
-        
+
+        // ⭐ Kun ID – ikke navn
         homeTeamId: homeTeamObj.id,
         awayTeamId: awayTeamObj.id,
 
-        homeTeamName: homeTeamObj.name,
-        awayTeamName: awayTeamObj.name,
-
         date: Timestamp.fromDate(fullDate),
-        time: time,   
-        arena: venue,  
+        time: time,
+        arena: venue,
         status: "not_started",
-        events: [],                             // klokkeslett
-    
+        events: [],
+
         homeScore: null,
         awayScore: null,
         played: false,

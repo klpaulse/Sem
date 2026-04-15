@@ -2,7 +2,7 @@ import { useState } from "react";
 import { db } from "../../config/Firebase";
 import { addDoc, collection } from "firebase/firestore";
 
-export default function CreateTeamForm() {
+export default function CreateTeamForm({ divisions }) {
   const [name, setName] = useState("");
   const [division, setDivision] = useState("");
 
@@ -12,9 +12,10 @@ export default function CreateTeamForm() {
     if (!name || !division) return alert("Fyll inn alle feltene");
 
     try {
-        const docRef = await addDoc(teamsRef,{ 
+      await addDoc(teamsRef, {
         name,
-        division
+        division,
+        players: []
       });
 
       setName("");
@@ -38,11 +39,12 @@ export default function CreateTeamForm() {
 
       <select value={division} onChange={(e) => setDivision(e.target.value)}>
         <option value="">Velg divisjon</option>
-        <option value="7.div avd 2">7.div avd 2</option>
-        <option value="7.div avd 1">7.div avd 1</option>
-        <option value="6.div">6.div</option>
-        <option value="5.div">5.div</option>
-        <option value="4.div">4.div</option>
+
+        {divisions.map((div) => (
+          <option key={div} value={div}>
+            {div}
+          </option>
+        ))}
       </select>
 
       <button onClick={handleSubmit}>Legg til lag</button>

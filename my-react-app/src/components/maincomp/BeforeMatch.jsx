@@ -3,6 +3,7 @@ import Countdown from "../Countdown";
 import "../../assets/style/matchPage.css";
 import BeforeMatchInfo from "./BeforeMatchInfo";
 import { getSeasonMatches } from "../../services/MatchService";
+import { getTeam } from "../../services/TeamService";
 
 // 🔥 Felles dato-normalisering
 function normalizeDate(d) {
@@ -20,6 +21,29 @@ export default function BeforeMatch({ match, allMatches }) {
   const [homeSeason, setHomeSeason] = useState([]);
   const [awaySeason, setAwaySeason] = useState([]);
 
+  const [homeName, setHomeName] = useState("Hjemmelag");
+  const [awayName, setAwayName] = useState("Bortelag");
+
+  // ⭐ Hent lagnavn basert på ID
+  useEffect(() => {
+    async function loadNames() {
+      if (!match) return;
+
+      if (match.homeTeamId) {
+        const home = await getTeam(match.homeTeamId);
+        setHomeName(home?.name || "Ukjent lag");
+      }
+
+      if (match.awayTeamId) {
+        const away = await getTeam(match.awayTeamId);
+        setAwayName(away?.name || "Ukjent lag");
+      }
+    }
+
+    loadNames();
+  }, [match]);
+
+  // ⭐ Hent sesongstatistikk
   useEffect(() => {
     async function loadSeason() {
       if (!match) return;
@@ -46,8 +70,8 @@ export default function BeforeMatch({ match, allMatches }) {
       {/* Kampkort */}
       <div className="last-played-card">
         <div className="lp-row">
-          <span className="lp-title">{match.homeTeamName}</span>
-          <span className="lp-title">{match.awayTeamName}</span>
+          <span className="lp-title">{homeName}</span>
+          <span className="lp-title">{awayName}</span>
         </div>
 
         <p className="dato">

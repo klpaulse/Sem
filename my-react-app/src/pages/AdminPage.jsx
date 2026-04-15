@@ -5,116 +5,78 @@ import { useAuthState } from "react-firebase-hooks/auth";
 
 import LagAdministrasjon from "../components/admincomp/LagAdministrasjon";
 import KampAdministrasjon from "../components/admincomp/KampAdministrasjon";
-import AdminMatches from "../components/admincomp/AdminMatches";
-import LiveControls from "../components/admincomp/LiveControls";
 import PlayerAdmin from "../components/admincomp/PlayerAdmin";
-import EventList from "../components/admincomp/EventList";
+import LiveAdmin from "../components/admincomp/LiveAdmin";
 
 import "../assets/style/adminPage.css";
 
+
+
 export default function AdminPage() {
+  const [activeTab, setActiveTab] = useState("live");
   const [divisions, setDivisions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedMatch, setSelectedMatch] = useState(null);
 
   const [user] = useAuthState(auth);
   const [isAdmin, setIsAdmin] = useState(null);
 
+  // Sjekk admin
   useEffect(() => {
     const checkAdmin = async () => {
-      if (!user) {
-        setIsAdmin(false);
-        return;
-      }
+      if (!user) return setIsAdmin(false);
 
       const ref = doc(db, "admins", user.uid);
       const snap = await getDoc(ref);
-
       setIsAdmin(snap.exists());
     };
 
     checkAdmin();
   }, [user]);
 
+  // Hent divisjoner
   useEffect(() => {
     const teamsRef = collection(db, "teams");
 
-    const unsubscribe = onSnapshot(teamsRef, (snapshot) => {
+    const unsub = onSnapshot(teamsRef, (snapshot) => {
       const allTeams = snapshot.docs.map((doc) => doc.data());
       const uniqueDivs = [...new Set(allTeams.map((t) => t.division))];
-
       uniqueDivs.sort();
       setDivisions(uniqueDivs);
       setLoading(false);
     });
 
-    return () => unsubscribe();
-  }, []);
-
-  // ⭐ Hent matchen LIVE når vi får en ID
-  useEffect(() => {
-    if (!selectedMatch?.id) return;
-
-    const ref = doc(db, "matches", selectedMatch.id);
-
-    const unsub = onSnapshot(ref, (snap) => {
-      if (snap.exists()) {
-        setSelectedMatch({ id: snap.id, ...snap.data() });
-      }
-    });
-
     return () => unsub();
-  }, [selectedMatch?.id]);
+  }, []);
 
   if (isAdmin === null) return <p>Sjekker tilgang...</p>;
   if (!user) return <p>Du må logge inn for å få tilgang</p>;
   if (!isAdmin) return <p>Du har ikke administratorrettigheter</p>;
 
   return (
-    <main className="adminpage-container">
-      <h1 className="adminpage-title">Administrator</h1>
+    <div className="admin-layout">
 
-      {loading ? (
-        <p>Laster divisjoner...</p>
-      ) : (
-        <>
-          <section className="admin-section">
-            <h2 className="admin-section-title">Lagadministrasjon</h2>
-            <LagAdministrasjon divisions={divisions} />
-          </section>
+      <aside className="admin-sidebar">
+        <button onClick={() => setActiveTab("live")}>Live</button>
+        <button onClick={() => setActiveTab("teams")}>Lag</button>
+        <button onClick={() => setActiveTab("matches")}>Kamper</button>
+        <button onClick={() => setActiveTab("players")}>Spillere</button>
+      </aside>
 
-          <section className="admin-section">
-            <h2 className="admin-section-title">Kampadministrasjon</h2>
-            <KampAdministrasjon divisions={divisions} />
-          </section>
+      <main className="admin-main">
+        {loading && <p>Laster..</p>}
 
-          <section className="admin-section">
-            <h2 className="admin-section-title">Resultatadministrasjon</h2>
-            <AdminMatches onSelectMatch={(match) => setSelectedMatch(match)} />
-          </section>
+        {!loading && (
+          <>
+            {activeTab === "live" && <LiveAdmin />}
+            {activeTab === "teams" && <LagAdministrasjon divisions={divisions}/>}
+            {activeTab === "matches" && <KampAdministrasjon divisions={divisions} />}
+            {activeTab === "players" && <PlayerAdmin />}
+          </>
+        )}
+      </main>
+      
 
-          <section className="admin-section">
-            <h2 className="admin-section-title">Livekontroll</h2>
-
-            {!selectedMatch && (
-              <p>Velg en kamp fra listen over for å starte livekontroll.</p>
-            )}
-
-            {selectedMatch && (
-              <>
-                <button onClick={() => setSelectedMatch(null)}>← Tilbake</button>
-
-                <LiveControls match={selectedMatch} />
-
-                <EventList match={selectedMatch} />
-              </>
-            )}
-          </section>
-
-          <PlayerAdmin />
-        </>
-      )}
-    </main>
+    </div>
   );
 }
 

@@ -1,16 +1,17 @@
-import NextMatch from "../components/maincomp/NextMatch";
-import MatchReport from "../components/MatchReport";
-import Tabs from "../components/Tabs";
-import MatchFilters from "../components/maincomp/MatchFilters";
-import MatchList from "../components/maincomp/MatchList";
-import "../assets/style/matchPage.css";
-
 import { useEffect, useState } from "react";
 import { collection, onSnapshot, query, orderBy, getDocs, doc } from "firebase/firestore";
 import { db } from "../config/Firebase";
 
 import { useParams } from "react-router-dom";
+
+import Countdown from "../components/Countdown";
 import BeforeMatch from "../components/maincomp/BeforeMatch";
+import MatchReport from "../components/MatchReport";
+import Tabs from "../components/Tabs";
+
+import { getTeam } from "../services/TeamService";
+
+import "../assets/style/matchPage.css";
 
 export default function MatchPage() {
   const { id } = useParams();
@@ -20,9 +21,8 @@ export default function MatchPage() {
   const [events, setEvents] = useState([]);
   const [activeTab, setActiveTab] = useState("rapport");
 
-  const [selectedRound, setSelectedRound] = useState(null);
-  const [selectedMonth, setSelectedMonth] = useState(null);
-  const [selectedTeam, setSelectedTeam] = useState(null);
+  const [homeName, setHomeName] = useState("Hjemmelag");
+  const [awayName, setAwayName] = useState("Bortelag");
 
   // 🔥 Hent ALLE kamper (ikke live)
   useEffect(() => {
@@ -50,6 +50,25 @@ export default function MatchPage() {
 
     return () => unsub();
   }, [id]);
+
+  // ⭐ Hent lagnavn basert på ID
+  useEffect(() => {
+    async function loadNames() {
+      if (!selectedMatch) return;
+
+      if (selectedMatch.homeTeamId) {
+        const home = await getTeam(selectedMatch.homeTeamId);
+        setHomeName(home?.name || "Ukjent lag");
+      }
+
+      if (selectedMatch.awayTeamId) {
+        const away = await getTeam(selectedMatch.awayTeamId);
+        setAwayName(away?.name || "Ukjent lag");
+      }
+    }
+
+    loadNames();
+  }, [selectedMatch]);
 
   // 🔥 Hent events live
   useEffect(() => {
@@ -101,7 +120,7 @@ export default function MatchPage() {
         </p>
 
         <div className="lp-row">
-          <span className="lp-title">{selectedMatch.homeTeamName}</span>
+          <span className="lp-title">{homeName}</span>
 
           <p className="lp-result">
             {selectedMatch.status === "not_started"
@@ -109,7 +128,7 @@ export default function MatchPage() {
               : `${selectedMatch.homeScore} - ${selectedMatch.awayScore}`}
           </p>
 
-          <span className="lp-title">{selectedMatch.awayTeamName}</span>
+          <span className="lp-title">{awayName}</span>
         </div>
 
         <p className="lp-date">

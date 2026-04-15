@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getTeam } from "../../services/TeamService";
 
 export default function DivisionList({
   matchesByDivision,
@@ -7,13 +8,37 @@ export default function DivisionList({
 }) {
   const divisions = Object.keys(matchesByDivision);
   const [openDivisions, setOpenDivisions] = useState({});
+  const [teamNames, setTeamNames] = useState({});
+
+  // ⭐ Hent lagnavn basert på ID
+  useEffect(() => {
+    async function loadNames() {
+      const map = {};
+
+      for (const division of divisions) {
+        const matches = matchesByDivision[division] || [];
+
+        for (const m of matches) {
+          if (m.homeTeamId && !map[m.homeTeamId]) {
+            map[m.homeTeamId] = await getTeam(m.homeTeamId);
+          }
+          if (m.awayTeamId && !map[m.awayTeamId]) {
+            map[m.awayTeamId] = await getTeam(m.awayTeamId);
+          }
+        }
+      }
+
+      setTeamNames(map);
+    }
+
+    if (divisions.length > 0) loadNames();
+  }, [divisions, matchesByDivision]);
 
   // Åpne nye divisjoner uten å trigge infinite loop
   useEffect(() => {
     setOpenDivisions((prev) => {
       const updated = { ...prev };
 
-      // Kun legg til nye divisjoner
       divisions.forEach((d) => {
         if (!(d in updated)) {
           updated[d] = true;
@@ -22,7 +47,7 @@ export default function DivisionList({
 
       return updated;
     });
-  }, [divisions.length]); // ← kun når antall divisjoner endrer seg
+  }, [divisions.length]);
 
   const toggleDivision = (division) => {
     setOpenDivisions((prev) => ({
@@ -97,6 +122,11 @@ export default function DivisionList({
                   const homeWon = played && match.homeScore > match.awayScore;
                   const awayWon = played && match.awayScore > match.homeScore;
 
+                  const homeName =
+                    teamNames[match.homeTeamId]?.name || "Ukjent lag";
+                  const awayName =
+                    teamNames[match.awayTeamId]?.name || "Ukjent lag";
+
                   return (
                     <div
                       key={match.id}
@@ -117,7 +147,7 @@ export default function DivisionList({
                               homeWon ? "winner" : awayWon ? "loser" : ""
                             }`}
                           >
-                            {match.homeTeamName || match.homeTeam}
+                            {homeName}
                           </span>
                         </div>
 
@@ -134,7 +164,7 @@ export default function DivisionList({
                               awayWon ? "winner" : homeWon ? "loser" : ""
                             }`}
                           >
-                            {match.awayTeamName || match.awayTeam}
+                            {awayName}
                           </span>
                         </div>
                       </div>

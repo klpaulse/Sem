@@ -16,7 +16,7 @@ export default function MatchFilters({
   const uniqueTeams = [
     ...new Set(
       matches
-        .flatMap((m) => [m.homeTeam, m.awayTeam])
+        .flatMap((m) => [m.homeTeamId, m.awayTeamId])
         .filter(Boolean)
     ),
   ];
@@ -59,9 +59,9 @@ export default function MatchFilters({
         onChange={(e) => setSelectedTeam(e.target.value || null)}
       >
         <option value="">Alle lag</option>
-        {uniqueTeams.map((team) => (
-          <option key={team} value={team}>
-            {team}
+        {uniqueTeams.map((teamId) => (
+          <option key={teamId} value={teamId}>
+            {teamId}
           </option>
         ))}
       </select>

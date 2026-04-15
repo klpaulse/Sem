@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getAllMatches, updateMatchResult } from "../../services/MatchService";
+import { getTeam } from "../../services/TeamService";
 import ResultsForm from "./ResultsForm";
 
 export default function AdminMatches({ onSelectMatch }) {
@@ -10,6 +11,9 @@ export default function AdminMatches({ onSelectMatch }) {
   const [awayScore, setAwayScore] = useState("");
   const [location, setLocation] = useState("");
 
+  const [teams, setTeams] = useState({}); // ⭐ cache for lag
+
+  // Hent alle kamper
   useEffect(() => {
     async function load() {
       const all = await getAllMatches();
@@ -17,6 +21,28 @@ export default function AdminMatches({ onSelectMatch }) {
     }
     load();
   }, []);
+
+  // Hent alle lag som trengs
+  useEffect(() => {
+    async function loadTeams() {
+      const cache = {};
+
+      for (const m of matches) {
+        if (m.homeTeamId && !cache[m.homeTeamId]) {
+          cache[m.homeTeamId] = await getTeam(m.homeTeamId);
+        }
+        if (m.awayTeamId && !cache[m.awayTeamId]) {
+          cache[m.awayTeamId] = await getTeam(m.awayTeamId);
+        }
+      }
+
+      setTeams(cache);
+    }
+
+    if (matches.length > 0) {
+      loadTeams();
+    }
+  }, [matches]);
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -70,9 +96,10 @@ export default function AdminMatches({ onSelectMatch }) {
         <div
           key={m.id}
           className="admin-match-row"
-          onClick={() => onSelectMatch({ id: m.id })}  
+          onClick={() => onSelectMatch(m)}
+          style={{ cursor: "pointer" }}
         >
-          {m.homeTeamName} – {m.awayTeamName}
+          {teams[m.homeTeamId]?.name || "?"} – {teams[m.awayTeamId]?.name || "?"}
         </div>
       ))}
 
@@ -81,10 +108,11 @@ export default function AdminMatches({ onSelectMatch }) {
       {missingResults.map(m => (
         <details key={m.id} open={editingMatch?.id === m.id}>
           <summary
-            onClick={() => onSelectMatch({ id: m.id })}   
+            onClick={() => onSelectMatch(m)}
             style={{ cursor: "pointer" }}
           >
-            {m.date.toLocaleDateString("no-NO")} – {m.homeTeamName} vs {m.awayTeamName}
+            {m.date.toLocaleDateString("no-NO")} –{" "}
+            {teams[m.homeTeamId]?.name || "?"} vs {teams[m.awayTeamId]?.name || "?"}
           </summary>
 
           <div style={{ padding: "10px 0" }}>
@@ -122,10 +150,11 @@ export default function AdminMatches({ onSelectMatch }) {
       {completedMatches.map(m => (
         <details key={m.id} open={editingMatch?.id === m.id}>
           <summary
-            onClick={() => onSelectMatch({ id: m.id })}   
+            onClick={() => onSelectMatch(m)}
             style={{ cursor: "pointer" }}
           >
-            {m.date.toLocaleDateString("no-NO")} – {m.homeTeamName} vs {m.awayTeamName}
+            {m.date.toLocaleDateString("no-NO")} –{" "}
+            {teams[m.homeTeamId]?.name || "?"} vs {teams[m.awayTeamId]?.name || "?"}
             {" "}({m.homeScore}–{m.awayScore})
           </summary>
 
@@ -147,7 +176,7 @@ export default function AdminMatches({ onSelectMatch }) {
                   setEditingMatch={setEditingMatch}
                   homeScore={homeScore}
                   setHomeScore={setHomeScore}
-                  awayScore={awayScore} 
+                  awayScore={awayScore}
                   setAwayScore={setAwayScore}
                   location={location}
                   setLocation={setLocation}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getTeam } from "../../services/TeamService";
 
 function normalizeDate(d) {
   if (!d) return null;
@@ -10,8 +11,30 @@ function normalizeDate(d) {
 
 export default function Upcoming({ matches }) {
   const [upcomingMatches, setUpcomingMatches] = useState([]);
+  const [teamNames, setTeamNames] = useState({});
   const navigate = useNavigate();
 
+  // ⭐ Hent lagnavn basert på ID
+  useEffect(() => {
+    async function loadNames() {
+      const map = {};
+
+      for (const m of matches) {
+        if (m.homeTeamId && !map[m.homeTeamId]) {
+          map[m.homeTeamId] = await getTeam(m.homeTeamId);
+        }
+        if (m.awayTeamId && !map[m.awayTeamId]) {
+          map[m.awayTeamId] = await getTeam(m.awayTeamId);
+        }
+      }
+
+      setTeamNames(map);
+    }
+
+    if (matches.length > 0) loadNames();
+  }, [matches]);
+
+  // ⭐ Finn kommende kamper
   useEffect(() => {
     if (!matches || matches.length === 0) return;
 
@@ -41,6 +64,9 @@ export default function Upcoming({ matches }) {
       {upcomingMatches.map((m) => {
         const matchDate = m.dateObj;
 
+        const homeName = teamNames[m.homeTeamId]?.name || "Ukjent lag";
+        const awayName = teamNames[m.awayTeamId]?.name || "Ukjent lag";
+
         return (
           <div
             key={m.id}
@@ -51,7 +77,7 @@ export default function Upcoming({ matches }) {
               {matchDate.toLocaleDateString("no-NO")} – {m.time}
             </p>
             <p>
-              {m.homeTeamName} vs {m.awayTeamName}
+              {homeName} vs {awayName}
             </p>
           </div>
         );

@@ -15,7 +15,6 @@ export default function ResultsForm({
   const [homeTeam, setHomeTeam] = useState(null);
   const [awayTeam, setAwayTeam] = useState(null);
 
-  // Hent lagnavn basert på ID
   useEffect(() => {
     if (!editingMatch) return;
 
@@ -39,7 +38,7 @@ export default function ResultsForm({
       <h2>Legg inn resultat</h2>
 
       <p>
-        {editingMatch.homeTeamName} vs {editingMatch.awayTeamName}
+        {homeTeam.name} vs {awayTeam.name}
       </p>
 
       <input
@@ -55,8 +54,6 @@ export default function ResultsForm({
         value={awayScore}
         onChange={(e) => setAwayScore(e.target.value)}
       />
-
-  
 
       <button onClick={saveResult}>Lagre resultat</button>
       <button onClick={() => setEditingMatch(null)}>Avbryt</button>

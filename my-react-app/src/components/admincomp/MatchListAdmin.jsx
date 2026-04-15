@@ -10,11 +10,11 @@ export default function MatchListAdmin({ matches, setEditingMatch, deleteMatch }
       const cache = {};
 
       for (const match of matches) {
-        if (!cache[match.homeTeam]) {
-          cache[match.homeTeam] = await getTeam(match.homeTeam);
+        if (match.homeTeamId && !cache[match.homeTeamId]) {
+          cache[match.homeTeamId] = await getTeam(match.homeTeamId);
         }
-        if (!cache[match.awayTeam]) {
-          cache[match.awayTeam] = await getTeam(match.awayTeam);
+        if (match.awayTeamId && !cache[match.awayTeamId]) {
+          cache[match.awayTeamId] = await getTeam(match.awayTeamId);
         }
       }
 
@@ -31,8 +31,8 @@ export default function MatchListAdmin({ matches, setEditingMatch, deleteMatch }
       <h2>Alle kamper</h2>
 
       {matches.map((match) => {
-        const home = teamData[match.homeTeam];
-        const away = teamData[match.awayTeam];
+        const home = teamData[match.homeTeamId];
+        const away = teamData[match.awayTeamId];
 
         if (!home || !away) {
           return <p key={match.id}>Laster lag...</p>;
@@ -41,7 +41,7 @@ export default function MatchListAdmin({ matches, setEditingMatch, deleteMatch }
         return (
           <div key={match.id}>
             <h2>
-              {home.teamName} vs {away.teamName}
+              {home.name} vs {away.name}
             </h2>
 
             {/* Dato */}
