@@ -12,9 +12,8 @@ import {
   getDocs,
   deleteDoc
 } from "firebase/firestore";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db } from "../../config/Firebase";
-import { storage } from "../../config/Firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, storage } from "../../config/Firebase";
 
 import EventForm from "./forms/EventForm";
 import EventList from "./EventList";
@@ -78,21 +77,32 @@ export default function LiveControls({ match }) {
   const [subData, setSubData] = useState({ team: "", in: "", out: "", comment: "" });
   const [fkData, setFkData] = useState({ team: "", player: "", comment: "" });
 
-  // ⭐ Simple events (corner, injury, comment, addedTime)
-  const [simpleData, setSimpleData] = useState({ team: "", minutes: "", image: null });
+  // ⭐ Simple events (corner, injury, comment, addedTime, image)
+  const [simpleData, setSimpleData] = useState({ team: "", minutes: "", image: null, comment: "" });
 
   // ⭐ Nullstill skjema når type endres
   useEffect(() => {
     setText("");
-    setSimpleData({ team: "", minutes: "", image: null });
+    setSimpleData({ team: "", minutes: "", image: null, comment: "" });
   }, [type]);
 
   // ⭐ Minutt
   function getMinute() {
     if (!liveMatch?.startTime) return 0;
-    const start = new Date(liveMatch.startTime);
+
     const now = new Date();
-    return Math.floor((now - start) / 60000);
+
+    // Før 2. omgang
+    if (!liveMatch.secondHalfStarted || !liveMatch.secondHalfStartTime) {
+      const start = new Date(liveMatch.startTime);
+      return Math.floor((now - start) / 60000);
+    }
+
+    // Etter 2. omgang
+    const secondHalfStart = new Date(liveMatch.secondHalfStartTime);
+    const secondHalfMinutes = Math.floor((now - secondHalfStart) / 60000);
+
+    return 45 + secondHalfMinutes;
   }
 
   // ⭐ Last opp bilde
@@ -120,24 +130,30 @@ export default function LiveControls({ match }) {
     await updateDoc(matchRef, {
       status: "live",
       startTime: new Date().toISOString(),
-      secondHalfStarted: false
+      secondHalfStarted: false,
+      secondHalfStartTime: null
     });
 
     addSystemEvent("Kampen har startet");
   }
 
-  // ⭐ Pause
+  // ⭐ Pause (slutt 1. omgang)
   async function pauseMatch() {
-    await updateDoc(matchRef, { paused: true });
-    addSystemEvent("Pause");
+    await updateDoc(matchRef, {
+      status: "halftime"
+    });
+
+    addSystemEvent("Pause (slutt 1. omgang)");
   }
 
   // ⭐ Start 2. omgang
   async function startSecondHalf() {
     await updateDoc(matchRef, {
-      paused: false,
-      secondHalfStarted: true
+      status: "live",
+      secondHalfStarted: true,
+      secondHalfStartTime: new Date().toISOString()
     });
+
     addSystemEvent("2. omgang har startet");
   }
 
@@ -156,34 +172,23 @@ export default function LiveControls({ match }) {
     if (qSnap.empty) return;
 
     const last = qSnap.docs[0];
-    const data = last.data();
-
-    if (data.type === "goal") {
-      const newHome =
-        data.team === liveMatch.homeTeamId
-          ? liveMatch.homeScore - 1
-          : liveMatch.homeScore;
-
-      const newAway =
-        data.team === liveMatch.awayTeamId
-          ? liveMatch.awayScore - 1
-          : liveMatch.awayScore;
-
-      await updateDoc(matchRef, {
-        homeScore: newHome,
-        awayScore: newAway
-      });
-    }
-
     await deleteDoc(last.ref);
   }
 
   // ⭐ Legg til hendelse
   async function addEvent() {
-    const minute = getMinute();
+    let imageUrl = null;
 
-    // ⭐ Last opp bilde hvis valgt
-    const imageUrl = await uploadImage(simpleData.image);
+    console.log("1. FILE:", simpleData.image);
+    console.log("2. TYPE:", type);
+
+    if (type === "image" && simpleData.image) {
+      console.log("3. UPLOADING...");
+      imageUrl = await uploadImage(simpleData.image);
+      console.log("4. URL:", imageUrl);
+    }
+
+    const minute = getMinute();
 
     // ⭐ MÅL
     if (type === "goal") {
@@ -305,70 +310,41 @@ export default function LiveControls({ match }) {
       });
       return;
     }
+
+    // ⭐ IMAGE
+    if (type === "image") {
+      await addDoc(eventsRef, {
+        id: crypto.randomUUID(),
+        type: "image",
+        imageUrl,
+        text: simpleData.comment || "",
+        minute,
+        createdAt: serverTimestamp()
+      });
+      return;
+    }
   }
 
   if (!liveMatch || !homeTeam || !awayTeam) {
     return <p>Laster kampdata...</p>;
   }
 
-  const isLive = liveMatch.status === "live";
-  const isFinished = liveMatch.status === "finished";
-
   return (
-    <section className="live-controls">
+    <div className="live-controls">
+      <h2>Livekontroll</h2>
 
-      {/* ⭐ Kampstatus */}
-      <div className="match-status-bar">
-        <button onClick={startMatch} disabled={isLive || isFinished}>Start</button>
-        <button onClick={pauseMatch} disabled={!isLive}>Pause</button>
-        <button onClick={startSecondHalf} disabled={!isLive}>2. omgang</button>
-        <button onClick={endMatch} disabled={!isLive}>Slutt</button>
-        <button onClick={undoLastEvent}>Angre</button>
-      </div>
-
-      {/* ⭐ Hendelsesvalg */}
-      <div className="event-selector">
-        <button onClick={() => setType("goal")}>
-          <FontAwesomeIcon icon={faFutbol} /> Mål
-        </button>
-
-        <button onClick={() => setType("yellow")}>
-          <FontAwesomeIcon icon={faSquare} className="yellow-card" /> Gult kort
-        </button>
-
-        <button onClick={() => setType("red")}>
-          <FontAwesomeIcon icon={faSquare} className="red-card" /> Rødt kort
-        </button>
-
-        <button onClick={() => setType("sub")}>
-          <FontAwesomeIcon icon={faArrowUp} /> Bytte
-        </button>
-
-        <button onClick={() => setType("injury")}>
-          <FontAwesomeIcon icon={faUserInjured} /> Skade
-        </button>
-
-        <button onClick={() => setType("corner")}>
-          <FontAwesomeIcon icon={faFlag} /> Corner
-        </button>
-
-        <button onClick={() => setType("whistle")}>
-          <FontAwesomeIcon icon={faBullhorn} /> Frispark
-        </button>
-
-        <button onClick={() => setType("comment")}>
-          <FontAwesomeIcon icon={faComment} /> Kommentar
-        </button>
-
-        <button onClick={() => setType("addedTime")}>
-          <FontAwesomeIcon icon={faClock} /> Tilleggstid
-        </button>
-
-        <button onClick={() => setType("image")}>
-  <FontAwesomeIcon icon={faImage} /> Legg til bilde
-</button>
-
-
+      {/* ⭐ Knapper */}
+      <div className="event-buttons">
+        <button onClick={() => setType("goal")}><FontAwesomeIcon icon={faFutbol} /> Mål</button>
+        <button onClick={() => setType("yellow")}><FontAwesomeIcon icon={faSquare} /> Gult</button>
+        <button onClick={() => setType("red")}><FontAwesomeIcon icon={faSquare} /> Rødt</button>
+        <button onClick={() => setType("sub")}><FontAwesomeIcon icon={faArrowUp} /> Bytte</button>
+        <button onClick={() => setType("injury")}><FontAwesomeIcon icon={faUserInjured} /> Skade</button>
+        <button onClick={() => setType("corner")}><FontAwesomeIcon icon={faFlag} /> Corner</button>
+        <button onClick={() => setType("whistle")}><FontAwesomeIcon icon={faBullhorn} /> Frispark</button>
+        <button onClick={() => setType("comment")}><FontAwesomeIcon icon={faComment} /> Kommentar</button>
+        <button onClick={() => setType("addedTime")}><FontAwesomeIcon icon={faClock} /> Tilleggstid</button>
+        <button onClick={() => setType("image")}><FontAwesomeIcon icon={faImage} /> Bilde</button>
       </div>
 
       {/* ⭐ Skjema */}
@@ -392,14 +368,21 @@ export default function LiveControls({ match }) {
         addEvent={addEvent}
       />
 
-      {/* ⭐ Live feed */}
-      <div className="report-feed">
-        <EventList match={liveMatch} homeTeam={homeTeam} awayTeam={awayTeam}/>
+      {/* ⭐ Kampkontroll */}
+      <div className="match-controls">
+        <button onClick={startMatch}>Start kamp</button>
+        <button onClick={pauseMatch}>Pause</button>
+        <button onClick={startSecondHalf}>Start 2. omgang</button>
+        <button onClick={endMatch}>Slutt kamp</button>
+        <button onClick={undoLastEvent}>Angre siste</button>
       </div>
 
-    </section>
+      {/* ⭐ Hendelser */}
+      <EventList match={liveMatch} />
+    </div>
   );
 }
+
 
 
 

@@ -47,8 +47,6 @@ export default function EventForm({
     whistle: { icon: faBullhorn, label: "Frispark" },
     comment: { icon: faComment, label: "Kommentar" },
     addedTime: { icon: faClock, label: "Tilleggstid" },
-
-    // ⭐ NY TYPE
     image: { icon: faImage, label: "Legg til bilde" }
   };
 

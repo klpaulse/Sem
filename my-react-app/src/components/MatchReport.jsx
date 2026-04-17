@@ -266,6 +266,38 @@ if (e.type === "sub") {
             );
           }
 
+          // ⭐ BILDE
+if (e.type === "image") {
+  return (
+    <div key={e.id} className="event event-image">
+
+      {/* IKON */}
+      <span className="event-icon">
+        <FontAwesomeIcon icon={faComment} />
+      </span>
+
+      {/* TEKST + BILDE */}
+      <div className="event-text">
+        <p>Bildehendelse</p>
+
+        {e.text && <p>{e.text}</p>}
+
+        {e.imageUrl && (
+          <img
+            src={e.imageUrl}
+            alt="Hendelsesbilde"
+            className="event-image-img"
+          />
+        )}
+      </div>
+
+      {/* MINUTT */}
+      <span className="event-minute">{formatMinute(e.minute)}'</span>
+    </div>
+  );
+}
+
+
           // ⭐ KOMMENTAR
           if (e.type === "comment") {
             return (

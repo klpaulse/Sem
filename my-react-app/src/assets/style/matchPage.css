@@ -573,6 +573,13 @@ display: inline-block;
   color: #ffffffdd;
 }
 
+.event-image-img {
+  width: 100%;
+  max-width: 300px;
+  border-radius: 6px;
+  margin-top: 6px;
+}
+
 
 
 
