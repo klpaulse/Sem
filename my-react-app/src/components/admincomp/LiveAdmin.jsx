@@ -1,17 +1,18 @@
 import { useState } from "react";
+import Calandar from "../homecomp/Calandar";
 import AdminMatches from "./AdminMatches";
 import LiveControls from "./LiveControls";
 
 
 export default function LiveAdmin() {
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedMatch, setSelectedMatch] = useState(null);
 
   const handleSelectMatch = (match) => {
-    // Sikrer at match er ren og kun inneholder ID-feltene
     const cleanMatch = {
       id: match.id,
       homeTeamId: String(match.homeTeamId),
-awayTeamId: String(match.awayTeamId),
+      awayTeamId: String(match.awayTeamId),
       division: match.division,
       date: match.date,
       time: match.time,
@@ -25,7 +26,17 @@ awayTeamId: String(match.awayTeamId),
 
   return (
     <div className="live-admin">
-      <AdminMatches onSelectMatch={handleSelectMatch} />
+
+      <Calandar
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+        setSelectedMatch={setSelectedMatch}
+      />
+
+      <AdminMatches
+        selectedDate={selectedDate}
+        onSelectMatch={handleSelectMatch}
+      />
 
       {!selectedMatch && (
         <p>Velg en kamp for å starte livekontroll.</p>
@@ -38,9 +49,9 @@ awayTeamId: String(match.awayTeamId),
           </button>
 
           <LiveControls match={selectedMatch} />
-         
         </>
       )}
     </div>
   );
 }
+

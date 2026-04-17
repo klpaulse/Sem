@@ -3,7 +3,16 @@ import { getAllMatches, updateMatchResult } from "../../services/MatchService";
 import { getTeam } from "../../services/TeamService";
 import ResultsForm from "./ResultsForm";
 
-export default function AdminMatches({ onSelectMatch }) {
+// Trygg dato-normalisering
+function normalizeDate(d) {
+  if (!d) return null;
+  if (d instanceof Date) return d;
+  if (d.toDate) return d.toDate(); // Firestore Timestamp
+  const parsed = new Date(d);
+  return isNaN(parsed) ? null : parsed;
+}
+
+export default function AdminMatches({ selectedDate, onSelectMatch }) {
   const [matches, setMatches] = useState([]);
   const [editingMatch, setEditingMatch] = useState(null);
 
@@ -11,7 +20,7 @@ export default function AdminMatches({ onSelectMatch }) {
   const [awayScore, setAwayScore] = useState("");
   const [location, setLocation] = useState("");
 
-  const [teams, setTeams] = useState({}); // ⭐ cache for lag
+  const [teams, setTeams] = useState({});
 
   // Hent alle kamper
   useEffect(() => {
@@ -22,7 +31,7 @@ export default function AdminMatches({ onSelectMatch }) {
     load();
   }, []);
 
-  // Hent alle lag som trengs
+  // Hent lag for alle kamper
   useEffect(() => {
     async function loadTeams() {
       const cache = {};
@@ -39,27 +48,30 @@ export default function AdminMatches({ onSelectMatch }) {
       setTeams(cache);
     }
 
-    if (matches.length > 0) {
-      loadTeams();
-    }
+    if (matches.length > 0) loadTeams();
   }, [matches]);
 
-  const today = new Date().toISOString().split("T")[0];
+  // Hvis selectedDate ikke finnes enda → ikke crash
+  if (!selectedDate) {
+    return <p>Velg en dato</p>;
+  }
 
-  const todaysMatches = matches.filter(m => {
-    const d = m.date;
-    return d.toISOString().split("T")[0] === today;
+  const normalizedSelected = normalizeDate(selectedDate);
+  if (!normalizedSelected) {
+    return <p>Ugyldig dato valgt</p>;
+  }
+
+  const selectedDay = normalizedSelected.toISOString().split("T")[0];
+
+  // Filtrer kamper for valgt dag
+  const matchesForDay = matches.filter((m) => {
+    const matchDate = normalizeDate(m.date);
+    if (!matchDate) return false;
+    const matchDay = matchDate.toISOString().split("T")[0];
+    return matchDay === selectedDay;
   });
 
-  const missingResults = matches.filter(m => {
-    const d = m.date;
-    return d < new Date() && (m.homeScore === null || m.awayScore === null);
-  });
-
-  const completedMatches = matches.filter(m => {
-    return m.homeScore !== null && m.awayScore !== null;
-  });
-
+  // Start redigering
   function startEditing(match) {
     setEditingMatch(match);
     setHomeScore(match.homeScore ?? "");
@@ -67,16 +79,12 @@ export default function AdminMatches({ onSelectMatch }) {
     setLocation(match.location ?? "");
   }
 
+  // Lagre resultat
   async function saveResult() {
-    await updateMatchResult(
-      editingMatch.id,
-      homeScore,
-      awayScore,
-      location
-    );
+    await updateMatchResult(editingMatch.id, homeScore, awayScore, location);
 
-    setMatches(prev =>
-      prev.map(m =>
+    setMatches((prev) =>
+      prev.map((m) =>
         m.id === editingMatch.id
           ? { ...m, homeScore, awayScore, location, played: true }
           : m
@@ -88,11 +96,14 @@ export default function AdminMatches({ onSelectMatch }) {
 
   return (
     <section className="admin-page">
-      <h1>Admin – Kamper</h1>
+      <h1>Kamper denne dagen</h1>
 
-      <h2>Dagens kamper</h2>
-      {todaysMatches.length === 0 && <p>Ingen kamper i dag.</p>}
-      {todaysMatches.map(m => (
+      {matchesForDay.length === 0 && (
+        <p>Ingen kamper denne dagen.</p>
+      )}
+
+      {/* Kamp-liste */}
+      {matchesForDay.map((m) => (
         <div
           key={m.id}
           className="admin-match-row"
@@ -103,90 +114,23 @@ export default function AdminMatches({ onSelectMatch }) {
         </div>
       ))}
 
-      <h2>Tidligere kamper uten resultat</h2>
-
-      {missingResults.map(m => (
-        <details key={m.id} open={editingMatch?.id === m.id}>
-          <summary
-            onClick={() => onSelectMatch(m)}
-            style={{ cursor: "pointer" }}
-          >
-            {m.date.toLocaleDateString("no-NO")} –{" "}
-            {teams[m.homeTeamId]?.name || "?"} vs {teams[m.awayTeamId]?.name || "?"}
-          </summary>
-
-          <div style={{ padding: "10px 0" }}>
-            {editingMatch?.id !== m.id && (
-              <div
-                className="admin-match-row"
-                onClick={() => startEditing(m)}
-                style={{ cursor: "pointer" }}
-              >
-                Legg inn resultat
-              </div>
-            )}
-
-            {editingMatch?.id === m.id && (
-              <div className="result-card">
-                <ResultsForm
-                  editingMatch={editingMatch}
-                  setEditingMatch={setEditingMatch}
-                  homeScore={homeScore}
-                  setHomeScore={setHomeScore}
-                  awayScore={awayScore}
-                  setAwayScore={setAwayScore}
-                  location={location}
-                  setLocation={setLocation}
-                  saveResult={saveResult}
-                />
-              </div>
-            )}
-          </div>
-        </details>
-      ))}
-
-      <h2>Endre resultat</h2>
-
-      {completedMatches.map(m => (
-        <details key={m.id} open={editingMatch?.id === m.id}>
-          <summary
-            onClick={() => onSelectMatch(m)}
-            style={{ cursor: "pointer" }}
-          >
-            {m.date.toLocaleDateString("no-NO")} –{" "}
-            {teams[m.homeTeamId]?.name || "?"} vs {teams[m.awayTeamId]?.name || "?"}
-            {" "}({m.homeScore}–{m.awayScore})
-          </summary>
-
-          <div style={{ padding: "10px 0" }}>
-            {editingMatch?.id !== m.id && (
-              <div
-                className="admin-match-row"
-                onClick={() => startEditing(m)}
-                style={{ cursor: "pointer" }}
-              >
-                Endre resultat
-              </div>
-            )}
-
-            {editingMatch?.id === m.id && (
-              <div className="result-card">
-                <ResultsForm
-                  editingMatch={editingMatch}
-                  setEditingMatch={setEditingMatch}
-                  homeScore={homeScore}
-                  setHomeScore={setHomeScore}
-                  awayScore={awayScore}
-                  setAwayScore={setAwayScore}
-                  location={location}
-                  setLocation={setLocation}
-                  saveResult={saveResult}
-                />
-              </div>
-            )}
-          </div>
-        </details>
-      ))}
+      {/* Redigering */}
+      {editingMatch && (
+        <div className="result-card">
+          <ResultsForm
+            editingMatch={editingMatch}
+            setEditingMatch={setEditingMatch}
+            homeScore={homeScore}
+            setHomeScore={setHomeScore}
+            awayScore={awayScore}
+            setAwayScore={setAwayScore}
+            location={location}
+            setLocation={setLocation}
+            saveResult={saveResult}
+          />
+        </div>
+      )}
     </section>
   );
 }
+

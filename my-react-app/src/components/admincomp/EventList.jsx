@@ -11,7 +11,9 @@ import {
   faComment,
   faFlag,
   faBullhorn,
-  faCog
+  faCog,
+  faClock,
+  faImage
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -23,7 +25,6 @@ export default function EventList({ match }) {
   // ⭐ Hent lag
   useEffect(() => {
     if (!match) return;
-
 
     async function loadTeams() {
       const home = await getTeam(match.homeTeamId);
@@ -78,10 +79,17 @@ export default function EventList({ match }) {
 
   if (!homeTeam || !awayTeam) {
     return <div>Laster hendelser...</div>;
-    // ⭐ GLOBAL DEBUG
-console.log("EVENTLIST – EVENTS:", events);
-console.log("HOME TEAM PLAYERS:", homeTeam?.players);
-console.log("AWAY TEAM PLAYERS:", awayTeam?.players);
+  }
+
+  // ⭐ Automatisk visning av minutt
+  function getDisplayMinute(minute) {
+    if (!match?.secondHalfStarted) {
+      if (minute <= 45) return `${minute}'`;
+      return `45' +${minute - 45}`;
+    }
+
+    if (minute <= 90) return `${minute}'`;
+    return `90' +${minute - 90}`;
   }
 
   // ⭐ Ikoner
@@ -103,6 +111,10 @@ console.log("AWAY TEAM PLAYERS:", awayTeam?.players);
         return <FontAwesomeIcon icon={faFlag} className="event-icon" />;
       case "whistle":
         return <FontAwesomeIcon icon={faBullhorn} className="event-icon" />;
+      case "addedTime":
+        return <FontAwesomeIcon icon={faClock} className="event-icon" />;
+      case "image":
+        return <FontAwesomeIcon icon={faImage} className="event-icon" />;
       case "system":
         return <FontAwesomeIcon icon={faCog} className="event-icon" />;
       default:
@@ -115,13 +127,14 @@ console.log("AWAY TEAM PLAYERS:", awayTeam?.players);
       <h3>Hendelser</h3>
 
       {events.map((ev) => (
-        
         <div key={ev.id} className={`event event-${ev.type}`}>
+          
           {/* Ikon */}
           <div className="event-icon">{getIcon(ev)}</div>
 
           {/* Tekst */}
           <div className="event-text">
+
             {/* Tittel */}
             <p>
               {ev.type === "goal" && `${getTeamName(ev.team)} SCORER!`}
@@ -132,6 +145,8 @@ console.log("AWAY TEAM PLAYERS:", awayTeam?.players);
               {ev.type === "corner" && `Corner – ${getTeamName(ev.team)}`}
               {ev.type === "whistle" && `Frispark – ${getTeamName(ev.team)}`}
               {ev.type === "comment" && `Kommentar`}
+              {ev.type === "addedTime" && `Tilleggstid`}
+              {ev.type === "image" && `Bilde`}
               {ev.type === "system" && `${ev.text}`}
             </p>
 
@@ -162,16 +177,44 @@ console.log("AWAY TEAM PLAYERS:", awayTeam?.players);
               </>
             )}
 
+            {/* ⭐ TILLEGGSTID */}
+            {ev.type === "addedTime" && (
+              <p>
+                Det er lagt til <strong>{ev.minutes}</strong> minutter
+              </p>
+            )}
+
             {/* ⭐ Kommentar */}
-            {ev.text && ev.type !== "system" && ev.type !== "sub" && (
+            {ev.text && ev.type !== "system" && ev.type !== "addedTime" && (
               <p>{ev.text}</p>
             )}
+
+            {/* ⭐ Kommentar for addedTime */}
+            {ev.type === "addedTime" && ev.text && (
+              <p>{ev.text}</p>
+            )}
+
+            {/* ⭐ BILDE */}
+            {ev.imageUrl && (
+              <img
+                src={ev.imageUrl}
+                alt="Hendelsesbilde"
+                className="event-image"
+              />
+            )}
+
           </div>
 
           {/* Minutt */}
-          <div className="event-minute">{ev.minute}'</div>
+          <div className="event-minute">
+            {getDisplayMinute(ev.minute)}
+          </div>
         </div>
       ))}
     </section>
   );
 }
+
+
+
+

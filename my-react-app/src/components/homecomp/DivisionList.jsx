@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getTeam } from "../../services/TeamService";
 
 export default function DivisionList({
@@ -6,7 +6,7 @@ export default function DivisionList({
   navigate,
   selectedDate
 }) {
-  const divisions = Object.keys(matchesByDivision);
+  const divisions = useMemo(() => Object.keys(matchesByDivision), [matchesByDivision])
   const [openDivisions, setOpenDivisions] = useState({});
   const [teamNames, setTeamNames] = useState({});
 
@@ -32,22 +32,24 @@ export default function DivisionList({
     }
 
     if (divisions.length > 0) loadNames();
-  }, [divisions, matchesByDivision]);
+  }, [divisions]);
 
   // Åpne nye divisjoner uten å trigge infinite loop
   useEffect(() => {
     setOpenDivisions((prev) => {
       const updated = { ...prev };
+      let changed = false
 
       divisions.forEach((d) => {
         if (!(d in updated)) {
           updated[d] = true;
+          changed = true
         }
       });
 
-      return updated;
+      return changed ? updated : prev;
     });
-  }, [divisions.length]);
+  }, [divisions]);
 
   const toggleDivision = (division) => {
     setOpenDivisions((prev) => ({

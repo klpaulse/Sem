@@ -6,7 +6,7 @@ import {
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 
-export default function Calandar({ selectedDate, setSelectedDate }) {
+export default function Calandar({ selectedDate, setSelectedDate, setSelectedMatch }) {
   const [showFullCalandar, setShowFullCalandar] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [slideDirection, setSlideDirection] = useState(null);
@@ -14,21 +14,29 @@ export default function Calandar({ selectedDate, setSelectedDate }) {
 
   const stripRef = useRef(null);
 
+function toSafeDate(value) {
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? new Date() : d;
+}
+
+const safeSelectedDate = toSafeDate(selectedDate);
+
+
   // 15-dagers strip
- const days = useMemo(() => {
-  return [...Array(15)].map((_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() + (i - 7));
-    return d;
-  });
-}, []);
+  const days = useMemo(() => {
+    return [...Array(15)].map((_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() + (i - 7));
+      return d;
+    });
+  }, []);
 
   const handleSelectDate = (day) => {
     setSelectedDate(day);
+    setSelectedMatch(null);
     setShowFullCalandar(false);
   };
 
-  // Scroll slik at "i dag" vises
   useEffect(() => {
     if (!showFullCalandar && stripRef.current) {
       const todayIndex = 7;
@@ -37,10 +45,8 @@ export default function Calandar({ selectedDate, setSelectedDate }) {
     }
   }, [showFullCalandar]);
 
-  // Ukedager
-   const weekDays = ["MA", "TI", "ON", "TO", "FR", "LØ", "SØ"]
+  const weekDays = ["MA", "TI", "ON", "TO", "FR", "LØ", "SØ"];
 
-  // Full kalender-grid (inkl. forrige/neste måned)
   const getFullMonthGrid = (date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -53,19 +59,16 @@ export default function Calandar({ selectedDate, setSelectedDate }) {
 
     const grid = [];
 
-    // Forrige måned
     for (let i = 0; i < startWeekday; i++) {
       const d = new Date(year, month, -(startWeekday - 1 - i));
       grid.push({ date: d, isOtherMonth: true });
     }
 
-    // Denne måneden
     for (let i = 1; i <= daysInMonth; i++) {
       const d = new Date(year, month, i);
       grid.push({ date: d, isOtherMonth: false });
     }
 
-    // Neste måned
     while (grid.length < 42) {
       const d = new Date(year, month + 1, grid.length - daysInMonth - startWeekday + 1);
       grid.push({ date: d, isOtherMonth: true });
@@ -75,7 +78,7 @@ export default function Calandar({ selectedDate, setSelectedDate }) {
   };
 
   const goPrevMonth = () => {
-    setSlideDirection("right")
+    setSlideDirection("right");
     setAnimate(true);
     setTimeout(() => {
       const newMonth = new Date(currentMonth);
@@ -86,7 +89,7 @@ export default function Calandar({ selectedDate, setSelectedDate }) {
   };
 
   const goNextMonth = () => {
-    setSlideDirection("left")
+    setSlideDirection("left");
     setAnimate(true);
     setTimeout(() => {
       const newMonth = new Date(currentMonth);
@@ -99,13 +102,13 @@ export default function Calandar({ selectedDate, setSelectedDate }) {
   const goToToday = () => {
     const today = new Date();
     setSelectedDate(today);
+    setSelectedMatch(null);
     setCurrentMonth(today);
   };
 
   return (
     <div className="calandar-container">
 
-      {/* STRIP-VISNING */}
       {!showFullCalandar && (
         <div className="calandar-strip" ref={stripRef}>
           <div
@@ -116,8 +119,7 @@ export default function Calandar({ selectedDate, setSelectedDate }) {
           </div>
 
           {days.map((day, index) => {
-            const isSelected =
-              day.toDateString() === selectedDate.toDateString();
+            const isSelected = day.toDateString() === safeSelectedDate.toDateString();
 
             return (
               <div
@@ -142,56 +144,47 @@ export default function Calandar({ selectedDate, setSelectedDate }) {
         </div>
       )}
 
-      {/* FULL MÅNEDSKALENDER */}
       {showFullCalandar && (
         <div className="month-view">
 
-          {/* Toppseksjon */}
           <div className="month-header">
-            
             <button className="nav-btn" onClick={goPrevMonth}>
               <FontAwesomeIcon icon={faChevronLeft} />
             </button>
-<div className="calandar-title-wrapper">
-  
-            <h3 className="calendar-title">
-              {currentMonth.toLocaleDateString("no-NO", {
-                month: "long",
-                year: "numeric",
-              })}
-            </h3>
 
-            <button
-            className="close-month-btn"
-            onClick={() => setShowFullCalandar(false)}
-          >
-            X
-          </button>
-          </div>
+            <div className="calandar-title-wrapper">
+              <h3 className="calendar-title">
+                {currentMonth.toLocaleDateString("no-NO", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              </h3>
+
+              <button
+                className="close-month-btn"
+                onClick={() => setShowFullCalandar(false)}
+              >
+                X
+              </button>
+            </div>
 
             <button className="nav-btn" onClick={goNextMonth}>
               <FontAwesomeIcon icon={faChevronRight} />
             </button>
           </div>
 
-
-          {/* Ukedager */}
           <div className="weekdays-row">
             {weekDays.map((d) => (
               <div key={d} className="weekday">{d}</div>
             ))}
           </div>
 
-          {/* Kalender-grid */}
           <div className={`month-grid slide-${slideDirection} ${animate ? "animating" : ""}`}>
             {getFullMonthGrid(currentMonth).map((dayObj, index) => {
               const day = dayObj.date;
 
-              const isSelected =
-                day.toDateString() === selectedDate.toDateString();
-
-              const isToday =
-                day.toDateString() === new Date().toDateString();
+              const isSelected = day.toDateString() === safeSelectedDate.toDateString();
+              const isToday = day.toDateString() === new Date().toDateString();
 
               return (
                 <div
@@ -208,9 +201,9 @@ export default function Calandar({ selectedDate, setSelectedDate }) {
             })}
           </div>
 
-          
         </div>
       )}
     </div>
   );
 }
+

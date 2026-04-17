@@ -6,7 +6,9 @@ import {
   faUserInjured,
   faFlag,
   faBullhorn,
-  faComment
+  faComment,
+  faClock,
+  faImage
 } from "@fortawesome/free-solid-svg-icons";
 
 import GoalForm from "./GoalForm";
@@ -27,12 +29,14 @@ export default function EventForm({
   setSubData,
   fkData,
   setFkData,
+  simpleData,
+  setSimpleData,
   liveMatch,
   homeTeam,
   awayTeam,
   addEvent
 }) {
-console.log("EVENTFORM RENDERS, TYPE:", type);
+ 
   const titles = {
     goal: { icon: faFutbol, label: "Mål" },
     yellow: { icon: faSquare, label: "Gult kort", className: "yellow-card" },
@@ -41,25 +45,27 @@ console.log("EVENTFORM RENDERS, TYPE:", type);
     injury: { icon: faUserInjured, label: "Skade" },
     corner: { icon: faFlag, label: "Corner" },
     whistle: { icon: faBullhorn, label: "Frispark" },
-    comment: { icon: faComment, label: "Kommentar" }
+    comment: { icon: faComment, label: "Kommentar" },
+    addedTime: { icon: faClock, label: "Tilleggstid" },
+
+    // ⭐ NY TYPE
+    image: { icon: faImage, label: "Legg til bilde" }
   };
 
   const current = titles[type];
 
-  // ⭐ FIXEN SOM STOPPER KRASJ
   if (!homeTeam || !awayTeam) {
     return <div>Laster lag...</div>;
-    
   }
 
   return (
     <div className="event-form">
-
       <h4 className="form-title">
         <FontAwesomeIcon icon={current.icon} className={current.className} />
         {current.label}
       </h4>
 
+      {/* ⭐ TYPE-SPESIFIKKE SKJEMAER */}
       {type === "goal" && (
         <GoalForm
           data={goalData}
@@ -68,7 +74,7 @@ console.log("EVENTFORM RENDERS, TYPE:", type);
           awayTeam={awayTeam}
         />
       )}
-console.log("EVENTFORM: Viser CardForm nå");
+
       {(type === "yellow" || type === "red") && (
         <CardForm
           data={cardData}
@@ -96,22 +102,58 @@ console.log("EVENTFORM: Viser CardForm nå");
         />
       )}
 
-      {(type === "corner" || type === "injury" || type === "comment") && (
+      {(type === "corner" ||
+        type === "injury" ||
+        type === "comment" ||
+        type === "addedTime") && (
         <SimpleEventForm
           type={type}
           text={text}
           setText={setText}
           homeTeam={homeTeam}
           awayTeam={awayTeam}
+          simpleData={simpleData}
+          setSimpleData={setSimpleData}
         />
       )}
 
-      {type !== "comment" && (
+      {/* ⭐ KOMMENTARFELT FOR TYPER SOM IKKE HAR EGET SKJEMA */}
+      {!(
+        type === "comment" ||
+        type === "corner" ||
+        type === "injury" ||
+        type === "whistle" ||
+        type === "addedTime" ||
+        type === "image"
+      ) && (
         <textarea
           placeholder="Kommentar (valgfritt)"
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
+      )}
+
+      {/* ⭐ BILDEOPPLASTING – KUN FOR TYPE === "image" */}
+      {type === "image" && (
+        <div className="image-upload">
+          <label>Bilde:</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) =>
+              setSimpleData({ ...simpleData, image: e.target.files[0] })
+            }
+          />
+
+          <label>Kommentar:</label>
+          <input
+            type="text"
+            value={simpleData.comment || ""}
+            onChange={(e) =>
+              setSimpleData({ ...simpleData, comment: e.target.value })
+            }
+          />
+        </div>
       )}
 
       <button className="submit-event" onClick={addEvent}>
@@ -120,4 +162,7 @@ console.log("EVENTFORM: Viser CardForm nå");
     </div>
   );
 }
+
+
+
          

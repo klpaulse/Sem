@@ -11,6 +11,7 @@ import { onAuthStateChanged } from 'firebase/auth'
 import LoginPage from './pages/LoginPage.jsx'
 import HomePage from './pages/HomePage'
 import LiveControls from './components/admincomp/LiveControls.jsx'
+import ErrorBoundary from '../../ErrorBoundary.jsx'
 
 
 function App() {
@@ -62,25 +63,28 @@ function App() {
   }
 
   return (
+    
     <>
+    <ErrorBoundary>
       <Routes>
         <Route index element={<HomePage matches={matches} divisions={divisions} />} />
 
         <Route path="/match/:id" element={<MatchPage />} />
 
         <Route path="/login" element={<LoginPage />} />
-
+  
         <Route
           path="/admin"
   element={
     <AdminPage matches={matches} divisions={divisions} />
   }
-        />
-      
-       
 
+        />
+       
       </Routes>
+      </ErrorBoundary>
     </>
+     
   )
 }
 
