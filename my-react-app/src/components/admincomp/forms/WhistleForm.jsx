@@ -5,6 +5,13 @@ export default function WhistleForm({ data, setData, homeTeam, awayTeam }) {
   const [selectedPlayer, setSelectedPlayer] = useState(data.player || "");
   const [comment, setComment] = useState(data.comment || "");
 
+  // ⭐ Nullstill når parent-data endres
+  useEffect(() => {
+    setSelectedTeam(data.team || "");
+    setSelectedPlayer(data.player || "");
+    setComment(data.comment || "");
+  }, [data]);
+
   const players =
     selectedTeam === homeTeam?.id
       ? homeTeam?.players || []
@@ -12,6 +19,7 @@ export default function WhistleForm({ data, setData, homeTeam, awayTeam }) {
       ? awayTeam?.players || []
       : [];
 
+  // Oppdater EventForm når noe endres
   useEffect(() => {
     setData({
       team: selectedTeam,

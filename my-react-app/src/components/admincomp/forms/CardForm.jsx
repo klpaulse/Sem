@@ -4,6 +4,12 @@ export default function CardForm({ data, setData, homeTeam, awayTeam }) {
   const [selectedTeam, setSelectedTeam] = useState(data.team || "");
   const [selectedPlayer, setSelectedPlayer] = useState(data.player || "");
 
+  // ⭐ Når LiveControls nullstiller data → nullstill feltene her også
+  useEffect(() => {
+    setSelectedTeam(data.team || "");
+    setSelectedPlayer(data.player || "");
+  }, [data]);
+
   const players =
     selectedTeam === homeTeam?.id
       ? homeTeam?.players || []
@@ -11,6 +17,7 @@ export default function CardForm({ data, setData, homeTeam, awayTeam }) {
       ? awayTeam?.players || []
       : [];
 
+  // Oppdater parent når feltene endres
   useEffect(() => {
     setData({
       team: selectedTeam,

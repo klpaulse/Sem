@@ -11,6 +11,11 @@ export default function SimpleEventForm({
 }) {
   const [selectedTeam, setSelectedTeam] = useState(simpleData.team || "");
 
+  // ⭐ Nullstill når parent-data endres
+  useEffect(() => {
+    setSelectedTeam(simpleData.team || "");
+  }, [simpleData]);
+
   // Oppdater team kun for corner/injury
   useEffect(() => {
     if (type === "corner" || type === "injury") {
@@ -36,7 +41,7 @@ export default function SimpleEventForm({
         </>
       )}
 
-      {/* ⭐ Tilleggstid – egen state, ikke text */}
+      {/* ⭐ Tilleggstid */}
       {type === "addedTime" && (
         <>
           <label>Tilleggstid</label>
@@ -54,7 +59,7 @@ export default function SimpleEventForm({
         </>
       )}
 
-      {/* ⭐ Kommentar – fungerer nå som normalt */}
+      {/* ⭐ Kommentar */}
       <label>Kommentar</label>
       <input
         value={text}
@@ -68,5 +73,6 @@ export default function SimpleEventForm({
     </div>
   );
 }
+
 
 

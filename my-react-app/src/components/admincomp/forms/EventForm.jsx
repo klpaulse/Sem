@@ -57,7 +57,7 @@ export default function EventForm({
   }
 
   return (
-    <div className="event-form">
+    <div className="event-form"  key={type} >
       <h4 className="form-title">
         <FontAwesomeIcon icon={current.icon} className={current.className} />
         {current.label}

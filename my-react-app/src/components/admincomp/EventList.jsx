@@ -13,7 +13,9 @@ import {
   faBullhorn,
   faCog,
   faClock,
-  faImage
+  faImage,
+  faArrowUp,
+  faArrowDown
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -61,13 +63,23 @@ export default function EventList({ match }) {
         ? awayTeam
         : null;
 
-    if (!team) return playerId;
+    if (!team || !team.players) return playerId;
 
-    const players = Array.isArray(team.players)
-      ? team.players
-      : Object.values(team.players || {});
+    let players = team.players;
 
-    return players.find((p) => p.id === playerId)?.name || playerId;
+    if (!Array.isArray(players)) {
+      players = Object.entries(players).map(([id, value]) => {
+        if (typeof value === "string") return { id, name: value };
+        return value;
+      });
+    }
+
+    if (Array.isArray(players) && typeof players[0] === "string") {
+      players = players.map((id) => ({ id, name: id }));
+    }
+
+    const player = players.find((p) => p.id === playerId);
+    return player?.name || playerId;
   }
 
   // ⭐ Hent lagnavn
@@ -81,139 +93,203 @@ export default function EventList({ match }) {
     return <div>Laster hendelser...</div>;
   }
 
-  // ⭐ Automatisk visning av minutt
+  // ⭐ Minutt-format
   function getDisplayMinute(minute) {
     if (!match?.secondHalfStarted) {
       if (minute <= 45) return `${minute}'`;
-      return `45' +${minute - 45}`;
+      return `45+${minute - 45}`;
     }
 
     if (minute <= 90) return `${minute}'`;
-    return `90' +${minute - 90}`;
+    return `90+${minute - 90}`;
   }
 
   // ⭐ Ikoner
   function getIcon(ev) {
     switch (ev.type) {
       case "goal":
-        return <FontAwesomeIcon icon={faFutbol} className="event-icon" />;
+        return <FontAwesomeIcon icon={faFutbol} />;
       case "yellow":
-        return <FontAwesomeIcon icon={faSquare} className="event-icon yellow-card" />;
+        return <FontAwesomeIcon icon={faSquare} className="yellow-card" />;
       case "red":
-        return <FontAwesomeIcon icon={faSquare} className="event-icon red-card" />;
+        return <FontAwesomeIcon icon={faSquare} className="red-card" />;
       case "injury":
-        return <FontAwesomeIcon icon={faUserInjured} className="event-icon" />;
+        return <FontAwesomeIcon icon={faUserInjured} />;
       case "sub":
-        return <FontAwesomeIcon icon={faArrowsRotate} className="event-icon" />;
+        return <FontAwesomeIcon icon={faArrowsRotate} />;
       case "comment":
-        return <FontAwesomeIcon icon={faComment} className="event-icon" />;
+        return <FontAwesomeIcon icon={faComment} />;
       case "corner":
-        return <FontAwesomeIcon icon={faFlag} className="event-icon" />;
+        return <FontAwesomeIcon icon={faFlag} />;
       case "whistle":
-        return <FontAwesomeIcon icon={faBullhorn} className="event-icon" />;
+        return <FontAwesomeIcon icon={faBullhorn} />;
       case "addedTime":
-        return <FontAwesomeIcon icon={faClock} className="event-icon" />;
+        return <FontAwesomeIcon icon={faClock} />;
       case "image":
-        return <FontAwesomeIcon icon={faImage} className="event-icon" />;
+        return <FontAwesomeIcon icon={faImage} />;
       case "system":
-        return <FontAwesomeIcon icon={faCog} className="event-icon" />;
+        return <FontAwesomeIcon icon={faCog} />;
+      case "questionAnswer":
+        return <FontAwesomeIcon icon={faComment} />;
       default:
         return null;
     }
   }
 
   return (
-    <section>
-      <h3>Hendelser</h3>
+    <div className="report-container">
+      <div className="report-feed">
 
-      {events.map((ev) => (
-        <div key={ev.id} className={`event event-${ev.type}`}>
-          
-          {/* Ikon */}
-          <div className="event-icon">{getIcon(ev)}</div>
+        <h3>Hendelser</h3>
 
-          {/* Tekst */}
-          <div className="event-text">
+        {events.map((ev) => (
+          <div key={ev.id} className={`event event-${ev.type}`}>
 
-            {/* Tittel */}
-            <p>
-              {ev.type === "goal" && `${getTeamName(ev.team)} SCORER!`}
-              {ev.type === "yellow" && `Gult kort – ${getTeamName(ev.team)}`}
-              {ev.type === "red" && `Rødt kort – ${getTeamName(ev.team)}`}
-              {ev.type === "injury" && `Skade – ${getTeamName(ev.team)}`}
-              {ev.type === "sub" && `Bytte – ${getTeamName(ev.team)}`}
-              {ev.type === "corner" && `Corner – ${getTeamName(ev.team)}`}
-              {ev.type === "whistle" && `Frispark – ${getTeamName(ev.team)}`}
-              {ev.type === "comment" && `Kommentar`}
-              {ev.type === "addedTime" && `Tilleggstid`}
-              {ev.type === "image" && `Bilde`}
-              {ev.type === "system" && `${ev.text}`}
-            </p>
+            {/* Ikon */}
+            <span className="event-icon">{getIcon(ev)}</span>
 
-            {/* ⭐ MÅL */}
-            {ev.type === "goal" && (
-              <>
-                <p className="goal-detail">
-                  Mål: <strong>{getPlayerName(ev.team, ev.player)}</strong>
-                </p>
+            {/* Tekst */}
+            <div className="event-text">
 
-                {ev.assist && (
-                  <p className="goal-detail">
-                    Assist: <strong>{getPlayerName(ev.team, ev.assist)}</strong>
+              {/* ⭐ SYSTEM */}
+              {ev.type === "system" && (
+                <p className="system-text">{ev.text}</p>
+              )}
+
+              {/* ⭐ MÅL */}
+              {ev.type === "goal" && (
+                <>
+                  <p className="goal-title">{getTeamName(ev.team)} SCORER!</p>
+                  <p className="goal-score">
+                    {ev.homeScore}-{ev.awayScore}
                   </p>
-                )}
-              </>
-            )}
+                  <p className="goal-detail">
+                    Mål: {getPlayerName(ev.team, ev.player)}
+                  </p>
+                  {ev.assist && (
+                    <p className="goal-detail">
+                      Målgivende: {getPlayerName(ev.team, ev.assist)}
+                    </p>
+                  )}
+                  {ev.text && <p className="goal-comment">{ev.text}</p>}
+                </>
+              )}
 
-            {/* ⭐ BYTTE */}
-            {ev.type === "sub" && (
-              <>
-                <p>
-                  Inn: <strong>{getPlayerName(ev.team, ev.in)}</strong>
-                </p>
-                <p>
-                  Ut: <strong>{getPlayerName(ev.team, ev.out)}</strong>
-                </p>
-              </>
-            )}
+              {/* ⭐ BYTTE */}
+              {ev.type === "sub" && (
+                <>
+                  <p className="sub-title">Spillerbytte – {getTeamName(ev.team)}</p>
+                  <p className="sub-in">
+                    <FontAwesomeIcon icon={faArrowUp} /> Inn:{" "}
+                    {getPlayerName(ev.team, ev.in)}
+                  </p>
+                  <p className="sub-out">
+                    <FontAwesomeIcon icon={faArrowDown} /> Ut:{" "}
+                    {getPlayerName(ev.team, ev.out)}
+                  </p>
+                  {ev.comment && <p className="sub-comment">{ev.comment}</p>}
+                </>
+              )}
 
-            {/* ⭐ TILLEGGSTID */}
-            {ev.type === "addedTime" && (
-              <p>
-                Det er lagt til <strong>{ev.minutes}</strong> minutter
-              </p>
-            )}
+              {/* ⭐ GULT KORT */}
+              {ev.type === "yellow" && (
+                <>
+                  <p>Gult kort – {getTeamName(ev.team)}</p>
+                  <p>{getPlayerName(ev.team, ev.player)}</p>
+                  {ev.text && <p>{ev.text}</p>}
+                </>
+              )}
 
-            {/* ⭐ Kommentar */}
-            {ev.text && ev.type !== "system" && ev.type !== "addedTime" && (
-              <p>{ev.text}</p>
-            )}
+              {/* ⭐ RØDT KORT */}
+              {ev.type === "red" && (
+                <>
+                  <p>Rødt kort – {getTeamName(ev.team)}</p>
+                  <p>{getPlayerName(ev.team, ev.player)}</p>
+                  {ev.text && <p>{ev.text}</p>}
+                </>
+              )}
 
-            {/* ⭐ Kommentar for addedTime */}
-            {ev.type === "addedTime" && ev.text && (
-              <p>{ev.text}</p>
-            )}
+              {/* ⭐ SKADE */}
+              {ev.type === "injury" && (
+                <>
+                  <p>Skade – {getTeamName(ev.team)}</p>
+                  {ev.text && <p>{ev.text}</p>}
+                </>
+              )}
 
-            {/* ⭐ BILDE */}
-            {ev.imageUrl && (
-              <img
-                src={ev.imageUrl}
-                alt="Hendelsesbilde"
-                className="event-image"
-              />
-            )}
+              {/* ⭐ CORNER */}
+              {ev.type === "corner" && (
+                <>
+                  <p>Hjørnespark – {getTeamName(ev.team)}</p>
+                  {ev.player && (
+                    <p>{getPlayerName(ev.team, ev.player)} tar corneren</p>
+                  )}
+                  {ev.text && <p>{ev.text}</p>}
+                </>
+              )}
 
+              {/* ⭐ FRISPARK */}
+              {ev.type === "whistle" && (
+                <>
+                  <p>Frispark – {getTeamName(ev.team)}</p>
+                  {ev.player && <p>{getPlayerName(ev.team, ev.player)}</p>}
+                  {ev.comment && <p>{ev.comment}</p>}
+                </>
+              )}
+
+              {/* ⭐ TILLEGGSTID */}
+              {ev.type === "addedTime" && (
+                <>
+                  <p>
+                    Det er lagt til <strong>{ev.minutes}</strong> minutter
+                  </p>
+                  {ev.text && <p>{ev.text}</p>}
+                </>
+              )}
+
+              {/* ⭐ KOMMENTAR */}
+              {ev.type === "comment" && <p>{ev.text}</p>}
+
+              {/* ⭐ BILDE */}
+              {ev.type === "image" && (
+                <>
+                  <p>Bildehendelse</p>
+                  {ev.text && <p>{ev.text}</p>}
+                  {ev.imageUrl && (
+                    <img
+                      src={ev.imageUrl}
+                      alt="Hendelsesbilde"
+                      className="event-image-img"
+                    />
+                  )}
+                </>
+              )}
+
+              {/* ⭐ PUBLIKUMSSPØRSMÅL */}
+              {ev.type === "questionAnswer" && (
+                <>
+                  <p>
+                    <strong>{ev.name} spør:</strong> {ev.question}
+                  </p>
+                  <p>
+                    <strong>Svar:</strong> {ev.answer}
+                  </p>
+                </>
+              )}
+            </div>
+
+            {/* Minutt */}
+            <span className="event-minute">{getDisplayMinute(ev.minute)}</span>
           </div>
-
-          {/* Minutt */}
-          <div className="event-minute">
-            {getDisplayMinute(ev.minute)}
-          </div>
-        </div>
-      ))}
-    </section>
+        ))}
+      </div>
+    </div>
   );
 }
+
+
+
+
 
 
 

@@ -6,6 +6,14 @@ export default function SubForm({ data, setData, homeTeam, awayTeam }) {
   const [playerOut, setPlayerOut] = useState(data.out || "");
   const [comment, setComment] = useState(data.comment || "");
 
+  // ⭐ Nullstill når parent-data endres
+  useEffect(() => {
+    setSelectedTeam(data.team || "");
+    setPlayerIn(data.in || "");
+    setPlayerOut(data.out || "");
+    setComment(data.comment || "");
+  }, [data]);
+
   const players =
     selectedTeam === homeTeam?.id
       ? homeTeam?.players || []

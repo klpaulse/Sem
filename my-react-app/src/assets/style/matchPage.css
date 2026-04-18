@@ -355,15 +355,16 @@ display: inline-block;
    SPILLERBYTTE
 ================================ */
 
-.sub-in-icon {
-  color: #2ecc71;
-  margin-right: 6px;
+/* Grønn pil opp */
+.event-sub .sub-in svg {
+  color: #2ecc71 !important;
 }
 
-.sub-out-icon {
-  color: #e74c3c;
-  margin-right: 6px;
+/* Rød pil ned */
+.event-sub .sub-out svg {
+  color: #e74c3c !important;
 }
+
 
 /* ================================
    GULT KORT
@@ -579,6 +580,77 @@ display: inline-block;
   border-radius: 6px;
   margin-top: 6px;
 }
+
+/* Hele eventen */
+.event-question {
+  background: #2a2a2a !important;   /* litt lysere enn card-bg */
+  border-top: 1px solid #3a3a3a !important;
+  border-bottom: 1px solid #3a3a3a !important;
+  padding: 10px 12px;
+  border-radius: 6px;
+  display: grid;
+  grid-template-columns: 30px 1fr 30px;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Ikonet – midtstilt */
+.event-question .event-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 22px;
+  color: #e5e5e5;
+}
+
+/* TEKST */
+.event-question .event-text p {
+  margin: 2px 0;
+  color: #f0f0f0 !important;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+/* SPØRSMÅLSBOKS */
+.event-question .question-block {
+  background: #2a2a2a;       /* samme som eventen → subtil */
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid #3a3a3a; /* lett markering */
+  margin-bottom: 6px;
+}
+
+.event-question .question-line {
+  font-weight: 600;
+  color: #ffffff !important;
+  margin-bottom: 2px;
+}
+
+/* SVARSBOKS */
+.event-question .answer-block {
+  background: #1f1f1f;       /* litt mørkere → tydelig skille */
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid #333;
+  margin-top: 6px;
+}
+
+.event-question .answer-line {
+  font-weight: 600;
+  color: #4ecf7a !important;
+  margin-bottom: 2px;
+}
+
+
+
+
+
+
+
+
+
+
 
 
 

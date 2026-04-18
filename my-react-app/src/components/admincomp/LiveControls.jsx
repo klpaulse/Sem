@@ -32,6 +32,7 @@ import {
   faClock,
   faImage
 } from "@fortawesome/free-solid-svg-icons";
+import AdminQuestions from "./AdminQuestions";
 
 export default function LiveControls({ match }) {
   if (!match) return <p>Laster kamp...</p>;
@@ -43,14 +44,19 @@ export default function LiveControls({ match }) {
   const [liveMatch, setLiveMatch] = useState(null);
 
   useEffect(() => {
-    if (!match?.id) return;
+  if (!match || !match.id) return;
 
-    const unsub = onSnapshot(matchRef, (snap) => {
+  const ref = doc(db, "matches", match.id);
+
+  const unsub = onSnapshot(ref, (snap) => {
+    if (snap.exists()) {
       setLiveMatch({ id: snap.id, ...snap.data() });
-    });
+    }
+  });
 
-    return () => unsub();
-  }, [match.id]);
+  return () => unsub();
+}, [match?.id]);
+
 
   // ⭐ Hent lag
   const [homeTeam, setHomeTeam] = useState(null);
@@ -60,6 +66,7 @@ export default function LiveControls({ match }) {
     async function loadTeams() {
       const home = await getTeam(match.homeTeamId);
       const away = await getTeam(match.awayTeamId);
+
 
       setHomeTeam(home);
       setAwayTeam(away);
@@ -76,8 +83,11 @@ export default function LiveControls({ match }) {
   const [cardData, setCardData] = useState({ team: "", player: "" });
   const [subData, setSubData] = useState({ team: "", in: "", out: "", comment: "" });
   const [fkData, setFkData] = useState({ team: "", player: "", comment: "" });
+  const [commentData, setCommentData] = useState({ text: "" });
+const [imageData, setImageData] = useState({ image: null });
 
-  // ⭐ Simple events (corner, injury, comment, addedTime, image)
+
+  // ⭐ Simple events
   const [simpleData, setSimpleData] = useState({ team: "", minutes: "", image: null, comment: "" });
 
   // ⭐ Nullstill skjema når type endres
@@ -92,13 +102,11 @@ export default function LiveControls({ match }) {
 
     const now = new Date();
 
-    // Før 2. omgang
     if (!liveMatch.secondHalfStarted || !liveMatch.secondHalfStartTime) {
       const start = new Date(liveMatch.startTime);
       return Math.floor((now - start) / 60000);
     }
 
-    // Etter 2. omgang
     const secondHalfStart = new Date(liveMatch.secondHalfStartTime);
     const secondHalfMinutes = Math.floor((now - secondHalfStart) / 60000);
 
@@ -137,12 +145,9 @@ export default function LiveControls({ match }) {
     addSystemEvent("Kampen har startet");
   }
 
-  // ⭐ Pause (slutt 1. omgang)
+  // ⭐ Pause
   async function pauseMatch() {
-    await updateDoc(matchRef, {
-      status: "halftime"
-    });
-
+    await updateDoc(matchRef, { status: "halftime" });
     addSystemEvent("Pause (slutt 1. omgang)");
   }
 
@@ -179,13 +184,8 @@ export default function LiveControls({ match }) {
   async function addEvent() {
     let imageUrl = null;
 
-    console.log("1. FILE:", simpleData.image);
-    console.log("2. TYPE:", type);
-
     if (type === "image" && simpleData.image) {
-      console.log("3. UPLOADING...");
       imageUrl = await uploadImage(simpleData.image);
-      console.log("4. URL:", imageUrl);
     }
 
     const minute = getMinute();
@@ -221,6 +221,10 @@ export default function LiveControls({ match }) {
         createdAt: serverTimestamp()
       });
 
+      setGoalData({ team: "", player: "", assist: "" });
+
+
+
       return;
     }
 
@@ -236,6 +240,8 @@ export default function LiveControls({ match }) {
         minute,
         createdAt: serverTimestamp()
       });
+      setCardData({ team: "", player: "" });
+
       return;
     }
 
@@ -252,6 +258,8 @@ export default function LiveControls({ match }) {
         minute,
         createdAt: serverTimestamp()
       });
+      setSubData({ team: "", in: "", out: "" });
+
       return;
     }
 
@@ -267,6 +275,8 @@ export default function LiveControls({ match }) {
         minute,
         createdAt: serverTimestamp()
       });
+     setFkData({ team: "", player: "", comment: "" });
+
       return;
     }
 
@@ -281,6 +291,10 @@ export default function LiveControls({ match }) {
         minute,
         createdAt: serverTimestamp()
       });
+      setSimpleData({ team: "", minutes: "", image: null, comment: "" });
+setText("");
+
+
       return;
     }
 
@@ -295,6 +309,9 @@ export default function LiveControls({ match }) {
         minute,
         createdAt: serverTimestamp()
       });
+      setSimpleData({ team: "", minutes: "", image: null, comment: "" });
+setText("");
+
       return;
     }
 
@@ -308,6 +325,8 @@ export default function LiveControls({ match }) {
         minute,
         createdAt: serverTimestamp()
       });
+      setText("");
+
       return;
     }
 
@@ -321,6 +340,8 @@ export default function LiveControls({ match }) {
         minute,
         createdAt: serverTimestamp()
       });
+      setSimpleData({ team: "", minutes: "", image: null, comment: "" });
+
       return;
     }
   }
@@ -368,6 +389,7 @@ export default function LiveControls({ match }) {
         addEvent={addEvent}
       />
 
+
       {/* ⭐ Kampkontroll */}
       <div className="match-controls">
         <button onClick={startMatch}>Start kamp</button>
@@ -377,11 +399,17 @@ export default function LiveControls({ match }) {
         <button onClick={undoLastEvent}>Angre siste</button>
       </div>
 
+             {/* ⭐ Admin spørsmål – plassert riktig */}
+      <AdminQuestions matchId={match.id} getMinute={getMinute} />
+
       {/* ⭐ Hendelser */}
       <EventList match={liveMatch} />
+
+     
     </div>
   );
 }
+
 
 
 
