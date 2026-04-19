@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { collection, onSnapshot, query, orderBy, getDocs, doc } from "firebase/firestore";
 import { db } from "../config/Firebase";
 
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 import Countdown from "../components/Countdown";
 import BeforeMatch from "../components/maincomp/BeforeMatch";
@@ -15,6 +15,7 @@ import "../assets/style/matchPage.css";
 
 export default function MatchPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [allMatches, setAllMatches] = useState([]);
   const [selectedMatch, setSelectedMatch] = useState(null);
@@ -106,7 +107,13 @@ export default function MatchPage() {
   return (
     <>
       <header className="header">
-        <h1 className="live-header">Breddefotball live</h1>
+        <h1
+          className="live-header"
+          onClick={() => navigate("/")}
+          style={{ cursor: "pointer" }}
+        >
+          Breddefotball live
+        </h1>
       </header>
 
       {/* Kampkort */}
@@ -125,7 +132,7 @@ export default function MatchPage() {
           <p className="lp-result">
             {selectedMatch.status === "not_started"
               ? `Kl ${selectedMatch.time}`
-              : `${selectedMatch.homeScore} - ${selectedMatch.awayScore}`}
+              : `${selectedMatch.homeScore ?? 0} - ${selectedMatch.awayScore ?? 0}`}
           </p>
 
           <span className="lp-title">{awayName}</span>
@@ -157,3 +164,6 @@ export default function MatchPage() {
     </>
   );
 }
+
+
+

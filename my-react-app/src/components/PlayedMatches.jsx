@@ -77,7 +77,7 @@ export default function PlayedMatches({ matches }) {
 
             {harResultat ? (
               <p>
-                {homeName} {m.homeScore} – {m.awayScore} {awayName}
+                {homeName} {m.homeScore ?? 0} – {m.awayScore ?? 0} {awayName}
               </p>
             ) : (
               <p>Resultat kommer</p>

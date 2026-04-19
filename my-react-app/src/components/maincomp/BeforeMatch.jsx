@@ -4,6 +4,7 @@ import "../../assets/style/matchPage.css";
 import BeforeMatchInfo from "./BeforeMatchInfo";
 import { getSeasonMatches } from "../../services/MatchService";
 import { getTeam } from "../../services/TeamService";
+import { useNavigate } from "react-router-dom";
 
 // 🔥 Felles dato-normalisering
 function normalizeDate(d) {
@@ -16,6 +17,7 @@ function normalizeDate(d) {
 export default function BeforeMatch({ match, allMatches }) {
   if (!match) return null;
 
+  const navigate = useNavigate();
   const matchDate = normalizeDate(match.date);
 
   const [homeSeason, setHomeSeason] = useState([]);
@@ -60,7 +62,13 @@ export default function BeforeMatch({ match, allMatches }) {
 
   return (
     <section className="page">
-      <h1 className="live-header">Breddefotball Live</h1>
+      <h1
+        className="live-header"
+        onClick={() => navigate("/")}
+        style={{ cursor: "pointer" }}
+      >
+        Breddefotball Live
+      </h1>
 
       {/* Countdown */}
       <div className="countdown">

@@ -1,10 +1,19 @@
 import { useEffect, useState } from "react";
 import { getTeam } from "../../services/TeamService";
+import ResultsForm from "./ResultsForm";
 
-export default function MatchListAdmin({ matches, setEditingMatch, deleteMatch }) {
-  const [teamData, setTeamData] = useState({}); // cache for lag
+export default function MatchListAdmin({
+  matches,
+  editingMatch,
+  setEditingMatch,
+  mode // "missing" eller "all"
+}) {
+  const [teamData, setTeamData] = useState({});
+  const [homeScore, setHomeScore] = useState("");
+  const [awayScore, setAwayScore] = useState("");
+  const [location, setLocation] = useState("");
 
-  // Hent alle lag som trengs
+  // Hent lagene
   useEffect(() => {
     async function loadTeams() {
       const cache = {};
@@ -21,15 +30,11 @@ export default function MatchListAdmin({ matches, setEditingMatch, deleteMatch }
       setTeamData(cache);
     }
 
-    if (matches.length > 0) {
-      loadTeams();
-    }
+    if (matches.length > 0) loadTeams();
   }, [matches]);
 
   return (
     <section>
-      <h2>Alle kamper</h2>
-
       {matches.map((match) => {
         const home = teamData[match.homeTeamId];
         const away = teamData[match.awayTeamId];
@@ -38,30 +43,64 @@ export default function MatchListAdmin({ matches, setEditingMatch, deleteMatch }
           return <p key={match.id}>Laster lag...</p>;
         }
 
-        return (
-          <div key={match.id}>
-            <h2>
-              {home.name} vs {away.name}
-            </h2>
+        const hasResult =
+          match.homeScore != null && match.awayScore != null;
 
-            {/* Dato */}
-            {match.homeScore == null && match.date?.toDate && (
-              <p>Dato: {match.date.toDate().toLocaleDateString("no-NO")}</p>
+        return (
+          <div key={match.id} style={{ marginBottom: "1.5rem" }}>
+            <h3>
+              {home.name} vs {away.name}
+            </h3>
+
+            {match.date?.toDate && (
+              <p>
+                Dato:{" "}
+                {match.date.toDate().toLocaleDateString("no-NO")}
+              </p>
             )}
 
-            {/* Resultat */}
-            {match.homeScore != null ? (
+            {hasResult ? (
               <p>
                 Resultat: {match.homeScore} - {match.awayScore}
               </p>
             ) : (
-              <button onClick={() => setEditingMatch(match)}>Legg inn resultat</button>
+              <p>Mangler resultat</p>
             )}
 
-            <button onClick={() => deleteMatch(match.id)}>Slett kamp</button>
+            {/* MODE-STYRING */}
+            {mode === "missing" && !hasResult && (
+              <button onClick={() => setEditingMatch(match)}>
+                Legg inn resultat
+              </button>
+            )}
+
+            {mode === "all" && hasResult && (
+              <button onClick={() => setEditingMatch(match)}>
+                Rediger
+              </button>
+            )}
+
+            {/* RESULTATSKJEMA */}
+            {editingMatch?.id === match.id && (
+              <ResultsForm
+                editingMatch={editingMatch}
+                setEditingMatch={setEditingMatch}
+                homeScore={homeScore}
+                setHomeScore={setHomeScore}
+                awayScore={awayScore}
+                setAwayScore={setAwayScore}
+                location={location}
+                setLocation={setLocation}
+              />
+            )}
           </div>
         );
       })}
     </section>
   );
 }
+
+
+
+
+

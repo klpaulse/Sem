@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import './App.css'
 
 import AdminPage from './pages/AdminPage'
@@ -13,12 +13,13 @@ import HomePage from './pages/HomePage'
 import LiveControls from './components/admincomp/LiveControls.jsx'
 import ErrorBoundary from './ErrorBoundary.jsx'
 
-
 function App() {
   const [matches, setMatches] = useState([])
   const [divisions, setDivisions] = useState([])
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+
+  const location = useLocation()
 
   // LIVE: hent kamper
   useEffect(() => {
@@ -63,29 +64,31 @@ function App() {
   }
 
   return (
-    
     <>
-    <ErrorBoundary>
-      <Routes>
-        <Route index element={<HomePage matches={matches} divisions={divisions} />} />
+      <ErrorBoundary>
+        <Routes>
+          <Route
+            index
+            element={<HomePage matches={matches} divisions={divisions} />}
+          />
 
-        <Route path="/match/:id" element={<MatchPage />} />
+          {/* Tving remount når URL endrer seg */}
+          <Route
+            path="/match/:id"
+            element={<MatchPage key={location.key} />}
+          />
 
-        <Route path="/login" element={<LoginPage />} />
-  
-        <Route
-          path="/admin"
-  element={
-    <AdminPage matches={matches} divisions={divisions} />
-  }
+          <Route path="/login" element={<LoginPage />} />
 
-        />
-       
-      </Routes>
+          <Route
+            path="/admin"
+            element={<AdminPage matches={matches} divisions={divisions} />}
+          />
+        </Routes>
       </ErrorBoundary>
     </>
-     
   )
 }
 
 export default App
+

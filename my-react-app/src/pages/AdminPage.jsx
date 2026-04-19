@@ -7,6 +7,8 @@ import LagAdministrasjon from "../components/admincomp/LagAdministrasjon";
 import KampAdministrasjon from "../components/admincomp/KampAdministrasjon";
 import PlayerAdmin from "../components/admincomp/PlayerAdmin";
 import LiveAdmin from "../components/admincomp/LiveAdmin";
+import ResultatAdmin from "../components/admincomp/ResultatAdmin";
+
 
 import "../assets/style/adminPage.css";
 
@@ -60,6 +62,8 @@ export default function AdminPage() {
         <button onClick={() => setActiveTab("teams")}>Lag</button>
         <button onClick={() => setActiveTab("matches")}>Kamper</button>
         <button onClick={() => setActiveTab("players")}>Spillere</button>
+        <button onClick={() => setActiveTab("results")}>Resultater</button>
+
       </aside>
 
       <main className="admin-main">
@@ -71,6 +75,8 @@ export default function AdminPage() {
             {activeTab === "teams" && <LagAdministrasjon divisions={divisions}/>}
             {activeTab === "matches" && <KampAdministrasjon divisions={divisions} />}
             {activeTab === "players" && <PlayerAdmin />}
+            {activeTab === "results" && <ResultatAdmin />}
+
           </>
         )}
       </main>
