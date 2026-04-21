@@ -53,6 +53,8 @@ export default function BeforeMatchInfo({
     .sort((a, b) => normalizeDate(b.date) - normalizeDate(a.date))
     .slice(0, 3);
 
+    
+
   return (
     <section className="before-match-info">
       <h2 className="beforematch">Før kampen</h2>

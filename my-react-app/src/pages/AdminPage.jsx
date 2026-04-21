@@ -11,6 +11,7 @@ import ResultatAdmin from "../components/admincomp/ResultatAdmin";
 
 
 import "../assets/style/adminPage.css";
+import FormationAdmin from "../components/admincomp/FormationAdmin";
 
 
 
@@ -21,6 +22,8 @@ export default function AdminPage() {
 
   const [user] = useAuthState(auth);
   const [isAdmin, setIsAdmin] = useState(null);
+  const [selectedMatch, setSelectedMatch] = useState(null);
+
 
   // Sjekk admin
   useEffect(() => {
@@ -63,6 +66,8 @@ export default function AdminPage() {
         <button onClick={() => setActiveTab("matches")}>Kamper</button>
         <button onClick={() => setActiveTab("players")}>Spillere</button>
         <button onClick={() => setActiveTab("results")}>Resultater</button>
+        <button onClick={() => setActiveTab("formasjon")}>Formasjon</button>
+
 
       </aside>
 
@@ -76,6 +81,9 @@ export default function AdminPage() {
             {activeTab === "matches" && <KampAdministrasjon divisions={divisions} />}
             {activeTab === "players" && <PlayerAdmin />}
             {activeTab === "results" && <ResultatAdmin />}
+            {activeTab === "formasjon" && ( <FormationAdmin match={selectedMatch} />
+)}
+
 
           </>
         )}

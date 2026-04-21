@@ -61,15 +61,15 @@ body{
   .countdown{
      display: flex; 
     flex-direction: row;
-    color: #fff; 
-    align-items: center;  
-    gap: 0.6rem;  
-    animation: fadeIn 0.4s ease;
-    padding: 10px 14px;
-    border-radius: 6px; 
-    margin-bottom: -1rem; 
-    font-size: 16px; 
-    
+     text-align: center;
+     justify-content: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: #ccc;
+  margin-top: 6px;
+  opacity: 0.9;
+   
+
   }
 
   .knapp-kampdetaljer{
@@ -483,6 +483,16 @@ display: inline-block;
   box-shadow: 0 0 12px rgba(52,152,219,0.7);
 }
 
+.timeline-empty {
+  padding: 12px 0;
+  color: #aaa;
+  font-size: 14px;
+  text-align: center;
+  font-style: italic;
+}
+
+
+
 
 .beforematch {
   color: #ffffffcc;
@@ -647,6 +657,166 @@ display: inline-block;
   color: #4ecf7a !important;
   margin-bottom: 2px;
 }
+
+.audience-questions {
+  margin-top: 1.5rem;
+}
+
+/* Ask button */
+.ask-btn {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.ask-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Popup container */
+.question-popup {
+  margin-top: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px;
+  border-radius: 10px;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.25s ease;
+}
+
+/* Labels */
+.question-popup label {
+  display: block;
+  margin-bottom: 4px;
+  color: #ddd;
+  font-size: 14px;
+}
+
+/* Inputs */
+.question-popup input,
+.question-popup textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  color: #fff;
+  font-size: 14px;
+  margin-bottom: 12px;
+  outline: none;
+}
+
+.question-popup input:focus,
+.question-popup textarea:focus {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Textarea */
+.question-popup textarea {
+  min-height: 80px;
+  resize: none;
+}
+
+/* Submit button */
+.question-popup button[type="submit"] {
+  width: 100%;
+  background: #2b7cff;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.question-popup button[type="submit"]:hover {
+  background: #1f63d1;
+}
+
+.question-popup {
+  position: relative;
+}
+
+/* Minimalistisk X-knapp */
+.close-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #aaa;
+  transition: 0.2s ease;
+}
+
+.close-btn:hover {
+  color: #fff;
+}
+
+/* Selve X-ikonet */
+.close-icon {
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 300;
+}
+
+/*formasjon-bane*/
+.formation-field {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 0.65;
+  background: #1a3d1a;
+  border: 2px solid #2e5c2e;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Banestreker */
+.formation-field::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to bottom, transparent 0%, transparent 10%, rgba(255,255,255,0.15) 10%, transparent 11%),
+    linear-gradient(to bottom, transparent 0%, transparent 50%, rgba(255,255,255,0.15) 50%, transparent 51%),
+    linear-gradient(to bottom, transparent 0%, transparent 90%, rgba(255,255,255,0.15) 90%, transparent 91%);
+  pointer-events: none;
+}
+
+.player-chip {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  background: rgba(255,255,255,0.08);
+  padding: 6px 10px;
+  border-radius: 10px;
+  text-align: center;
+  color: #fff;
+  font-size: 12px;
+  width: 60px;
+}
+
+.player-number {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.player-name {
+  font-size: 11px;
+  opacity: 0.9;
+}
+
+
+
+
+
+
 
 
 

@@ -12,6 +12,7 @@ import Tabs from "../components/Tabs";
 import { getTeam } from "../services/TeamService";
 
 import "../assets/style/matchPage.css";
+import LagComponent from "../components/maincomp/LagComponent";
 
 export default function MatchPage() {
   const { id } = useParams();

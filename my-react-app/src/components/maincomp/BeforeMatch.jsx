@@ -69,11 +69,7 @@ export default function BeforeMatch({ match, allMatches }) {
       >
         Breddefotball Live
       </h1>
-
-      {/* Countdown */}
-      <div className="countdown">
-        <Countdown date={matchDate} />
-      </div>
+      
 
       {/* Kampkort */}
       <div className="last-played-card">
@@ -89,6 +85,9 @@ export default function BeforeMatch({ match, allMatches }) {
               minute: "2-digit",
             })}
         </p>
+        <div className="countdown">
+        <Countdown date={matchDate} />
+      </div>
       </div>
 
       {/* Info-boksene (inkl. timeline) */}

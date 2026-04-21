@@ -32,6 +32,10 @@ export default function AudienceQuestions({ matchId }) {
 
       {showBox && (
         <div className="question-popup">
+          <button className="close-btn" onClick={() => setShowBox(false)}>
+           <span className="close-icon">×</span>
+          </button>
+
           <form onSubmit={submit}>
             <label>Navn</label>
             <input
