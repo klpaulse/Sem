@@ -9,26 +9,30 @@ import {
 } from "firebase/firestore";
 import { db } from "../../config/Firebase";
 
-
-
 import FormationField from "../maincomp/FormationField";
 import PlayerChip from "../maincomp/PlayerChip";
 import { FORMATIONS } from "../../services/formationPresets";
 
 export default function FormationAdmin({ match }) {
-  const [players, setPlayers] = useState([]);        // spillere/posisjoner på banen
-  const [allPlayers, setAllPlayers] = useState([]);  // alle spillere i laget
+  const [players, setPlayers] = useState([]);
+  const [allPlayers, setAllPlayers] = useState([]);
   const [selectedFormation, setSelectedFormation] = useState("4-3-3");
+  const [activeSide, setActiveSide] = useState("home");
 
   const fieldRef = useRef(null);
   const [draggingId, setDraggingId] = useState(null);
 
-  // ⭐ HENT ALLE SPILLERE FRA LAGET
+  // ⭐ Hent spillere for valgt lag
   useEffect(() => {
     async function loadPlayers() {
-      if (!match?.homeTeamId) return;
+      if (!match) return;
 
-      const ref = collection(db, "teams", match.homeTeamId, "players");
+      const teamId =
+        activeSide === "home" ? match.homeTeamId : match.awayTeamId;
+
+      if (!teamId) return;
+
+      const ref = collection(db, "teams", teamId, "players");
       const snap = await getDocs(ref);
 
       const list = snap.docs.map((doc) => ({
@@ -40,13 +44,13 @@ export default function FormationAdmin({ match }) {
     }
 
     loadPlayers();
-  }, [match]);
+  }, [match, activeSide]);
 
-  // ⭐ HENT FORMASJON LIVE FRA FIRESTORE
+  // ⭐ Hent formasjon for valgt side
   useEffect(() => {
     if (!match?.id) return;
 
-    const ref = doc(db, "matches", match.id, "formation", "current");
+    const ref = doc(db, "matches", match.id, "formation", activeSide);
 
     const unsub = onSnapshot(ref, (snap) => {
       if (snap.exists()) {
@@ -72,33 +76,57 @@ export default function FormationAdmin({ match }) {
     });
 
     return () => unsub();
-  }, [match]);
+  }, [match, activeSide]);
 
-  // ⭐ SPILLERE SOM IKKE ER PÅ BANEN (BENK)
+  // ⭐ Spillere som ikke er på banen
   const benchPlayers = allPlayers.filter(
     (p) => !players.some((pos) => pos.id === p.id)
   );
 
-  // ⭐ FORMASJON-VELGER
-  function applyFormation(formationName) {
-    setSelectedFormation(formationName);
+  // ⭐ Formasjon-velger med horisontal halv-bane skalering
+function applyFormation(formationName) {
+  setSelectedFormation(formationName);
 
-    const preset = FORMATIONS[formationName];
-    if (!preset) return;
+  const preset = FORMATIONS[formationName];
+  if (!preset) return;
 
-    // tomme posisjoner uten spillere
-    const newPositions = preset.map((pos) => ({
+  const OFFSET_HOME = 8;   // behold denne – hjemmelag er bra nå
+  const OFFSET_AWAY = 7;   // flytt bortelag litt mer opp
+
+  const newPositions = preset.map((pos) => {
+    let finalY;
+
+    if (activeSide === "home") {
+      // Hjemmelag → speilvend → skaler → skyv ned mot midten
+      const mirroredY = 100 - pos.y;
+      finalY = mirroredY * 0.5 + OFFSET_HOME;
+    } else {
+      // Bortelag → skaler → skyv opp mot midten
+      finalY = 50 + (pos.y * 0.5) - OFFSET_AWAY;
+    }
+
+    return {
       id: pos.id,
       name: "",
       number: "",
       x: pos.x,
-      y: pos.y,
-    }));
+      y: finalY,
+    };
+  });
 
-    setPlayers(newPositions);
-  }
+  setPlayers(newPositions);
+}
 
-  // ⭐ START DRAGGING
+
+
+
+
+
+
+
+
+
+  // ⭐ Start dragging
   function startDrag(id, fromBench = false) {
     setDraggingId(id);
 
@@ -106,26 +134,25 @@ export default function FormationAdmin({ match }) {
       const p = allPlayers.find((pl) => pl.id === id);
       if (!p) return;
 
-      // legg spilleren inn på banen midlertidig
       setPlayers((prev) => [
         ...prev,
         {
           id: p.id,
           name: p.name,
           number: p.number,
-          x: 50,
-          y: 50,
+          x: 50, // midt på banen
+          y: activeSide === "home" ? 25 : 75, // midt i halvdel
         },
       ]);
     }
   }
 
-  // ⭐ STOPP DRAGGING
+  // ⭐ Stopp dragging
   function stopDrag() {
     setDraggingId(null);
   }
 
-  // ⭐ FLYTT SPILLER
+  // ⭐ Flytt spiller
   function onMove(e) {
     if (!draggingId) return;
 
@@ -142,11 +169,11 @@ export default function FormationAdmin({ match }) {
     );
   }
 
-  // ⭐ LAGRE FORMASJON
+  // ⭐ Lagre formasjon
   async function saveFormation() {
     if (!match?.id) return;
 
-    const ref = doc(db, "matches", match.id, "formation", "current");
+    const ref = doc(db, "matches", match.id, "formation", activeSide);
 
     const positions = {};
     players.forEach((p) => {
@@ -168,16 +195,42 @@ export default function FormationAdmin({ match }) {
   }
 
   return (
-    <div style={{ padding: "1rem", color: "#fff" }}>
-      <h2>Formasjon (Admin)</h2>
+    <div className="formation-admin">
+      <h2 className="formation-admin__title">Formasjon (Admin)</h2>
 
-      {/* ⭐ FORMASJON-VELGER */}
-      <div style={{ margin: "0.5rem 0 1rem" }}>
-        <label style={{ marginRight: "0.5rem" }}>Formasjon:</label>
+      {/* ⭐ Side-velger */}
+      <div className="formation-admin__side-toggle">
+        <button
+          onClick={() => setActiveSide("home")}
+          className={
+            "formation-admin__side-button" +
+            (activeSide === "home"
+              ? " formation-admin__side-button--active"
+              : "")
+          }
+        >
+          Hjemmelag
+        </button>
+
+        <button
+          onClick={() => setActiveSide("away")}
+          className={
+            "formation-admin__side-button" +
+            (activeSide === "away"
+              ? " formation-admin__side-button--active"
+              : "")
+          }
+        >
+          Bortelag
+        </button>
+      </div>
+
+      {/* ⭐ Formasjon-velger */}
+      <div className="formation-admin__formation-select">
+        <label>Formasjon:</label>
         <select
           value={selectedFormation}
           onChange={(e) => applyFormation(e.target.value)}
-          style={{ padding: "6px 10px" }}
         >
           {Object.keys(FORMATIONS).map((f) => (
             <option key={f} value={f}>
@@ -187,21 +240,18 @@ export default function FormationAdmin({ match }) {
         </select>
       </div>
 
-      {/* ⭐ BENK */}
-      <div style={{ marginBottom: "1rem" }}>
-        <h3>Spillere</h3>
+      {/* ⭐ Benk */}
+      <div className="formation-admin__bench">
+        <h3 className="formation-admin__bench-title">
+          Spillere ({activeSide === "home" ? "Hjemme" : "Borte"})
+        </h3>
 
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+        <div className="formation-admin__bench-list">
           {benchPlayers.map((p) => (
             <div
               key={p.id}
               onMouseDown={() => startDrag(p.id, true)}
-              style={{
-                padding: "8px 12px",
-                background: "rgba(255,255,255,0.1)",
-                borderRadius: "8px",
-                cursor: "grab",
-              }}
+              className="formation-admin__bench-player"
             >
               {p.number} – {p.name}
             </div>
@@ -209,40 +259,44 @@ export default function FormationAdmin({ match }) {
         </div>
       </div>
 
-      {/* ⭐ BANEN */}
+      {/* ⭐ Banen */}
       <div
         ref={fieldRef}
         onMouseMove={onMove}
         onMouseUp={stopDrag}
         onMouseLeave={stopDrag}
-        style={{ marginTop: "1rem" }}
+        className="formation-admin__field-wrapper"
       >
         <FormationField>
           {players.map((p) => (
             <div
               key={p.id}
               onMouseDown={() => startDrag(p.id)}
+              className="formation-admin__player-on-field"
               style={{
-                position: "absolute",
                 left: `${p.x}%`,
                 top: `${p.y}%`,
-                cursor: "grab",
-                transform: "translate(-50%, -50%)",
               }}
             >
-              <PlayerChip name={p.name} number={p.number} x={0} y={0} />
+              <PlayerChip name={p.name} number={p.number} />
             </div>
           ))}
         </FormationField>
       </div>
 
-      {/* ⭐ LAGRE */}
-      <button onClick={saveFormation} className="save-btn">
+      {/* ⭐ Lagre */}
+      <button
+        onClick={saveFormation}
+        className="formation-admin__save-button"
+      >
         Lagre formasjon
       </button>
     </div>
   );
 }
+
+
+
 
 
 

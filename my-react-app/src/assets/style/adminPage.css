@@ -142,3 +142,96 @@
 .form-section {
   margin-bottom: 16px;
 }
+
+.formation-admin {
+  padding: 1rem;
+  color: #fff;
+}
+
+.formation-admin__title {
+  font-size: 1.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.formation-admin__side-toggle {
+  margin: 1rem 0;
+}
+
+.formation-admin__side-button {
+  padding: 8px 12px;
+  margin-right: 10px;
+  background: #444;
+  color: #fff;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.formation-admin__side-button--active {
+  background: #2b7cff;
+}
+
+.formation-admin__formation-select {
+  margin: 0.5rem 0 1rem;
+}
+
+.formation-admin__formation-select label {
+  margin-right: 0.5rem;
+}
+
+.formation-admin__formation-select select {
+  padding: 6px 10px;
+  background: #222;
+  color: #fff;
+  border-radius: 6px;
+  border: 1px solid #555;
+}
+
+.formation-admin__bench {
+  margin-bottom: 1rem;
+}
+
+.formation-admin__bench-title {
+  margin-bottom: 0.5rem;
+}
+
+.formation-admin__bench-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.formation-admin__bench-player {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  cursor: grab;
+  font-size: 0.85rem;
+}
+
+.formation-admin__field-wrapper {
+  margin-top: 1rem;
+  position: relative;
+}
+
+.formation-admin__player-on-field {
+  position: absolute;
+  cursor: grab;
+  transform: translate(-50%, -50%);
+}
+
+.formation-admin__save-button {
+  margin-top: 1rem;
+  background: #2b7cff;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.formation-admin__save-button:hover {
+  background: #1f63d1;
+}
