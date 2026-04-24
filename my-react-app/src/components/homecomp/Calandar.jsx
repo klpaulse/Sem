@@ -6,7 +6,7 @@ import {
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 
-export default function Calandar({ selectedDate, setSelectedDate, setSelectedMatch }) {
+export default function Calandar({ selectedDate, setSelectedDate }) {
   const [showFullCalandar, setShowFullCalandar] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [slideDirection, setSlideDirection] = useState(null);
@@ -14,13 +14,12 @@ export default function Calandar({ selectedDate, setSelectedDate, setSelectedMat
 
   const stripRef = useRef(null);
 
-function toSafeDate(value) {
-  const d = new Date(value);
-  return isNaN(d.getTime()) ? new Date() : d;
-}
+  function toSafeDate(value) {
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? new Date() : d;
+  }
 
-const safeSelectedDate = toSafeDate(selectedDate);
-
+  const safeSelectedDate = toSafeDate(selectedDate);
 
   // 15-dagers strip
   const days = useMemo(() => {
@@ -33,7 +32,6 @@ const safeSelectedDate = toSafeDate(selectedDate);
 
   const handleSelectDate = (day) => {
     setSelectedDate(day);
-    setSelectedMatch(null);
     setShowFullCalandar(false);
   };
 
@@ -102,7 +100,6 @@ const safeSelectedDate = toSafeDate(selectedDate);
   const goToToday = () => {
     const today = new Date();
     setSelectedDate(today);
-    setSelectedMatch(null);
     setCurrentMonth(today);
   };
 
@@ -206,4 +203,5 @@ const safeSelectedDate = toSafeDate(selectedDate);
     </div>
   );
 }
+
 

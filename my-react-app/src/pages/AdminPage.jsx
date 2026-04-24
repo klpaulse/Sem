@@ -9,11 +9,8 @@ import PlayerAdmin from "../components/admincomp/PlayerAdmin";
 import LiveAdmin from "../components/admincomp/LiveAdmin";
 import ResultatAdmin from "../components/admincomp/ResultatAdmin";
 
-
 import "../assets/style/adminPage.css";
-import FormationAdmin from "../components/admincomp/FormationAdmin";
-
-
+import LiveControls from "../components/admincomp/LiveControls";
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState("live");
@@ -22,8 +19,10 @@ export default function AdminPage() {
 
   const [user] = useAuthState(auth);
   const [isAdmin, setIsAdmin] = useState(null);
-  const [selectedMatch, setSelectedMatch] = useState(null);
 
+  // ⭐ NYTT: Live-modus og valgt kamp
+  const [inLiveMode, setInLiveMode] = useState(false);
+  const [selectedMatch, setSelectedMatch] = useState(null);
 
   // Sjekk admin
   useEffect(() => {
@@ -61,14 +60,16 @@ export default function AdminPage() {
     <div className="admin-layout">
 
       <aside className="admin-sidebar">
-        <button onClick={() => setActiveTab("live")}>Live</button>
-        <button onClick={() => setActiveTab("teams")}>Lag</button>
-        <button onClick={() => setActiveTab("matches")}>Kamper</button>
-        <button onClick={() => setActiveTab("players")}>Spillere</button>
-        <button onClick={() => setActiveTab("results")}>Resultater</button>
-        <button onClick={() => setActiveTab("formasjon")}>Formasjon</button>
-
-
+        {/* ⭐ Når du er i live-modus, skjul menyen */}
+        {!inLiveMode && (
+          <>
+            <button onClick={() => setActiveTab("live")}>Live</button>
+            <button onClick={() => setActiveTab("teams")}>Lag</button>
+            <button onClick={() => setActiveTab("matches")}>Kamper</button>
+            <button onClick={() => setActiveTab("players")}>Spillere</button>
+            <button onClick={() => setActiveTab("results")}>Resultater</button>
+          </>
+        )}
       </aside>
 
       <main className="admin-main">
@@ -76,23 +77,49 @@ export default function AdminPage() {
 
         {!loading && (
           <>
-            {activeTab === "live" && <LiveAdmin />}
-            {activeTab === "teams" && <LagAdministrasjon divisions={divisions}/>}
-            {activeTab === "matches" && <KampAdministrasjon divisions={divisions} />}
-            {activeTab === "players" && <PlayerAdmin />}
-            {activeTab === "results" && <ResultatAdmin />}
-            {activeTab === "formasjon" && ( <FormationAdmin match={selectedMatch} />
-)}
+            {/* ⭐ LIVE-MODUS: Vis kun LiveAdmin for valgt kamp */}
+            {inLiveMode && selectedMatch && (
+              <LiveControls
+                match={selectedMatch}
+                onBack={() => {
+                  setInLiveMode(false);
+                  setSelectedMatch(null);
+                }}
+              />
+            )}
 
+            {/* ⭐ NORMAL ADMIN-MODUS */}
+            {!inLiveMode && (
+              <>
+                {activeTab === "live" && (
+                  <LiveAdmin
+                    onSelectMatch={(match) => {
+                      setSelectedMatch(match);
+                      setInLiveMode(true);
+                    }}
+                  />
+                )}
 
+                {activeTab === "teams" && (
+                  <LagAdministrasjon divisions={divisions} />
+                )}
+
+                {activeTab === "matches" && (
+                  <KampAdministrasjon divisions={divisions} />
+                )}
+
+                {activeTab === "players" && <PlayerAdmin />}
+
+                {activeTab === "results" && <ResultatAdmin />}
+              </>
+            )}
           </>
         )}
       </main>
-      
-
     </div>
   );
 }
+
 
 
 

@@ -11,9 +11,7 @@ export default function HomePage() {
   const [matches, setMatches] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const navigate = useNavigate();
-  const [selectedMatch, setSelectedMatch] = useState(null);
-
-
+  
   // LIVE-OPPDATERING AV KAMPER
   useEffect(() => {
     const matchesRef = collection(db, "matches");
@@ -68,7 +66,6 @@ export default function HomePage() {
         <Calandar
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
-          setSelectedMatch={setSelectedMatch}
         />
       </section>
 

@@ -235,3 +235,19 @@
 .formation-admin__save-button:hover {
   background: #1f63d1;
 }
+
+.back-button {
+  background: transparent;
+  border: 1px solid #555;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 12px;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}

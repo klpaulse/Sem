@@ -128,7 +128,7 @@ if (e.type === "questionAnswer") {
 
                 <div className="event-text">
                   <p className="goal-title">{getTeamName(e.team)} SCORER!</p>
-                  <p className="goal-score">{e.homeScore}-{e.awayScore}</p>
+                  <p className="goal-score">{e.homeScore ?? 0}-{e.awayScore ?? 0}</p>
                   <p className="goal-detail">Mål: {getPlayerName(e.team, e.player)}</p>
                   {e.assist && (
                     <p className="goal-detail">

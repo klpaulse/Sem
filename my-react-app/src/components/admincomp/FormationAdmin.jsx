@@ -13,7 +13,7 @@ import FormationField from "../maincomp/FormationField";
 import PlayerChip from "../maincomp/PlayerChip";
 import { FORMATIONS } from "../../services/formationPresets";
 
-export default function FormationAdmin({ match }) {
+export default function FormationAdmin({ match, homeTeam, awayTeam }) {
   const [players, setPlayers] = useState([]);
   const [allPlayers, setAllPlayers] = useState([]);
   const [selectedFormation, setSelectedFormation] = useState("4-3-3");
@@ -21,6 +21,15 @@ export default function FormationAdmin({ match }) {
 
   const fieldRef = useRef(null);
   const [draggingId, setDraggingId] = useState(null);
+
+  const activeTeamName =
+    activeSide === "home" ? match?.homeTeamName : match?.awayTeamName;
+
+  // ⭐ Automatisk velg hjemmelag når kampen åpnes
+  useEffect(() => {
+    if (!match) return;
+    setActiveSide("home");
+  }, [match]);
 
   // ⭐ Hent spillere for valgt lag
   useEffect(() => {
@@ -83,48 +92,38 @@ export default function FormationAdmin({ match }) {
     (p) => !players.some((pos) => pos.id === p.id)
   );
 
-  // ⭐ Formasjon-velger med horisontal halv-bane skalering
-function applyFormation(formationName) {
-  setSelectedFormation(formationName);
+  // ⭐ Formasjon-velger med halv-bane skalering
+  function applyFormation(formationName) {
+    setSelectedFormation(formationName);
 
-  const preset = FORMATIONS[formationName];
-  if (!preset) return;
+    const preset = FORMATIONS[formationName];
+    if (!preset) return;
 
-  const OFFSET_HOME = 8;   // behold denne – hjemmelag er bra nå
-  const OFFSET_AWAY = 7;   // flytt bortelag litt mer opp
+    const OFFSET_HOME = 8;
+    const OFFSET_AWAY = 7;
 
-  const newPositions = preset.map((pos) => {
-    let finalY;
+    const newPositions = preset.map((pos) => {
+      let finalY;
 
-    if (activeSide === "home") {
-      // Hjemmelag → speilvend → skaler → skyv ned mot midten
-      const mirroredY = 100 - pos.y;
-      finalY = mirroredY * 0.5 + OFFSET_HOME;
-    } else {
-      // Bortelag → skaler → skyv opp mot midten
-      finalY = 50 + (pos.y * 0.5) - OFFSET_AWAY;
-    }
+      if (activeSide === "home") {
+        const mirroredY = 100 - pos.y;
+        finalY = mirroredY * 0.5 + OFFSET_HOME;
+      } else {
+        finalY = 50 + pos.y * 0.5 - OFFSET_AWAY;
+      }
 
-    return {
-      id: pos.id,
-      name: "",
-      number: "",
-      x: pos.x,
-      y: finalY,
-    };
-  });
+      return {
+        id: pos.id,
+        name: "",
+        number: "",
+        playerId: null,
+        x: pos.x,
+        y: finalY,
+      };
+    });
 
-  setPlayers(newPositions);
-}
-
-
-
-
-
-
-
-
-
+    setPlayers(newPositions);
+  }
 
   // ⭐ Start dragging
   function startDrag(id, fromBench = false) {
@@ -134,14 +133,16 @@ function applyFormation(formationName) {
       const p = allPlayers.find((pl) => pl.id === id);
       if (!p) return;
 
+      if (players.some((pl) => pl.id === id)) return;
+
       setPlayers((prev) => [
         ...prev,
         {
           id: p.id,
           name: p.name,
           number: p.number,
-          x: 50, // midt på banen
-          y: activeSide === "home" ? 25 : 75, // midt i halvdel
+          x: 50,
+          y: activeSide === "home" ? 25 : 75,
         },
       ]);
     }
@@ -196,7 +197,9 @@ function applyFormation(formationName) {
 
   return (
     <div className="formation-admin">
-      <h2 className="formation-admin__title">Formasjon (Admin)</h2>
+      <h2 className="formation-admin__title">
+        Formasjon – {activeTeamName}
+      </h2>
 
       {/* ⭐ Side-velger */}
       <div className="formation-admin__side-toggle">
@@ -209,7 +212,7 @@ function applyFormation(formationName) {
               : "")
           }
         >
-          Hjemmelag
+          Hjemmelag – {match?.homeTeamName}
         </button>
 
         <button
@@ -221,13 +224,13 @@ function applyFormation(formationName) {
               : "")
           }
         >
-          Bortelag
+          Bortelag – {match?.awayTeamName}
         </button>
       </div>
 
       {/* ⭐ Formasjon-velger */}
       <div className="formation-admin__formation-select">
-        <label>Formasjon:</label>
+        <label>Formasjon for {activeTeamName}:</label>
         <select
           value={selectedFormation}
           onChange={(e) => applyFormation(e.target.value)}
@@ -243,7 +246,7 @@ function applyFormation(formationName) {
       {/* ⭐ Benk */}
       <div className="formation-admin__bench">
         <h3 className="formation-admin__bench-title">
-          Spillere ({activeSide === "home" ? "Hjemme" : "Borte"})
+          Benk – {activeTeamName}
         </h3>
 
         <div className="formation-admin__bench-list">
@@ -267,6 +270,10 @@ function applyFormation(formationName) {
         onMouseLeave={stopDrag}
         className="formation-admin__field-wrapper"
       >
+        <div className="formation-admin__field-label">
+          Formasjon for {activeTeamName}
+        </div>
+
         <FormationField>
           {players.map((p) => (
             <div
@@ -289,11 +296,13 @@ function applyFormation(formationName) {
         onClick={saveFormation}
         className="formation-admin__save-button"
       >
-        Lagre formasjon
+        Lagre formasjon for {activeTeamName}
       </button>
     </div>
   );
 }
+
+
 
 
 

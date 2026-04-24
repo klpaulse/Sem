@@ -33,12 +33,15 @@ import {
   faImage
 } from "@fortawesome/free-solid-svg-icons";
 import AdminQuestions from "./AdminQuestions";
+import FormationAdmin from "./FormationAdmin";
 
-export default function LiveControls({ match }) {
+export default function LiveControls({ match, onBack }) {
   if (!match) return <p>Laster kamp...</p>;
 
   const matchRef = doc(db, "matches", match.id);
   const eventsRef = collection(db, "matches", match.id, "events");
+  const [activeTab, setActiveTab] = useState("events"); 
+
 
   // ⭐ Live kampdata
   const [liveMatch, setLiveMatch] = useState(null);
@@ -164,7 +167,12 @@ const [imageData, setImageData] = useState({ image: null });
 
   // ⭐ Slutt kamp
   async function endMatch() {
-    await updateDoc(matchRef, { status: "finished" });
+    await updateDoc(matchRef, {
+      status: "finished",
+      homeScore: liveMatch.homeScore ?? 0,
+      awayScore: liveMatch.awayScore ?? 0
+    })
+
     addSystemEvent("Kampen er slutt");
   }
 
@@ -350,64 +358,106 @@ setText("");
     return <p>Laster kampdata...</p>;
   }
 
-  return (
-    <div className="live-controls">
-      <h2>Livekontroll</h2>
-
-      {/* ⭐ Knapper */}
-      <div className="event-buttons">
-        <button onClick={() => setType("goal")}><FontAwesomeIcon icon={faFutbol} /> Mål</button>
-        <button onClick={() => setType("yellow")}><FontAwesomeIcon icon={faSquare} /> Gult</button>
-        <button onClick={() => setType("red")}><FontAwesomeIcon icon={faSquare} /> Rødt</button>
-        <button onClick={() => setType("sub")}><FontAwesomeIcon icon={faArrowUp} /> Bytte</button>
-        <button onClick={() => setType("injury")}><FontAwesomeIcon icon={faUserInjured} /> Skade</button>
-        <button onClick={() => setType("corner")}><FontAwesomeIcon icon={faFlag} /> Corner</button>
-        <button onClick={() => setType("whistle")}><FontAwesomeIcon icon={faBullhorn} /> Frispark</button>
-        <button onClick={() => setType("comment")}><FontAwesomeIcon icon={faComment} /> Kommentar</button>
-        <button onClick={() => setType("addedTime")}><FontAwesomeIcon icon={faClock} /> Tilleggstid</button>
-        <button onClick={() => setType("image")}><FontAwesomeIcon icon={faImage} /> Bilde</button>
-      </div>
-
-      {/* ⭐ Skjema */}
-      <EventForm
-        type={type}
-        text={text}
-        setText={setText}
-        goalData={goalData}
-        setGoalData={setGoalData}
-        cardData={cardData}
-        setCardData={setCardData}
-        subData={subData}
-        setSubData={setSubData}
-        fkData={fkData}
-        setFkData={setFkData}
-        simpleData={simpleData}
-        setSimpleData={setSimpleData}
-        liveMatch={liveMatch}
-        homeTeam={homeTeam}
-        awayTeam={awayTeam}
-        addEvent={addEvent}
-      />
+return (
+  <div className="live-controls">
+   <button
+  className="back-button"
+  onClick={() => {
+    if (liveMatch?.status === "live") {
+      const leave = window.confirm("Kampen er i gang. Vil du forlate live-kampen?");
+      if (!leave) return;
+    }
+    onBack();
+  }}
+>
+  ← Tilbake
+</button>
 
 
-      {/* ⭐ Kampkontroll */}
-      <div className="match-controls">
-        <button onClick={startMatch}>Start kamp</button>
-        <button onClick={pauseMatch}>Pause</button>
-        <button onClick={startSecondHalf}>Start 2. omgang</button>
-        <button onClick={endMatch}>Slutt kamp</button>
-        <button onClick={undoLastEvent}>Angre siste</button>
-      </div>
+    <h2>Livekontroll</h2>
 
-             {/* ⭐ Admin spørsmål – plassert riktig */}
-      <AdminQuestions matchId={match.id} getMinute={getMinute} />
+    {/* ⭐ FANER – Hendelser / Formasjon */}
+    <div className="live-tabs">
+      <button
+        className={activeTab === "events" ? "active" : ""}
+        onClick={() => setActiveTab("events")}
+      >
+        Hendelser
+      </button>
 
-      {/* ⭐ Hendelser */}
-      <EventList match={liveMatch} />
-
-     
+      <button
+        className={activeTab === "formation" ? "active" : ""}
+        onClick={() => setActiveTab("formation")}
+      >
+        Formasjon
+      </button>
     </div>
-  );
+
+    {/* ⭐ VIS HENDELSER-FANEN */}
+    {activeTab === "events" && (
+      <>
+        {/* ⭐ Knapper for hendelser */}
+        <div className="event-buttons">
+          <button onClick={() => setType("goal")}><FontAwesomeIcon icon={faFutbol} /> Mål</button>
+          <button onClick={() => setType("yellow")}><FontAwesomeIcon icon={faSquare} /> Gult</button>
+          <button onClick={() => setType("red")}><FontAwesomeIcon icon={faSquare} /> Rødt</button>
+          <button onClick={() => setType("sub")}><FontAwesomeIcon icon={faArrowUp} /> Bytte</button>
+          <button onClick={() => setType("injury")}><FontAwesomeIcon icon={faUserInjured} /> Skade</button>
+          <button onClick={() => setType("corner")}><FontAwesomeIcon icon={faFlag} /> Corner</button>
+          <button onClick={() => setType("whistle")}><FontAwesomeIcon icon={faBullhorn} /> Frispark</button>
+          <button onClick={() => setType("comment")}><FontAwesomeIcon icon={faComment} /> Kommentar</button>
+          <button onClick={() => setType("addedTime")}><FontAwesomeIcon icon={faClock} /> Tilleggstid</button>
+          <button onClick={() => setType("image")}><FontAwesomeIcon icon={faImage} /> Bilde</button>
+        </div>
+
+        {/* ⭐ Skjema for hendelser */}
+        <EventForm
+          type={type}
+          text={text}
+          setText={setText}
+          goalData={goalData}
+          setGoalData={setGoalData}
+          cardData={cardData}
+          setCardData={setCardData}
+          subData={subData}
+          setSubData={setSubData}
+          fkData={fkData}
+          setFkData={setFkData}
+          simpleData={simpleData}
+          setSimpleData={setSimpleData}
+          liveMatch={liveMatch}
+          homeTeam={homeTeam}
+          awayTeam={awayTeam}
+          addEvent={addEvent}
+        />
+
+        {/* ⭐ Kampkontroll */}
+        <div className="match-controls">
+          <button onClick={startMatch}>Start kamp</button>
+          <button onClick={pauseMatch}>Pause</button>
+          <button onClick={startSecondHalf}>Start 2. omgang</button>
+          <button onClick={endMatch}>Slutt kamp</button>
+          <button onClick={undoLastEvent}>Angre siste</button>
+        </div>
+
+        {/* ⭐ Admin-spørsmål */}
+        <AdminQuestions matchId={match.id} getMinute={getMinute} />
+
+        {/* ⭐ Hendelsesliste */}
+        <EventList match={liveMatch} />
+      </>
+    )}
+
+    {/* ⭐ VIS FORMASJON-FANEN */}
+    {activeTab === "formation" && (
+      <FormationAdmin match={{
+        ...match,
+      homeTeamName : homeTeam?.name,
+      awayTeamName : awayTeam?.name }} />
+    )}
+  </div>
+);
+
 }
 
 
