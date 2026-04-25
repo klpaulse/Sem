@@ -208,6 +208,7 @@
   border-radius: 8px;
   cursor: grab;
   font-size: 0.85rem;
+  user-select: none;
 }
 
 .formation-admin__field-wrapper {
@@ -219,6 +220,13 @@
   position: absolute;
   cursor: grab;
   transform: translate(-50%, -50%);
+  z-index: 10; 
+  user-select: none;
+  touch-action: none; 
+}
+
+.formation-admin__player-on-field:hover .player-chip {
+  border: 2px solid rgba(255, 100, 100, 0.6);
 }
 
 .formation-admin__save-button {

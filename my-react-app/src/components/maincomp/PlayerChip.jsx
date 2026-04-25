@@ -1,11 +1,9 @@
-export default function PlayerChip({ name, number, x, y }) {
+export default function PlayerChip({ name, number }) {
   return (
-    <div
-      className="player-chip"
-      style={{ left: `${x}%`, top: `${y}%` }}
-    >
+    <div className="player-chip">
       <div className="player-number">{number}</div>
       <div className="player-name">{name}</div>
     </div>
   );
 }
+

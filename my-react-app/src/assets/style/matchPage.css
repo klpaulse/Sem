@@ -779,6 +779,7 @@ display: inline-block;
   border: 2px solid #2e5c2e;
   border-radius: 12px;
   overflow: hidden;
+  touch-action: none; 
 
   /* Subtil gress-tekstur */
   background-image:
@@ -924,8 +925,6 @@ display: inline-block;
 
 
 .player-chip {
-  position: absolute;
-  transform: translate(-50%, -50%);
   background: rgba(255,255,255,0.08);
   padding: 6px 10px;
   border-radius: 10px;
@@ -933,6 +932,7 @@ display: inline-block;
   color: #fff;
   font-size: 12px;
   width: 60px;
+  pointer-events: none; 
 }
 
 .player-number {

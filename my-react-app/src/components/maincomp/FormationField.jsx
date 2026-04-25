@@ -1,8 +1,14 @@
 // src/components/maincomp/FormationField.jsx
-export default function FormationField({ children }) {
-  return (
-    <div className="formation-field">
+import { forwardRef } from "react";
 
+const FormationField = forwardRef(function FormationField(
+  { children},ref
+) {
+  return (
+    <div
+      className="formation-field"
+      ref={ref}
+    >
       {/* ⭐ Målstreker */}
       <div className="goal-line goal-line--top" />
       <div className="goal-line goal-line--bottom" />
@@ -21,5 +27,8 @@ export default function FormationField({ children }) {
       {children}
     </div>
   );
-}
+});
+
+export default FormationField;
+
 
