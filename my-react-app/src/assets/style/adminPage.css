@@ -229,6 +229,17 @@
   border: 2px solid rgba(255, 100, 100, 0.6);
 }
 
+.formation-admin__player-on-field--ghost .player-chip {
+  background: rgba(255, 255, 255, 0.15);
+  opacity: 0.5;
+}
+
+.formation-admin__player-on-field--dragging .player-chip {
+  background: rgba(43, 124, 255, 0.6);
+  border: 2px solid #2b7cff;
+  transform: scale(1.1);
+}
+
 .formation-admin__save-button {
   margin-top: 1rem;
   background: #2b7cff;
@@ -238,6 +249,16 @@
   border: none;
   cursor: pointer;
   font-size: 0.95rem;
+}
+
+.formation-admin__position-marker {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px dashed rgba(255, 255, 255, 0.4);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
 .formation-admin__save-button:hover {

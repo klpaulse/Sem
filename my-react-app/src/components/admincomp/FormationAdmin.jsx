@@ -17,11 +17,12 @@ export default function FormationAdmin({ match }) {
   const [allPlayers, setAllPlayers] = useState([]);
   const [selectedFormation, setSelectedFormation] = useState("4-3-3");
   const [activeSide, setActiveSide] = useState("home");
+  const [homePlayers, setHomePlayers] = useState([])
+  const [draggingId, setDraggingId] = useState(null)
 
-const fieldRef = useRef(null);
-const selectedPlayerRef = useRef(null)
-const [draggingId, setDraggingId] = useState(null)
-const clickTimerRef = useRef(null)
+ const fieldRef = useRef(null);
+ const selectedPlayerRef = useRef(null)
+ const clickTimerRef = useRef(null)
 
   const activeTeamName =
     activeSide === "home" ? match?.homeTeamName : match?.awayTeamName;
@@ -33,6 +34,27 @@ const clickTimerRef = useRef(null)
     if (!match) return;
     setActiveSide("home");
   }, [match]);
+
+  useEffect(() => {
+    if(!match?.id) return 
+    const ref = doc(db, "matches", match.id, "formations", "home")
+
+    const unsub = onSnapshot(ref, (snap) => {
+      if (snap.exists()){
+        const data=snap.data()
+        const pos = data.positions || {}
+        const loaded = Object.keys(pos).map((key) => ({
+          id: key,
+          name: pos[key].name,
+          number: pos[key].number,
+          x: pos[key].x,
+          y: pos[key].y,
+        }))
+        setHomePlayers(loaded)
+      }
+    })
+    return () => unsub()
+  }, [match])
 
   /* -----------------------------
       HENT SPILLERE (ARRAY)
@@ -55,8 +77,7 @@ const clickTimerRef = useRef(null)
       }
 
       const data = snap.data();
-      const playersArray = data.players || [];
-      setAllPlayers(playersArray);
+      setAllPlayers(data.players || []);
     }
 
     loadPlayers();
@@ -112,8 +133,50 @@ const clickTimerRef = useRef(null)
     )
     }
     function handlePointerUp() {
-  selectedPlayerRef.current = null
-  setDraggingId(null)
+      const currentId = selectedPlayerRef.current
+      selectedPlayerRef.current = null
+      setDraggingId(null)
+
+      if(!currentId) return
+
+      const preset = FORMATIONS[selectedFormation]
+      if(!preset) return
+
+      const OFFSET_HOME = 8
+      const OFFSET_AWAY = 7
+      const SNAP_DISTANCE = 10
+       
+      setPlayers((prev) => {
+        return prev.map((p) => {
+          if (p.id !== currentId) return p
+          let closestPos = null
+          let closestDist = Infinity
+
+          preset.forEach((pos) => {
+            let finalY
+            if (activeSide === "home"){
+              const mirroredY = 100 - pos.y 
+              finalY = mirroredY * 0.5 + OFFSET_HOME
+            } else {
+              finalY = 50 + pos.y * 0.5 - OFFSET_AWAY
+            }
+            
+            const dx = p.x - pos.x
+            const dy = p.y - finalY
+            const dist = Math.sqrt(dx * dx + dy * dy)
+
+            if (dist < closestDist){
+              closestDist = dist
+              closestPos = { x: pos.x, y: finalY}
+            }
+          })
+
+          if (closestDist < SNAP_DISTANCE && closestPos){
+            return {...p, x:closestPos.x, y: closestPos.y}
+          }
+          return p 
+        })
+      })
 }
 
 window.addEventListener("pointermove", handlePointerMove)
@@ -294,15 +357,42 @@ return () => {
       </div>
 
       {/* Banen */}
-      <FormationField
-        ref={fieldRef}  
-      >
+      <FormationField ref={fieldRef}>
+        {FORMATIONS[selectedFormation]?.map((pos) => {
+          let finalY
+          if(activeSide === "home") {
+            const mirroredY = 100 - pos.y
+            finalY = mirroredY * 0.5 + 8
+          } else {
+            finalY = 50 + pos.y * 0.5-7
+          }
+          return(
+            <div
+            key={"marker-" + pos.id}
+            className="formation-admin__position-marker"
+            style={{left: `${pos.x}%`, top: `${finalY}%`}}
+            />
+
+        
+          )
+        })}
+        {activeSide === "away" && homePlayers.map((p) => (
+              <div
+              key={"home" + p.id}
+              className="formation-admin__player-on-field formation-admin__player-on-field--ghost"
+               style={{ left: `${p.x}%`, top: `${p.y}%` }}
+              >
+               <PlayerChip name={p.name} number={p.number} />
+              </div> 
+        ))}
+      
         {players.map((p) => (
           <div
             key={p.id}
             onPointerDown={(e) => {e.preventDefault(); e.stopPropagation(); console.log("pointerdown")
               if (clickTimerRef.current) {
-                clickTimerRef.current = null
+               clearTimeout(clickTimerRef.current)
+               clickTimerRef.current = null
                 removeFromField(p.id)
                 return
               }
@@ -319,6 +409,7 @@ return () => {
               top: `${p.y}%`,
             }}
           >
+
             <PlayerChip name={p.name} number={p.number} />
           </div>
         ))}
