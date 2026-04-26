@@ -1,9 +1,14 @@
-export default function PlayerChip({ name, number }) {
+export default function PlayerChip({ name, number, img }) {
   return (
     <div className="player-chip">
-      <div className="player-number">{number}</div>
-      <div className="player-name">{name}</div>
+      {img && (
+        <img src={img} alt={name} className="player-chip__img" />
+      )}
+
+      <div className="player-chip__number">{number}</div>
+      <div className="player-chip__name">{name}</div>
     </div>
   );
 }
+
 

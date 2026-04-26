@@ -130,7 +130,6 @@ export default function BeforeMatchInfo({
         </div>
 
         <div className="kampinfo-row">
-          <span className="kampinfo-label">Runde:</span>
           <span className="kampinfo-value">{match.round}</span>
         </div>
 

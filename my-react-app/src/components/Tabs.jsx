@@ -1,4 +1,4 @@
-export default function Tabs({ activeTab, setActiveTab }) {
+export default function Tabs({ activeTab, setActiveTab, hasFormation }) {
   return (
     <nav className="nav">
       <button
@@ -15,12 +15,14 @@ export default function Tabs({ activeTab, setActiveTab }) {
         Tabell
       </button>
 
+      {hasFormation && (
       <button
         className="nav-btn"
         onClick={() => setActiveTab("lag")}
       >
         Lag
       </button>
+      )}
     </nav>
   );
 }

@@ -26,6 +26,17 @@ export default function MatchPage() {
   const [homeName, setHomeName] = useState("Hjemmelag");
   const [awayName, setAwayName] = useState("Bortelag");
 
+  const [hasFormation, setHasFormation] = useState(false)
+
+  useEffect(() => {
+    if (!selectedMatch?.id) return 
+    const ref = doc(db, "matches", selectedMatch.id, "formations", "home")
+    const unsub = onSnapshot(ref, (snap) => {
+      setHasFormation(snap.exists())
+    })
+    return () => unsub()
+  }, [selectedMatch])
+
   // 🔥 Hent ALLE kamper (ikke live)
   useEffect(() => {
     const fetchAll = async () => {
@@ -146,7 +157,7 @@ export default function MatchPage() {
 
       {/* Rapport */}
       <main className="page">
-        <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
+        <Tabs activeTab={activeTab} setActiveTab={setActiveTab} hasFormation={hasFormation} />
 
         <section className="content-box">
           {activeTab === "rapport" && (

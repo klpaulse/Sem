@@ -5,6 +5,7 @@ import BeforeMatchInfo from "./BeforeMatchInfo";
 import { getSeasonMatches } from "../../services/MatchService";
 import { getTeam } from "../../services/TeamService";
 import { useNavigate } from "react-router-dom";
+import LagComponent from "./LagComponent";
 
 // 🔥 Felles dato-normalisering
 function normalizeDate(d) {
@@ -97,6 +98,8 @@ export default function BeforeMatch({ match, allMatches }) {
         homeSeason={homeSeason}
         awaySeason={awaySeason}
       />
+
+      <LagComponent match={match} />
     </section>
   );
 }

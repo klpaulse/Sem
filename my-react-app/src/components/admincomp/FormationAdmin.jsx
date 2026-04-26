@@ -23,9 +23,30 @@ export default function FormationAdmin({ match }) {
  const fieldRef = useRef(null);
  const selectedPlayerRef = useRef(null)
  const clickTimerRef = useRef(null)
+ const activeSideRef = useRef(activeSide)
+ const selectedFormationRef = useRef(selectedFormation)
+
+ useEffect(() => {
+  activeSideRef.current = activeSide
+ }, [activeSide])
+
+ useEffect(() => {
+  selectedFormationRef.current = selectedFormation
+ }, [selectedFormation])
 
   const activeTeamName =
     activeSide === "home" ? match?.homeTeamName : match?.awayTeamName;
+
+    function calcFinalY(posY, side){
+      if (side === "home"){
+        const mirroredY = 100 - posY
+        return mirroredY * 0.5 + 8
+      } else {
+        return 50 + posY * 0.5 - 7
+      }
+    }
+
+
 
   /* -----------------------------
       AUTO-VELG HJEMMELAG
@@ -139,11 +160,9 @@ export default function FormationAdmin({ match }) {
 
       if(!currentId) return
 
-      const preset = FORMATIONS[selectedFormation]
+      const preset = FORMATIONS[selectedFormationRef.current]
       if(!preset) return
 
-      const OFFSET_HOME = 8
-      const OFFSET_AWAY = 7
       const SNAP_DISTANCE = 10
        
       setPlayers((prev) => {
@@ -153,14 +172,8 @@ export default function FormationAdmin({ match }) {
           let closestDist = Infinity
 
           preset.forEach((pos) => {
-            let finalY
-            if (activeSide === "home"){
-              const mirroredY = 100 - pos.y 
-              finalY = mirroredY * 0.5 + OFFSET_HOME
-            } else {
-              finalY = 50 + pos.y * 0.5 - OFFSET_AWAY
-            }
-            
+            const finalY = calcFinalY(pos.y, activeSideRef.current)
+
             const dx = p.x - pos.x
             const dy = p.y - finalY
             const dist = Math.sqrt(dx * dx + dy * dy)
@@ -172,7 +185,11 @@ export default function FormationAdmin({ match }) {
           })
 
           if (closestDist < SNAP_DISTANCE && closestPos){
-            return {...p, x:closestPos.x, y: closestPos.y}
+            return {
+              ...p,
+               x:closestPos.x,
+                y: closestPos.y,
+              }
           }
           return p 
         })
@@ -209,22 +226,13 @@ return () => {
     const OFFSET_AWAY = 7;
 
     const newPositions = preset.map((pos) => {
-      let finalY;
-
-      if (activeSide === "home") {
-        const mirroredY = 100 - pos.y;
-        finalY = mirroredY * 0.5 + OFFSET_HOME;
-      } else {
-        finalY = 50 + pos.y * 0.5 - OFFSET_AWAY;
-      }
-
       return {
         id: pos.id,
         name: "",
         number: "",
         x: pos.x,
-        y: finalY,
-      };
+        y: calcFinalY(pos.y, activeSide),
+      }
     });
 
     setPlayers(newPositions);
@@ -358,24 +366,21 @@ return () => {
 
       {/* Banen */}
       <FormationField ref={fieldRef}>
-        {FORMATIONS[selectedFormation]?.map((pos) => {
-          let finalY
-          if(activeSide === "home") {
-            const mirroredY = 100 - pos.y
-            finalY = mirroredY * 0.5 + 8
-          } else {
-            finalY = 50 + pos.y * 0.5-7
-          }
-          return(
-            <div
-            key={"marker-" + pos.id}
-            className="formation-admin__position-marker"
-            style={{left: `${pos.x}%`, top: `${finalY}%`}}
-            />
+      {FORMATIONS[selectedFormation]?.map((pos) => {
+      const finalY = calcFinalY(pos.y, activeSide)
+     
+  return (
+    <div
+      key={"marker-" + pos.id}
+      className="formation-admin__position-marker"
+      style={{
+        left: `${pos.x}%`,
+        top: `${finalY}%`
+      }}
+    />
+  );
+})}
 
-        
-          )
-        })}
         {activeSide === "away" && homePlayers.map((p) => (
               <div
               key={"home" + p.id}
@@ -409,8 +414,9 @@ return () => {
               top: `${p.y}%`,
             }}
           >
-
+            {p.name && (
             <PlayerChip name={p.name} number={p.number} />
+            )}
           </div>
         ))}
       </FormationField>
