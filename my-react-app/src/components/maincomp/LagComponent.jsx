@@ -23,7 +23,9 @@ const unsubHome = onSnapshot(homeRef, (snap) => {
       number: pos[key].number,
       x: pos[key].x,
       y: pos[key].y,
+      img: pos[key].img || "",
     }))
+    console.log("loaded spillere:", loaded)
     setHomePlayers(loaded)
   } else {
     setHomePlayers([])
@@ -39,7 +41,9 @@ const unsubAway = onSnapshot(awayRef, (snap) => {
       number: pos[key].number,
       x: pos[key].x,
       y: pos[key].y,
+      img: pos[key].img || "",
     }))
+    console.log("loaded spillere:", loaded)
     setAwayPlayers(loaded)
   } else {
     setAwayPlayers([])
@@ -67,7 +71,7 @@ return () => {
           transform: "translate(-50%, -50%)",
         }}
       >
-        {p.name && <PlayerChip name={p.name} number={p.number} />}
+        {p.name && <PlayerChip name={p.name} number={p.number} img={p.img} team="home" />}
       </div>
     ))}
 
@@ -81,7 +85,7 @@ return () => {
           transform: "translate(-50%, -50%)",
         }}
       >
-        {p.name && <PlayerChip name={p.name} number={p.number} />}
+        {p.name && <PlayerChip name={p.name} number={p.number} img={p.img} team="away" />}
       </div>
     ))}
   </FormationField>

@@ -127,6 +127,7 @@ export default function FormationAdmin({ match }) {
           number: pos[key].number,
           x: pos[key].x,
           y: pos[key].y,
+          img: pos[key].img || "",
         }));
 
         setPlayers(loadedPlayers);
@@ -253,6 +254,7 @@ return () => {
           id: p.id,
           name: p.name,
           number: p.number,
+          img: p.img || "",
           x: 50,
           y: activeSide === "home" ? 25 : 75,
         },
@@ -278,12 +280,14 @@ return () => {
 
     const positions = {};
     players.forEach((p) => {
+       console.log("spiller:", p.name, "img:", p.img)
       positions[p.id] = {
         x: p.x,
         y: p.y,
         playerId: p.id,
         name: p.name || "",
         number: p.number || "",
+        img: p.img || ""
       };
     });
 

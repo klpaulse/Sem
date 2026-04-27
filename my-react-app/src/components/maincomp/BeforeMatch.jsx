@@ -6,6 +6,8 @@ import { getSeasonMatches } from "../../services/MatchService";
 import { getTeam } from "../../services/TeamService";
 import { useNavigate } from "react-router-dom";
 import LagComponent from "./LagComponent";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "../../config/Firebase";
 
 // 🔥 Felles dato-normalisering
 function normalizeDate(d) {
@@ -15,7 +17,7 @@ function normalizeDate(d) {
   return new Date(d); // ISO string
 }
 
-export default function BeforeMatch({ match, allMatches }) {
+export default function BeforeMatch({ match, allMatches}) {
   if (!match) return null;
 
   const navigate = useNavigate();
@@ -26,6 +28,19 @@ export default function BeforeMatch({ match, allMatches }) {
 
   const [homeName, setHomeName] = useState("Hjemmelag");
   const [awayName, setAwayName] = useState("Bortelag");
+  const [hasFormation, setHasFormation] = useState(false)
+  const [activeTab, setActiveTab] = useState("Før kampen")
+
+  useEffect(() => {
+    console.log("match.id:", match?.id)
+    if(!match?.id) return 
+    const ref = doc(db, "matches", match.id, "formations", "home")
+    const unsub = onSnapshot(ref, (snap) => {
+      console.log("hasFormation:", snap.exists())
+      setHasFormation(snap.exists())
+    })
+    return () => unsub()
+  }, [match])
 
   // ⭐ Hent lagnavn basert på ID
   useEffect(() => {
@@ -91,15 +106,36 @@ export default function BeforeMatch({ match, allMatches }) {
       </div>
       </div>
 
-      {/* Info-boksene (inkl. timeline) */}
-      <BeforeMatchInfo
-        match={match}
-        allMatches={allMatches}
-        homeSeason={homeSeason}
-        awaySeason={awaySeason}
-      />
+       {hasFormation && (
+    <nav className="nav">
+      <button
+        className="nav-btn"
+        onClick={() => setActiveTab("Før kampen")}
+      >
+        Før kampen
+      </button>
+      <button
+        className="nav-btn"
+        onClick={() => setActiveTab("lag")}
+      >
+        Lag
+      </button>
+    </nav>
+  )}
 
-      <LagComponent match={match} />
-    </section>
+  {activeTab === "Før kampen" && (
+    <BeforeMatchInfo
+      match={match}
+      allMatches={allMatches}
+      homeSeason={homeSeason}
+      awaySeason={awaySeason}
+    />
+  )}
+
+  {hasFormation && activeTab === "lag" && (
+    <LagComponent match={match} />
+  )}
+
+</section>
   );
 }

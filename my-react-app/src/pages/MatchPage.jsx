@@ -111,7 +111,7 @@ export default function MatchPage() {
   // ⭐ FØR KAMP
   if (selectedMatch.status === "not_started") {
     return (
-      <BeforeMatch match={selectedMatch} allMatches={allMatches} />
+      <BeforeMatch match={selectedMatch} allMatches={allMatches} hasFormation={hasFormation} />
     );
   }
 
