@@ -34,6 +34,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import AdminQuestions from "./AdminQuestions";
 import FormationAdmin from "./FormationAdmin";
+import SquadSelector from "./SquadSelector";
 
 export default function LiveControls({ match, onBack }) {
   if (!match) return <p>Laster kamp...</p>;
@@ -41,6 +42,9 @@ export default function LiveControls({ match, onBack }) {
   const matchRef = doc(db, "matches", match.id);
   const eventsRef = collection(db, "matches", match.id, "events");
   const [activeTab, setActiveTab] = useState("events"); 
+
+  const [formationStep, setFormationStep] = useState("squad")
+  const [currentMatch, setCurrentMatch] = useState(match)
 
 
   // ⭐ Live kampdata
@@ -450,14 +454,30 @@ return (
 
     {/* ⭐ VIS FORMASJON-FANEN */}
     {activeTab === "formation" && (
-      <FormationAdmin match={{
-        ...match,
-      homeTeamName : homeTeam?.name,
-      awayTeamName : awayTeam?.name }} />
+  <div>
+    {formationStep === "squad" && (
+      <SquadSelector
+        match={currentMatch}
+        onConfirm={(selectedIds) => {
+          setCurrentMatch((prev) => ({ ...prev, squad: selectedIds }));
+          setFormationStep("formation");
+        }}
+      />
+    )}
+
+    {formationStep === "formation" && (
+      <FormationAdmin
+        match={{
+          ...currentMatch,
+          homeTeamName: homeTeam?.name,
+          awayTeamName: awayTeam?.name,
+        }}
+      />
     )}
   </div>
-);
-
+)}
+</div>
+)
 }
 
 

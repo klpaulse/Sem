@@ -125,7 +125,7 @@ export default function FormationAdmin({ match }) {
         }
 
         const loadedPlayers = Object.keys(pos).map((key) => ({
-          id: key,
+          id: pos[key].playerId,
           name: pos[key].name,
           number: pos[key].number,
           x: pos[key].x,
@@ -293,7 +293,6 @@ setAwayPositions(awayFrom);
   }
 
   function removeFromField(id) {
-     console.log("removeFromField kalt med id:", id)
     setPlayers((prev) => prev.filter((p) => p.id !==id))
   }
 
@@ -307,29 +306,31 @@ setAwayPositions(awayFrom);
 
     const positions = {};
     players.forEach((p) => {
-       console.log("spiller:", p.name, "img:", p.img)
+       
       positions[p.id] = {
         x: p.x,
         y: p.y,
         playerId: p.id,
-        name: p.name || "",
-        number: p.number || "",
-        img: p.img || ""
+        name: p.name ?? "",
+        number: p.number ?? "",
+        img: p.img ?? ""
       };
     });
 
     const bench = benchPlayers.map((p) => ({
-      id: p.id,
-      name: p.name,
-      number: p.number,
-      img: p.img || ""
+      id: p.id ?? "",
+      name: p.name ?? "",
+      number: p.number ?? "",
+      img: p.img ?? ""
     }))
 
-    await setDoc(ref, {
+  
+   await setDoc(ref, {
       formation: selectedFormation,
       positions,
       bench
-    });
+    },
+  {merge : true});
 
   }
 
