@@ -25,6 +25,8 @@ export default function FormationAdmin({ match }) {
  const clickTimerRef = useRef(null)
  const activeSideRef = useRef(activeSide)
  const selectedFormationRef = useRef(selectedFormation)
+ const [homePositions, setHomePositions] = useState([])
+ const [awayPositions, setAwayPositions] = useState([])
 
  useEffect(() => {
   activeSideRef.current = activeSide
@@ -98,7 +100,8 @@ export default function FormationAdmin({ match }) {
       }
 
       const data = snap.data();
-      setAllPlayers(data.players || []);
+      const squad = match.squad || []
+      setAllPlayers((data.players || []).filter(p => squad.includes(p.id)));
     }
 
     loadPlayers();
@@ -224,8 +227,29 @@ return () => {
     const preset = FORMATIONS[formationName];
     if (!preset) return;
 
-    const OFFSET_HOME = 8;
-    const OFFSET_AWAY = 7;
+    const homeFrom = preset.map((pos) => ({
+      id: pos.id, 
+      name: "",
+      number: "",
+      x: pos.x,
+  y: calcFinalY(pos.y, "home"),
+}));
+
+
+const awayFrom = preset.map((pos) => ({
+  id: pos.id,
+  name: "",
+  number: "",
+  x: pos.x,
+  y: calcFinalY(pos.y, "away"),
+}));
+
+
+setHomePositions(homeFrom);
+setAwayPositions(awayFrom);
+
+
+ 
 
     const newPositions = preset.map((pos) => {
       return {
@@ -239,6 +263,8 @@ return () => {
 
     setPlayers(newPositions);
   }
+
+
 
   /* -----------------------------
       DRAGGING
@@ -292,9 +318,17 @@ return () => {
       };
     });
 
+    const bench = benchPlayers.map((p) => ({
+      id: p.id,
+      name: p.name,
+      number: p.number,
+      img: p.img || ""
+    }))
+
     await setDoc(ref, {
       formation: selectedFormation,
       positions,
+      bench
     });
 
   }
@@ -302,55 +336,62 @@ return () => {
   /* -----------------------------
       RENDER
   ------------------------------ */
-  return (
-    <div className="formation-admin">
-      <h2 className="formation-admin__title">
-        Formasjon – {activeTeamName}
-      </h2>
+ return (
+  <div className="formation-admin">
+    <h2 className="formation-admin__title">
+      Formasjon – {activeTeamName}
+    </h2>
 
-      {/* Side-velger */}
-      <div className="formation-admin__side-toggle">
-        <button
-          onClick={() => setActiveSide("home")}
-          className={
-            "formation-admin__side-button" +
-            (activeSide === "home"
-              ? " formation-admin__side-button--active"
-              : "")
-          }
-        >
-          Hjemmelag – {match?.homeTeamName}
-        </button>
+    {/* Side-velger */}
+    <div className="formation-admin__side-toggle">
+      <button
+        onClick={() => {
+          setPlayers([]);
+          setActiveSide("home");
+        }}
+        className={
+          "formation-admin__side-button" +
+          (activeSide === "home"
+            ? " formation-admin__side-button--active"
+            : "")
+        }
+      >
+        Hjemmelag – {match?.homeTeamName}
+      </button>
 
-        <button
-          onClick={() => setActiveSide("away")}
-          className={
-            "formation-admin__side-button" +
-            (activeSide === "away"
-              ? " formation-admin__side-button--active"
-              : "")
-          }
-        >
-          Bortelag – {match?.awayTeamName}
-        </button>
-      </div>
+      <button
+        onClick={() => {
+          setPlayers([]);
+          setActiveSide("away");
+        }}
+        className={
+          "formation-admin__side-button" +
+          (activeSide === "away"
+            ? " formation-admin__side-button--active"
+            : "")
+        }
+      >
+        Bortelag – {match?.awayTeamName}
+      </button>
+    </div>
 
-      {/* Formasjon-velger */}
-      <div className="formation-admin__formation-select">
-        <label>Formasjon for {activeTeamName}:</label>
-        <select
-          value={selectedFormation}
-          onChange={(e) => applyFormation(e.target.value)}
-        >
-          {Object.keys(FORMATIONS).map((f) => (
-            <option key={f} value={f}>
-              {f}
-            </option>
-          ))}
-        </select>
-      </div>
+    {/* Formasjon-velger */}
+    <div className="formation-admin__formation-select">
+      <label>Formasjon for {activeTeamName}:</label>
+      <select
+        value={selectedFormation}
+        onChange={(e) => applyFormation(e.target.value)}
+      >
+        {Object.keys(FORMATIONS).map((f) => (
+          <option key={f} value={f}>
+            {f}
+          </option>
+        ))}
+      </select>
+    </div>
 
-      {/* Benk */}
+    {/* BENK OVER BANEN (KUN HJEMMELAG) */}
+    {activeSide === "home" && (
       <div className="formation-admin__bench">
         <h3 className="formation-admin__bench-title">
           Benk – {activeTeamName}
@@ -360,7 +401,10 @@ return () => {
           {benchPlayers.map((p) => (
             <div
               key={p.id}
-              onPointerDown={(e) => {e.preventDefault(); startDrag (p.id, true)}}
+              onPointerDown={(e) => {
+                e.preventDefault();
+                startDrag(p.id, true);
+              }}
               className="formation-admin__bench-player"
             >
               {p.number} – {p.name}
@@ -368,87 +412,119 @@ return () => {
           ))}
         </div>
       </div>
+    )}
 
-      {/* Banen */}
-      <FormationField ref={fieldRef}>
+    {/* BANEN */}
+    <FormationField ref={fieldRef}>
       {FORMATIONS[selectedFormation]?.map((pos) => {
-      const finalY = calcFinalY(pos.y, activeSide)
-       console.log("marker pos:", pos.id, "x:", pos.x, "y:", finalY)
-     
-  return (
-    <div
-      key={"marker-" + pos.id}
-      className="formation-admin__position-marker"
-      style={{
-        left: `${pos.x}%`,
-        top: `${finalY}%`
-      }}
-    />
-  );
-})}
+        const finalY = calcFinalY(pos.y, activeSide);
 
-        {activeSide === "away" && homePlayers.map((p) => (
-              <div
-              key={"home" + p.id}
-              className="formation-admin__player-on-field formation-admin__player-on-field--ghost"
-               style={{ left: `${p.x}%`, top: `${p.y}%` }}
-              >
-               <PlayerChip name={p.name} number={p.number} />
-              </div> 
-        ))}
-      
-        {players.map((p) => (
+        return (
           <div
-            key={p.id}
-            onPointerDown={(e) => {e.preventDefault(); e.stopPropagation(); console.log("pointerdown")
-              if (clickTimerRef.current) {
-               clearTimeout(clickTimerRef.current)
-               clickTimerRef.current = null
-                removeFromField(p.id)
-                return
-              }
-              clickTimerRef.current = setTimeout(() => {
-                clickTimerRef.current = null 
-                startDrag(p.id)
-              }, 250)
-            }}
-
-            className={"formation-admin__player-on-field" + (draggingId === p.id ? " formation-admin__player-on-field--dragging" : "")}
-            
+            key={"marker-" + pos.id}
+            className="formation-admin__position-marker"
             style={{
-              left: `${p.x}%`,
-              top: `${p.y}%`,
+              left: `${pos.x}%`,
+              top: `${finalY}%`,
             }}
+          />
+        );
+      })}
+
+      {/* Ghost home players when away is active */}
+      {activeSide === "away" &&
+        homePlayers.map((p) => (
+          <div
+            key={"home" + p.id}
+            className="formation-admin__player-on-field formation-admin__player-on-field--ghost"
+            style={{ left: `${p.x}%`, top: `${p.y}%` }}
           >
-            {p.name && (
-            <PlayerChip name={p.name} number={p.number} />
-            )}
+            <PlayerChip name={p.name} number={p.number} img={p.img} />
           </div>
         ))}
-      </FormationField>
 
-      {/* Lagre */}
-      {activeSide === "home" ? (
-        
+      {/* Players on field */}
+      {players.map((p) => (
+        <div
+          key={p.id}
+          onPointerDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (clickTimerRef.current) {
+              clearTimeout(clickTimerRef.current);
+              clickTimerRef.current = null;
+              removeFromField(p.id);
+              return;
+            }
+
+            clickTimerRef.current = setTimeout(() => {
+              clickTimerRef.current = null;
+              startDrag(p.id);
+            }, 250);
+          }}
+          className={
+            "formation-admin__player-on-field" +
+            (draggingId === p.id
+              ? " formation-admin__player-on-field--dragging"
+              : "")
+          }
+          style={{
+            left: `${p.x}%`,
+            top: `${p.y}%`,
+          }}
+        >
+          {p.name && (
+            <PlayerChip name={p.name} number={p.number} img={p.img} />
+          )}
+        </div>
+      ))}
+    </FormationField>
+
+    {/* BENK UNDER BANEN (KUN BORTELAG) */}
+    {activeSide === "away" && (
+      <div className="formation-admin__bench">
+        <h3 className="formation-admin__bench-title">
+          Benk – {activeTeamName}
+        </h3>
+
+        <div className="formation-admin__bench-list">
+          {benchPlayers.map((p) => (
+            <div
+              key={p.id}
+              onPointerDown={(e) => {
+                e.preventDefault();
+                startDrag(p.id, true);
+              }}
+              className="formation-admin__bench-player"
+            >
+              {p.number} – {p.name}
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {/* Lagre */}
+    {activeSide === "home" ? (
       <button
-        onClick={async () => {await saveFormation(); setActiveSide("away");}}
+        onClick={async () => {
+          await saveFormation();
+          setPlayers([]);
+          setActiveSide("away");
+        }}
         className="formation-admin__save-button"
       >
-        Neste - Sett opp {match?.awayTeamName}
-        </button>
-        
-      ) : (
-        <button
-        onClick={saveFormation}
-         className="formation-admin__save-button"
-         >
-      
-      Lagre formasjon for {match?.awayTeamName}
+        Neste – Sett opp {match?.awayTeamName}
       </button>
-      
-      )}
-    </div>
-  );
+    ) : (
+      <button onClick={saveFormation} className="formation-admin__save-button">
+        Lagre formasjon for {match?.awayTeamName}
+      </button>
+    )}
+  </div>
+);
+
 }
 
 
