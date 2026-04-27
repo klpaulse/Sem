@@ -40,7 +40,7 @@ export default function FormationAdmin({ match }) {
     function calcFinalY(posY, side){
       if (side === "home"){
         const mirroredY = 100 - posY
-        return mirroredY * 0.5 + 8
+        return mirroredY * 0.5 + 10
       } else {
         return 50 + posY * 0.5 - 7
       }
@@ -186,6 +186,7 @@ export default function FormationAdmin({ match }) {
           })
 
           if (closestDist < SNAP_DISTANCE && closestPos){
+              console.log("snapper til:", closestPos)
             return {
               ...p,
                x:closestPos.x,
@@ -372,6 +373,7 @@ return () => {
       <FormationField ref={fieldRef}>
       {FORMATIONS[selectedFormation]?.map((pos) => {
       const finalY = calcFinalY(pos.y, activeSide)
+       console.log("marker pos:", pos.id, "x:", pos.x, "y:", finalY)
      
   return (
     <div
