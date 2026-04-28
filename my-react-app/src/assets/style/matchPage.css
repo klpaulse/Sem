@@ -988,6 +988,34 @@ display: inline-block;
   border-radius: 4px;
 }
 
+/* ============================
+   MOBILVERSJON AV PLAYERCHIP
+   ============================ */
+
+@media (max-width: 600px) {
+  .player-chip {
+    transform: scale(0.75);
+    gap: 1px;
+  }
+
+  .player-chip__avatar {
+    width: 20px;
+    height: 20px;
+    border-width: 1px;
+  }
+
+  .player-chip__number {
+    font-size: 8px;
+  }
+
+  .player-chip__name {
+    font-size: 8px;
+    padding: 1px 3px;
+    border-radius: 3px;
+  }
+}
+
+
 
 
 
