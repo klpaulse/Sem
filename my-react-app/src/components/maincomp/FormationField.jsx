@@ -1,12 +1,12 @@
-// src/components/maincomp/FormationField.jsx
 import { forwardRef } from "react";
 
 const FormationField = forwardRef(function FormationField(
-  { children},ref
+  { children, interactive = true },
+  ref
 ) {
   return (
     <div
-      className="formation-field"
+      className={`formation-field ${interactive ? "" : "no-interaction"}`}
       ref={ref}
     >
       {/* ⭐ Målstreker */}
@@ -30,5 +30,7 @@ const FormationField = forwardRef(function FormationField(
 });
 
 export default FormationField;
+
+
 
 

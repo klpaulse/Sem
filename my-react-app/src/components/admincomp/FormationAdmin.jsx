@@ -416,7 +416,7 @@ setAwayPositions(awayFrom);
     )}
 
     {/* BANEN */}
-    <FormationField ref={fieldRef}>
+    <FormationField ref={fieldRef} interactive={true}>
       {FORMATIONS[selectedFormation]?.map((pos) => {
         const finalY = calcFinalY(pos.y, activeSide);
 

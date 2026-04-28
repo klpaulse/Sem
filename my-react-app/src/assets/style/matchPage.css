@@ -774,12 +774,16 @@ display: inline-block;
 .formation-field {
   position: relative;
   width: 100%;
-  aspect-ratio: 0.65;
+  aspect-ratio: 3/4;
+  position: relative;
   background: #1a3d1a;
   border: 2px solid #2e5c2e;
   border-radius: 12px;
   overflow: hidden;
-  touch-action: none; 
+  touch-action: pan-y !important;
+  pointer-events: none; 
+
+  
 
   /* Subtil gress-tekstur */
   background-image:
@@ -790,6 +794,17 @@ display: inline-block;
       transparent 4px,
       transparent 12px
     );
+}
+
+/* Admin-modus */
+.formation-field.interactive {
+  touch-action: none;
+}
+
+/* Visningsmodus */
+.formation-field.no-interaction {
+  touch-action: pan-y !important;
+  pointer-events: none;
 }
 
 /* ============================
