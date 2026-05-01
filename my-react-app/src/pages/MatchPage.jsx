@@ -14,6 +14,8 @@ import { getTeam } from "../services/TeamService";
 import "../assets/style/matchPage.css";
 import LagComponent from "../components/maincomp/LagComponent";
 
+import { loadOrCreateMatchData } from "../components/admincomp/useMatchData";
+
 export default function MatchPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -26,18 +28,21 @@ export default function MatchPage() {
   const [homeName, setHomeName] = useState("Hjemmelag");
   const [awayName, setAwayName] = useState("Bortelag");
 
-  const [hasFormation, setHasFormation] = useState(false)
+  const [hasFormation, setHasFormation] = useState(false);
 
+  // ⭐ Hent eller opprett kampdata
   useEffect(() => {
-    if (!selectedMatch?.id) return 
-    const ref = doc(db, "matches", selectedMatch.id, "formations", "home")
-    const unsub = onSnapshot(ref, (snap) => {
-      setHasFormation(snap.exists())
-    })
-    return () => unsub()
-  }, [selectedMatch])
+    if (!id) return;
 
-  // 🔥 Hent ALLE kamper (ikke live)
+    async function load() {
+      const data = await loadOrCreateMatchData(id);
+      setSelectedMatch({ id, ...data });
+    }
+
+    load();
+  }, [id]);
+
+  // ⭐ Hent ALLE kamper
   useEffect(() => {
     const fetchAll = async () => {
       const ref = collection(db, "matches");
@@ -49,41 +54,7 @@ export default function MatchPage() {
     fetchAll();
   }, []);
 
-  // ⭐ Hent DENNE kampen live
-  useEffect(() => {
-    if (!id) return;
-
-    const ref = doc(db, "matches", id);
-
-    const unsub = onSnapshot(ref, (snap) => {
-      if (snap.exists()) {
-        setSelectedMatch({ id: snap.id, ...snap.data() });
-      }
-    });
-
-    return () => unsub();
-  }, [id]);
-
-  // ⭐ Hent lagnavn basert på ID
-  useEffect(() => {
-    async function loadNames() {
-      if (!selectedMatch) return;
-
-      if (selectedMatch.homeTeamId) {
-        const home = await getTeam(selectedMatch.homeTeamId);
-        setHomeName(home?.name || "Ukjent lag");
-      }
-
-      if (selectedMatch.awayTeamId) {
-        const away = await getTeam(selectedMatch.awayTeamId);
-        setAwayName(away?.name || "Ukjent lag");
-      }
-    }
-
-    loadNames();
-  }, [selectedMatch]);
-
-  // 🔥 Hent events live
+  // ⭐ Hent events live
   useEffect(() => {
     if (!selectedMatch) return;
 
@@ -103,15 +74,57 @@ export default function MatchPage() {
     return () => unsub();
   }, [selectedMatch]);
 
-  // 🔥 Kampstatus
-  if (!selectedMatch) {
-    return <p>Laster kamp...</p>;
-  }
+  // ⭐ Hent lagnavn
+  useEffect(() => {
+    async function loadNames() {
+      if (!selectedMatch) return;
+
+      if (selectedMatch.homeTeamId) {
+        const home = await getTeam(selectedMatch.homeTeamId);
+        setHomeName(home?.name || "Ukjent lag");
+      }
+
+      if (selectedMatch.awayTeamId) {
+        const away = await getTeam(selectedMatch.awayTeamId);
+        setAwayName(away?.name || "Ukjent lag");
+      }
+    }
+
+    loadNames();
+  }, [selectedMatch]);
+
+  // ⭐ Sjekk om formasjon finnes
+  useEffect(() => {
+    if (!selectedMatch?.id) return;
+    const ref = doc(db, "matches", selectedMatch.id, "formations", "home");
+    const unsub = onSnapshot(ref, (snap) => {
+      setHasFormation(snap.exists());
+    });
+    return () => unsub();
+  }, [selectedMatch]);
+
+  // ⭐ Kampstatus
+  if (!selectedMatch) return <p>Laster kamp...</p>;
+
+  const now = new Date();
+
+  const matchDate = selectedMatch.date?.toDate
+    ? selectedMatch.date.toDate()
+    : new Date(selectedMatch.date);
+
+  const matchTimePassed = now > matchDate;
+
+  const isFinished =
+    selectedMatch.status === "finished" || matchTimePassed;
 
   // ⭐ FØR KAMP
-  if (selectedMatch.status === "not_started") {
+  if (selectedMatch.status === "not_started" && !matchTimePassed) {
     return (
-      <BeforeMatch match={selectedMatch} allMatches={allMatches} hasFormation={hasFormation} />
+      <BeforeMatch
+        match={selectedMatch}
+        allMatches={allMatches}
+        hasFormation={hasFormation}
+      />
     );
   }
 
@@ -135,33 +148,59 @@ export default function MatchPage() {
             ? "Slutt"
             : selectedMatch.status === "live"
             ? "Live"
+            : isFinished
+            ? "slutt"
             : "Kamp"}
         </p>
 
         <div className="lp-row">
           <span className="lp-title">{homeName}</span>
 
+          {/* ⭐ RIKTIG RESULTATLOGIKK */}
           <p className="lp-result">
-            {selectedMatch.status === "not_started"
-              ? `Kl ${selectedMatch.time}`
-              : `${selectedMatch.homeScore ?? 0} - ${selectedMatch.awayScore ?? 0}`}
+            {selectedMatch.status === "live"
+              ? `${selectedMatch.homeScore ?? 0} - ${selectedMatch.awayScore ?? 0}` // LIVE-STILLING
+              : isFinished
+                ? (
+                    selectedMatch.homeScore !== null &&
+                    selectedMatch.awayScore !== null
+                      ? `${selectedMatch.homeScore} - ${selectedMatch.awayScore}` // SLUTT MED RESULTAT
+                      : "Stilling kommer" // SLUTT UTEN RESULTAT
+                  )
+                : selectedMatch.status === "not_started"
+                  ? `Kl ${selectedMatch.time}` // FØR KAMP
+                  : "Stilling kommer" // fallback
+            }
           </p>
 
           <span className="lp-title">{awayName}</span>
         </div>
 
         <p className="lp-date">
-          {selectedMatch.date.toDate().toLocaleDateString("no-NO")}
+          {selectedMatch.date?.toDate?.().toLocaleDateString("no-NO")}
         </p>
       </div>
 
-      {/* Rapport */}
+      {/* ⭐ COUNTDOWN KUN FØR KAMPEN ER FERDIG */}
+      {!isFinished && selectedMatch.status !== "live" && (
+        <Countdown match={selectedMatch} />
+      )}
+
+      {/* ⭐ Rapport */}
       <main className="page">
-        <Tabs activeTab={activeTab} setActiveTab={setActiveTab} hasFormation={hasFormation} />
+        <Tabs
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          hasFormation={hasFormation}
+        />
 
         <section className="content-box">
           {activeTab === "rapport" && (
-            <MatchReport match={selectedMatch} events={events} />
+            events.length > 0 ? (
+              <MatchReport match={selectedMatch} events={events} />
+            ) : (
+              <p className="no-live">Det har ikke vært noe live i denne kampen.</p>
+            )
           )}
 
           {activeTab === "tabell" && (
@@ -176,6 +215,3 @@ export default function MatchPage() {
     </>
   );
 }
-
-
-

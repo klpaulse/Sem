@@ -79,12 +79,18 @@ export async function getSeasonMatches(teamId, season = "2026") {
     .map(doc => {
       const data = doc.data();
 
-      const date = data.date?.toDate ? data.date.toDate() : new Date(data.date);
+      const date = data.date?.toDate
+        ? data.date.toDate()
+        : new Date(data.date);
 
       return {
         id: doc.id,
         ...data,
-        date
+        date,
+
+        // ⭐ VIKTIG: alltid legg til score-felter
+        homeScore: data.homeScore ?? null,
+        awayScore: data.awayScore ?? null,
       };
     })
     .sort((a, b) => a.date - b.date);

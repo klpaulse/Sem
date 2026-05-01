@@ -9,15 +9,15 @@ export default function PlayerAdmin() {
   const [selectedTeam, setSelectedTeam] = useState(null);
 
   const [playerName, setPlayerName] = useState("");
-  const [playerAge, setPlayerAge] = useState("");
+  const [playerBirthdate, setPlayerBirthdate] = useState("");
   const [playerFile, setPlayerFile] = useState(null);
 
   const [editingPlayer, setEditingPlayer] = useState(null);
   const [editName, setEditName] = useState("");
-  const [editAge, setEditAge] = useState("");
+  const [editBirthdate, setEditBirthdate] = useState("");
   const [editFile, setEditFile] = useState(null);
 
-  // Hent alle lag
+  // ⭐ Hent alle lag
   useEffect(() => {
     async function loadTeams() {
       const snap = await getDocs(collection(db, "teams"));
@@ -27,7 +27,7 @@ export default function PlayerAdmin() {
     loadTeams();
   }, []);
 
-  // Når vi velger lag
+  // ⭐ Når vi velger lag
   useEffect(() => {
     if (!selectedTeamId) {
       setSelectedTeam(null);
@@ -48,6 +48,14 @@ export default function PlayerAdmin() {
     return await getDownloadURL(fileRef);
   }
 
+  // ⭐ Beregn alder fra fødselsdato
+  function calculateAge(birthdate) {
+    if (!birthdate) return null;
+    const dob = new Date(birthdate);
+    const diff = Date.now() - dob.getTime();
+    return Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+  }
+
   // ⭐ Legg til spiller
   async function addPlayer() {
     if (!selectedTeamId || !playerName.trim()) return;
@@ -66,7 +74,7 @@ export default function PlayerAdmin() {
     const newPlayer = {
       id: crypto.randomUUID(),
       name: playerName.trim(),
-      age: playerAge ? Number(playerAge) : null,
+      birthdate: playerBirthdate || null,
       img: imageUrl
     };
 
@@ -80,7 +88,7 @@ export default function PlayerAdmin() {
     );
 
     setPlayerName("");
-    setPlayerAge("");
+    setPlayerBirthdate("");
     setPlayerFile(null);
   }
 
@@ -88,7 +96,7 @@ export default function PlayerAdmin() {
   function startEdit(player) {
     setEditingPlayer(player);
     setEditName(player.name);
-    setEditAge(player.age || "");
+    setEditBirthdate(player.birthdate || "");
     setEditFile(null);
   }
 
@@ -113,7 +121,7 @@ export default function PlayerAdmin() {
         ? {
             ...p,
             name: editName.trim(),
-            age: editAge ? Number(editAge) : null,
+            birthdate: editBirthdate || null,
             img: imageUrl
           }
         : p
@@ -176,7 +184,8 @@ export default function PlayerAdmin() {
                     style={{ marginRight: "8px", borderRadius: "4px" }}
                   />
                 )}
-                {p.name} {p.age && `(${p.age})`}
+                {p.name}{" "}
+                {p.birthdate && `(${calculateAge(p.birthdate)} år)`}
 
                 <button onClick={() => startEdit(p)} style={{ marginLeft: "10px" }}>
                   Endre
@@ -205,10 +214,9 @@ export default function PlayerAdmin() {
               />
 
               <input
-                type="number"
-                placeholder="Alder"
-                value={editAge}
-                onChange={(e) => setEditAge(e.target.value)}
+                type="date"
+                value={editBirthdate}
+                onChange={(e) => setEditBirthdate(e.target.value)}
               />
 
               <input
@@ -233,10 +241,9 @@ export default function PlayerAdmin() {
           />
 
           <input
-            type="number"
-            placeholder="Alder"
-            value={playerAge}
-            onChange={(e) => setPlayerAge(e.target.value)}
+            type="date"
+            value={playerBirthdate}
+            onChange={(e) => setPlayerBirthdate(e.target.value)}
           />
 
           <input

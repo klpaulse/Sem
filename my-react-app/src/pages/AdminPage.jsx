@@ -8,9 +8,11 @@ import KampAdministrasjon from "../components/admincomp/KampAdministrasjon";
 import PlayerAdmin from "../components/admincomp/PlayerAdmin";
 import LiveAdmin from "../components/admincomp/LiveAdmin";
 import ResultatAdmin from "../components/admincomp/ResultatAdmin";
+import LiveControls from "../components/admincomp/livekontroll/LiveControls";
+
+import { loadOrCreateMatchData } from "../components/admincomp/useMatchData";
 
 import "../assets/style/adminPage.css";
-import LiveControls from "../components/admincomp/LiveControls";
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState("live");
@@ -20,7 +22,7 @@ export default function AdminPage() {
   const [user] = useAuthState(auth);
   const [isAdmin, setIsAdmin] = useState(null);
 
-  // ⭐ NYTT: Live-modus og valgt kamp
+  // Live-modus
   const [inLiveMode, setInLiveMode] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState(null);
 
@@ -60,7 +62,6 @@ export default function AdminPage() {
     <div className="admin-layout">
 
       <aside className="admin-sidebar">
-        {/* ⭐ Når du er i live-modus, skjul menyen */}
         {!inLiveMode && (
           <>
             <button onClick={() => setActiveTab("live")}>Live</button>
@@ -77,7 +78,7 @@ export default function AdminPage() {
 
         {!loading && (
           <>
-            {/* ⭐ LIVE-MODUS: Vis kun LiveAdmin for valgt kamp */}
+            {/* LIVE-MODUS */}
             {inLiveMode && selectedMatch && (
               <LiveControls
                 match={selectedMatch}
@@ -88,13 +89,22 @@ export default function AdminPage() {
               />
             )}
 
-            {/* ⭐ NORMAL ADMIN-MODUS */}
+            {/* NORMAL ADMIN-MODUS */}
             {!inLiveMode && (
               <>
                 {activeTab === "live" && (
                   <LiveAdmin
-                    onSelectMatch={(match) => {
-                      setSelectedMatch(match);
+                    onSelectMatch={async (match) => {
+                      // Hent eller opprett kampdata
+                      const fullData = await loadOrCreateMatchData(match.id);
+
+                      // Kombiner fixture-data + kampdata
+                      setSelectedMatch({
+                        id: match.id,
+                        ...match,
+                        ...fullData
+                      });
+
                       setInLiveMode(true);
                     }}
                   />
@@ -119,11 +129,3 @@ export default function AdminPage() {
     </div>
   );
 }
-
-
-
-
-
-
-
-

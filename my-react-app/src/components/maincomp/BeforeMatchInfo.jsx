@@ -53,13 +53,11 @@ export default function BeforeMatchInfo({
     .sort((a, b) => normalizeDate(b.date) - normalizeDate(a.date))
     .slice(0, 3);
 
-    
-
   return (
     <section className="before-match-info">
       <h2 className="beforematch">Før kampen</h2>
 
-      {/* ⭐ TIMELINE */}
+      {/* ⭐ TIMELINE FOR BEGGE LAG – ALLTID VIST */}
       <div className="info-block">
         <h3 className="timeline-header">{homeName}</h3>
         <SeasonTimeline

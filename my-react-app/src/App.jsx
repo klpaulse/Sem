@@ -10,7 +10,7 @@ import { collection, onSnapshot } from 'firebase/firestore'
 import { onAuthStateChanged } from 'firebase/auth'
 import LoginPage from './pages/LoginPage.jsx'
 import HomePage from './pages/HomePage'
-import LiveControls from './components/admincomp/LiveControls.jsx'
+import LiveControls from './components/admincomp/livekontroll/LiveControls.jsx'
 import ErrorBoundary from './ErrorBoundary.jsx'
 
 function App() {
