@@ -229,8 +229,6 @@ return () => {
 
     const homeFrom = preset.map((pos) => ({
       id: pos.id, 
-      name: "",
-      number: "",
       x: pos.x,
   y: calcFinalY(pos.y, "home"),
 }));
@@ -238,8 +236,6 @@ return () => {
 
 const awayFrom = preset.map((pos) => ({
   id: pos.id,
-  name: "",
-  number: "",
   x: pos.x,
   y: calcFinalY(pos.y, "away"),
 }));
@@ -247,6 +243,7 @@ const awayFrom = preset.map((pos) => ({
 
 setHomePositions(homeFrom);
 setAwayPositions(awayFrom);
+setPlayers([])
 
 
  
@@ -270,6 +267,13 @@ setAwayPositions(awayFrom);
       DRAGGING
   ------------------------------ */
   function startDrag(id, fromBench = false) {
+
+    const isPlayer = players.some((p) => p.id === id)
+    const isBench = allPlayers.some((p) => p.id === id)
+    if (!isPlayer && !isBench){
+      return
+    }
+    
     if (fromBench){
       const p = allPlayers.find((pl) => pl.id === id)
       if(!p) return 

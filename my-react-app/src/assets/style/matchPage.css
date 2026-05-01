@@ -770,6 +770,7 @@ display: inline-block;
 /* ============================
    FOTBALLBANE – REALISTISK
    ============================ */
+   
 
 .formation-field {
   position: relative;
@@ -780,11 +781,7 @@ display: inline-block;
   border: 2px solid #2e5c2e;
   border-radius: 12px;
   overflow: hidden;
-  touch-action: pan-y !important;
-  pointer-events: none; 
-
   
-
   /* Subtil gress-tekstur */
   background-image:
     repeating-linear-gradient(
@@ -798,13 +795,14 @@ display: inline-block;
 
 /* Admin-modus */
 .formation-field.interactive {
-  touch-action: none;
+  pointer-events: auto !important; 
+  touch-action: none !important;
 }
 
 /* Visningsmodus */
 .formation-field.no-interaction {
   touch-action: pan-y !important;
-  pointer-events: none;
+  pointer-events: none !important;
 }
 
 /* ============================
@@ -987,6 +985,48 @@ display: inline-block;
   padding: 1px 4px;
   border-radius: 4px;
 }
+
+.bench-list {
+  margin-top: 20px;
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bench-list h3 {
+  margin-bottom: 6px;
+  font-size: 16px;
+  color: #fff;
+}
+
+.bench-player {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.08);
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.bench-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.bench-name {
+  color: #fff;
+  font-size: 14px;
+}
+
+
+.lagoppstilling-container {
+  background: transparent !important;
+}
+
+
 
 /* ============================
    MOBILVERSJON AV PLAYERCHIP
