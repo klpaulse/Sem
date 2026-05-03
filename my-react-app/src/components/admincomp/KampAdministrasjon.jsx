@@ -13,6 +13,9 @@ import {
 
 import { getTeam } from "../../services/TeamService";
 import CreateMatchForm from "./CreateMatchForm";
+import BulkImportMatches from "./BulkImportMatches";
+
+
 
 export default function KampAdministrasjon({ divisions }) {
   const [selectedDivision, setSelectedDivision] = useState("");
@@ -237,6 +240,11 @@ export default function KampAdministrasjon({ divisions }) {
         <h3>Legg til kamp</h3>
         <CreateMatchForm divisions={divisions} />
       </div>
+
+      <div className="kampadmin-card">
+  <h3>Bulk-import</h3>
+  <BulkImportMatches />
+</div>
 
     </section>
   );

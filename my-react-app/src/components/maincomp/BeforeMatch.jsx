@@ -68,6 +68,10 @@ export default function BeforeMatch({ match, allMatches}) {
 
       const home = await getSeasonMatches(match.homeTeamId, "2026");
       const away = await getSeasonMatches(match.awayTeamId, "2026");
+         console.log("homeTeamId:", match.homeTeamId);
+      console.log("awayTeamId:", match.awayTeamId);
+      console.log("homeSeason:", home);
+      console.log("awaySeason:", away);
 
       setHomeSeason(home);
       setAwaySeason(away);

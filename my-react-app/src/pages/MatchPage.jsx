@@ -15,6 +15,8 @@ import "../assets/style/matchPage.css";
 import LagComponent from "../components/maincomp/LagComponent";
 
 import { loadOrCreateMatchData } from "../components/admincomp/useMatchData";
+import TabellComponent from "../components/maincomp/TabellComponent";
+
 
 export default function MatchPage() {
   const { id } = useParams();
@@ -208,7 +210,7 @@ export default function MatchPage() {
           )}
 
           {activeTab === "lag" && (
-            <LagComponent match={selectedMatch} />
+            <LagComponent division={selectedMatch.division} season={selectedMatch.season} />
           )}
         </section>
       </main>

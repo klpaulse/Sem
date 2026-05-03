@@ -1062,6 +1062,75 @@ display: inline-block;
   }
 }
 
+.league-table {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e5e5e5;
+  font-size: 14px;
+}
+
+.table-header,
+.table-row {
+  display: grid;
+  grid-template-columns: 30px 1fr 30px 30px 30px 30px 70px 40px 30px;
+  padding: 10px;
+  align-items: center;
+}
+
+.table-header {
+  background: #f4f4f4;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #ddd;
+}
+
+.table-row {
+  border-bottom: 1px solid #eee;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.table-row span {
+  display: flex;
+  align-items: center;
+}
+
+.table-row:nth-child(odd) {
+  background: #fafafa;
+}
+
+.table-row:hover {
+  background: #f0f7ff;
+  transition: 0.2s;
+}
+
+/* Førsteplass */
+.table-row:first-child {
+  background: #e8ffe8;
+  font-weight: 600;
+}
+
+/* Sisteplass */
+.table-row:last-child {
+  background: #ffecec;
+}
+
+/* Lag-navn venstrejustert */
+.table-row span:nth-child(2),
+.table-header span:nth-child(2) {
+  justify-content: flex-start;
+}
+
+/* Tall høyrejustert */
+.table-row span:not(:nth-child(2)),
+.table-header span:not(:nth-child(2)) {
+  justify-content: center;
+}
+
 
 
 
