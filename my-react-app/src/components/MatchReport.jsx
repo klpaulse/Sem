@@ -10,12 +10,14 @@ import {
   faArrowUp,
   faArrowDown,
   faQuestion,
-  faArrowsRotate
+  faArrowsRotate,
+  faImage,
 } from "@fortawesome/free-solid-svg-icons";
 import { getTeam } from "../services/TeamService";
 import AudienceQuestions from "./maincomp/AudienceQuestions";
+import PollDisplay from "./maincomp/PollDisplay";
 
-export default function MatchReport({ match, events }) {
+export default function MatchReport({ match, events, matchId }) {
   if (!match) return null;
 
   const [homeTeam, setHomeTeam] = useState(null);
@@ -31,9 +33,7 @@ export default function MatchReport({ match, events }) {
     loadTeams();
   }, [match]);
 
-  if (!homeTeam || !awayTeam) {
-    return <div>Laster kampdata...</div>;
-  }
+  if (!homeTeam || !awayTeam) return <div>Laster kampdata...</div>;
 
   function getPlayerName(teamId, playerId) {
     const team = teamId === match.homeTeamId ? homeTeam : awayTeam;
@@ -51,9 +51,7 @@ export default function MatchReport({ match, events }) {
   }
 
   const isSecondHalf = events.some(
-    (e) =>
-      e.type === "system" &&
-      (e.text || "").toLowerCase().includes("2. omgang")
+    (e) => e.type === "system" && (e.text || "").toLowerCase().includes("2. omgang")
   );
 
   const formatMinute = (minute) => {
@@ -72,14 +70,32 @@ export default function MatchReport({ match, events }) {
     return a.createdAt.seconds - b.createdAt.seconds;
   });
 
+  // Sjekk om det finnes pre-match events
+  const hasPreMatchEvents = sortedEvents.some((e) => e.preMatch);
+  const hasLiveEvents = sortedEvents.some((e) => !e.preMatch);
+
   return (
     <div className="report-container">
       <div className="report-feed">
-        <h3>{match.status === "finished" ? "Kampreferat" : "Live oppdatering"}</h3>
 
+        {/* ⭐ AVSTEMNINGER ØVERST */}
+        <PollDisplay matchId={matchId || match.id} />
+
+        {/* ⭐ PUBLIKUMSSPØRSMÅL */}
         <AudienceQuestions matchId={match.id} />
 
+        {/* ⭐ TITTEL */}
+        <h3>
+          {match.status === "finished"
+            ? "Kampreferat"
+            : match.status === "not_started" && hasPreMatchEvents
+            ? "Før kampen"
+            : "Live oppdatering"}
+        </h3>
+
         {sortedEvents.map((e) => {
+          // ⭐ Minutt vises ikke for pre-match events
+          const showMinute = !e.preMatch && e.minute != null;
 
           // ⭐ SYSTEM
           if (e.type === "system") {
@@ -90,33 +106,27 @@ export default function MatchReport({ match, events }) {
             );
           }
 
-
-if (e.type === "questionAnswer") {
-  return (
-    <div key={e.id} className="event event-question">
-      <span className="event-icon">
-        <FontAwesomeIcon icon={faQuestion} />
-      </span>
-
-      <div className="event-text">
-
-        <div className="question-block">
-          <p className="question-line">{e.name} spør:</p>
-          <p>{e.question}</p>
-        </div>
-
-        <div className="answer-block">
-          <p className="answer-line">Admin svarer:</p>
-          <p>{e.answer}</p>
-        </div>
-
-      </div>
-
-      <span className="event-minute"></span>
-    </div>
-  );
-}
-
+          // ⭐ SPØRSMÅL/SVAR
+          if (e.type === "questionAnswer") {
+            return (
+              <div key={e.id} className="event event-question">
+                <span className="event-icon">
+                  <FontAwesomeIcon icon={faQuestion} />
+                </span>
+                <div className="event-text">
+                  <div className="question-block">
+                    <p className="question-line">{e.name} spør:</p>
+                    <p>{e.question}</p>
+                  </div>
+                  <div className="answer-block">
+                    <p className="answer-line">Admin svarer:</p>
+                    <p>{e.answer}</p>
+                  </div>
+                </div>
+                <span className="event-minute"></span>
+              </div>
+            );
+          }
 
           // ⭐ MÅL
           if (e.type === "goal") {
@@ -125,7 +135,6 @@ if (e.type === "questionAnswer") {
                 <span className="event-icon">
                   <FontAwesomeIcon icon={faFutbol} />
                 </span>
-
                 <div className="event-text">
                   <p className="goal-title">{getTeamName(e.team)} SCORER!</p>
                   <p className="goal-score">{e.homeScore ?? 0}-{e.awayScore ?? 0}</p>
@@ -137,8 +146,9 @@ if (e.type === "questionAnswer") {
                   )}
                   {e.text && <p className="goal-comment">{e.text}</p>}
                 </div>
-
-                <span className="event-minute">{formatMinute(e.minute)}'</span>
+                {showMinute && (
+                  <span className="event-minute">{formatMinute(e.minute)}'</span>
+                )}
               </div>
             );
           }
@@ -150,7 +160,6 @@ if (e.type === "questionAnswer") {
                 <span className="event-icon">
                   <FontAwesomeIcon icon={faArrowsRotate} />
                 </span>
-
                 <div className="event-text">
                   <p className="sub-title">Spillerbytte – {getTeamName(e.team)}</p>
                   <p className="sub-in">
@@ -161,8 +170,9 @@ if (e.type === "questionAnswer") {
                   </p>
                   {e.comment && <p className="sub-comment">{e.comment}</p>}
                 </div>
-
-                <span className="event-minute">{formatMinute(e.minute)}'</span>
+                {showMinute && (
+                  <span className="event-minute">{formatMinute(e.minute)}'</span>
+                )}
               </div>
             );
           }
@@ -174,14 +184,14 @@ if (e.type === "questionAnswer") {
                 <span className="event-icon">
                   <FontAwesomeIcon icon={faSquare} className="yellow-card" />
                 </span>
-
                 <div className="event-text">
                   <p>Gult kort – {getTeamName(e.team)}</p>
                   <p>{getPlayerName(e.team, e.player)}</p>
                   {e.text && <p>{e.text}</p>}
                 </div>
-
-                <span className="event-minute">{formatMinute(e.minute)}'</span>
+                {showMinute && (
+                  <span className="event-minute">{formatMinute(e.minute)}'</span>
+                )}
               </div>
             );
           }
@@ -193,14 +203,14 @@ if (e.type === "questionAnswer") {
                 <span className="event-icon">
                   <FontAwesomeIcon icon={faSquare} className="red-card" />
                 </span>
-
                 <div className="event-text">
                   <p>Rødt kort – {getTeamName(e.team)}</p>
                   <p>{getPlayerName(e.team, e.player)}</p>
                   {e.text && <p>{e.text}</p>}
                 </div>
-
-                <span className="event-minute">{formatMinute(e.minute)}'</span>
+                {showMinute && (
+                  <span className="event-minute">{formatMinute(e.minute)}'</span>
+                )}
               </div>
             );
           }
@@ -212,13 +222,13 @@ if (e.type === "questionAnswer") {
                 <span className="event-icon">
                   <FontAwesomeIcon icon={faUserInjured} />
                 </span>
-
                 <div className="event-text">
                   <p>Skade – {getTeamName(e.team)}</p>
                   {e.text && <p>{e.text}</p>}
                 </div>
-
-                <span className="event-minute">{formatMinute(e.minute)}'</span>
+                {showMinute && (
+                  <span className="event-minute">{formatMinute(e.minute)}'</span>
+                )}
               </div>
             );
           }
@@ -230,14 +240,14 @@ if (e.type === "questionAnswer") {
                 <span className="event-icon">
                   <FontAwesomeIcon icon={faFlag} />
                 </span>
-
                 <div className="event-text">
                   <p>Hjørnespark – {getTeamName(e.team)}</p>
                   {e.player && <p>{getPlayerName(e.team, e.player)} tar corneren</p>}
                   {e.text && <p>{e.text}</p>}
                 </div>
-
-                <span className="event-minute">{formatMinute(e.minute)}'</span>
+                {showMinute && (
+                  <span className="event-minute">{formatMinute(e.minute)}'</span>
+                )}
               </div>
             );
           }
@@ -249,14 +259,14 @@ if (e.type === "questionAnswer") {
                 <span className="event-icon">
                   <FontAwesomeIcon icon={faBullhorn} />
                 </span>
-
                 <div className="event-text">
                   <p>Frispark – {getTeamName(e.team)}</p>
                   {e.player && <p>{getPlayerName(e.team, e.player)}</p>}
                   {e.comment && <p>{e.comment}</p>}
                 </div>
-
-                <span className="event-minute">{formatMinute(e.minute)}'</span>
+                {showMinute && (
+                  <span className="event-minute">{formatMinute(e.minute)}'</span>
+                )}
               </div>
             );
           }
@@ -266,18 +276,21 @@ if (e.type === "questionAnswer") {
             return (
               <div key={e.id} className="event event-image">
                 <span className="event-icon">
-                  <FontAwesomeIcon icon={faComment} />
+                  <FontAwesomeIcon icon={faImage} />
                 </span>
-
                 <div className="event-text">
-                  <p>Bildehendelse</p>
                   {e.text && <p>{e.text}</p>}
                   {e.imageUrl && (
-                    <img src={e.imageUrl} alt="Hendelsesbilde" className="event-image-img" />
+                    <img
+                      src={e.imageUrl}
+                      alt="Hendelsesbilde"
+                      className="event-image-img"
+                    />
                   )}
                 </div>
-
-                <span className="event-minute">{formatMinute(e.minute)}'</span>
+                {showMinute && (
+                  <span className="event-minute">{formatMinute(e.minute)}'</span>
+                )}
               </div>
             );
           }
@@ -289,12 +302,12 @@ if (e.type === "questionAnswer") {
                 <span className="event-icon">
                   <FontAwesomeIcon icon={faComment} />
                 </span>
-
                 <div className="event-text">
                   <p>{e.text}</p>
                 </div>
-
-                <span className="event-minute">{formatMinute(e.minute)}'</span>
+                {showMinute && (
+                  <span className="event-minute">{formatMinute(e.minute)}'</span>
+                )}
               </div>
             );
           }
@@ -305,5 +318,3 @@ if (e.type === "questionAnswer") {
     </div>
   );
 }
-
-

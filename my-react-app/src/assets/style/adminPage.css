@@ -139,6 +139,284 @@
   background: #27ae60;
 }
 
+/* -------------------------------------------------------
+   PRE-MATCH PANEL
+------------------------------------------------------- */
+
+.prematch-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.prematch-section {
+  background: var(--card-bg);
+  border: 1px solid #FFFFFF0F;
+  padding: 16px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.prematch-section h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.prematch-section h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+  color: #aaa;
+}
+
+.prematch-section textarea,
+.prematch-section input[type="text"],
+.prematch-section input[type="file"] {
+  width: 100%;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.prematch-section textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.prematch-section input[type="file"] {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.prematch-section button {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: white;
+  cursor: pointer;
+}
+
+.prematch-section button:hover {
+  background: #222;
+}
+
+.prematch-section button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Legg til kommentar / last opp - primærknapp */
+.prematch-section > button:last-child,
+.prematch-section button[onClick] {
+  width: 100%;
+  background: #2ecc71;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  color: #000;
+  margin-top: 4px;
+}
+
+.prematch-section > button:last-child:hover {
+  background: #27ae60;
+}
+
+/* -------------------------------------------------------
+   POLL
+------------------------------------------------------- */
+
+.poll-card {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.poll-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.poll-header strong {
+  font-size: 15px;
+}
+
+.poll-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.poll-toggle {
+  background: #1a1a1a;
+  border: 1px solid #444;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.poll-toggle:hover {
+  background: #222;
+}
+
+.poll-delete {
+  background: transparent;
+  border: 1px solid #444;
+  color: #e74c3c;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.poll-delete:hover {
+  background: #2a1a1a;
+}
+
+.poll-results {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.poll-option-result {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.poll-option-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #ccc;
+}
+
+.poll-bar-bg {
+  background: #2a2a2a;
+  border-radius: 4px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.poll-bar-fill {
+  background: #2ecc71;
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.poll-total {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+}
+
+/* Lag ny avstemning */
+.poll-create {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid #2a2a2a;
+  padding-top: 14px;
+}
+
+.poll-create input[type="text"] {
+  width: 100%;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.poll-option-input {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.poll-option-input input {
+  flex: 1;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.poll-option-input button {
+  background: transparent;
+  border: 1px solid #444;
+  color: #e74c3c;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.poll-option-input button:hover {
+  background: #2a1a1a;
+}
+
+.add-option-btn {
+  background: #1a1a1a !important;
+  border: 1px dashed #444 !important;
+  color: #aaa !important;
+  padding: 8px !important;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  width: 100%;
+}
+
+.add-option-btn:hover {
+  background: #222 !important;
+  color: white !important;
+}
+
+.create-poll-btn {
+  width: 100%;
+  background: #2ecc71 !important;
+  border: none !important;
+  padding: 12px !important;
+  border-radius: 6px;
+  font-weight: 600;
+  color: #000 !important;
+  cursor: pointer;
+}
+
+.create-poll-btn:hover {
+  background: #27ae60 !important;
+}
+
+.create-poll-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .form-section {
   margin-bottom: 16px;
 }

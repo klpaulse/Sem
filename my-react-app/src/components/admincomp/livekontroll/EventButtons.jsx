@@ -11,7 +11,7 @@ import {
   faImage,
 } from "@fortawesome/free-solid-svg-icons";
 
-export default function EventButtons({ activeType, onSelect }) {
+export default function EventButtons({ activeType, onSelect, onlyTypes }) {
   const buttons = [
     { type: "goal",      icon: faFutbol,      label: "Mål" },
     { type: "yellow",    icon: faSquare,       label: "Gult" },
@@ -25,9 +25,13 @@ export default function EventButtons({ activeType, onSelect }) {
     { type: "image",     icon: faImage,        label: "Bilde" },
   ];
 
+  const filtered = onlyTypes
+    ? buttons.filter((b) => onlyTypes.includes(b.type))
+    : buttons;
+
   return (
     <div className="event-buttons">
-      {buttons.map(({ type, icon, label }) => (
+      {filtered.map(({ type, icon, label }) => (
         <button
           key={type}
           onClick={() => onSelect(type)}

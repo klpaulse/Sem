@@ -17,7 +17,6 @@ import LagComponent from "../components/maincomp/LagComponent";
 import { loadOrCreateMatchData } from "../components/admincomp/useMatchData";
 import TabellComponent from "../components/maincomp/TabellComponent";
 
-
 export default function MatchPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -32,19 +31,15 @@ export default function MatchPage() {
 
   const [hasFormation, setHasFormation] = useState(false);
 
-  // ⭐ Hent eller opprett kampdata
   useEffect(() => {
     if (!id) return;
-
     async function load() {
       const data = await loadOrCreateMatchData(id);
       setSelectedMatch({ id, ...data });
     }
-
     load();
   }, [id]);
 
-  // ⭐ Hent ALLE kamper
   useEffect(() => {
     const fetchAll = async () => {
       const ref = collection(db, "matches");
@@ -52,11 +47,9 @@ export default function MatchPage() {
       const list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setAllMatches(list);
     };
-
     fetchAll();
   }, []);
 
-  // ⭐ Hent events live
   useEffect(() => {
     if (!selectedMatch) return;
 
@@ -76,26 +69,21 @@ export default function MatchPage() {
     return () => unsub();
   }, [selectedMatch]);
 
-  // ⭐ Hent lagnavn
   useEffect(() => {
     async function loadNames() {
       if (!selectedMatch) return;
-
       if (selectedMatch.homeTeamId) {
         const home = await getTeam(selectedMatch.homeTeamId);
         setHomeName(home?.name || "Ukjent lag");
       }
-
       if (selectedMatch.awayTeamId) {
         const away = await getTeam(selectedMatch.awayTeamId);
         setAwayName(away?.name || "Ukjent lag");
       }
     }
-
     loadNames();
   }, [selectedMatch]);
 
-  // ⭐ Sjekk om formasjon finnes
   useEffect(() => {
     if (!selectedMatch?.id) return;
     const ref = doc(db, "matches", selectedMatch.id, "formations", "home");
@@ -105,22 +93,19 @@ export default function MatchPage() {
     return () => unsub();
   }, [selectedMatch]);
 
-  // ⭐ Kampstatus
   if (!selectedMatch) return <p>Laster kamp...</p>;
 
   const now = new Date();
-
   const matchDate = selectedMatch.date?.toDate
     ? selectedMatch.date.toDate()
     : new Date(selectedMatch.date);
-
   const matchTimePassed = now > matchDate;
+  const isFinished = selectedMatch.status === "finished" || matchTimePassed;
 
-  const isFinished =
-    selectedMatch.status === "finished" || matchTimePassed;
+  // ⭐ Vis BeforeMatch kun hvis ingen events finnes ennå
+  const hasEvents = events.length > 0;
 
-  // ⭐ FØR KAMP
-  if (selectedMatch.status === "not_started" && !matchTimePassed) {
+  if (selectedMatch.status === "not_started" && !matchTimePassed && !hasEvents) {
     return (
       <BeforeMatch
         match={selectedMatch}
@@ -130,7 +115,6 @@ export default function MatchPage() {
     );
   }
 
-  // ⭐ UNDER / ETTER KAMP
   return (
     <>
       <header className="header">
@@ -143,7 +127,6 @@ export default function MatchPage() {
         </h1>
       </header>
 
-      {/* Kampkort */}
       <div className="last-played-card">
         <p className="lp-status">
           {selectedMatch.status === "finished"
@@ -151,28 +134,25 @@ export default function MatchPage() {
             : selectedMatch.status === "live"
             ? "Live"
             : isFinished
-            ? "slutt"
+            ? "Slutt"
+            : selectedMatch.status === "not_started" && hasEvents
+            ? "Før kamp"
             : "Kamp"}
         </p>
 
         <div className="lp-row">
           <span className="lp-title">{homeName}</span>
 
-          {/* ⭐ RIKTIG RESULTATLOGIKK */}
           <p className="lp-result">
             {selectedMatch.status === "live"
-              ? `${selectedMatch.homeScore ?? 0} - ${selectedMatch.awayScore ?? 0}` // LIVE-STILLING
+              ? `${selectedMatch.homeScore ?? 0} - ${selectedMatch.awayScore ?? 0}`
               : isFinished
-                ? (
-                    selectedMatch.homeScore !== null &&
-                    selectedMatch.awayScore !== null
-                      ? `${selectedMatch.homeScore} - ${selectedMatch.awayScore}` // SLUTT MED RESULTAT
-                      : "Stilling kommer" // SLUTT UTEN RESULTAT
-                  )
-                : selectedMatch.status === "not_started"
-                  ? `Kl ${selectedMatch.time}` // FØR KAMP
-                  : "Stilling kommer" // fallback
-            }
+              ? selectedMatch.homeScore !== null && selectedMatch.awayScore !== null
+                ? `${selectedMatch.homeScore} - ${selectedMatch.awayScore}`
+                : "Stilling kommer"
+              : selectedMatch.status === "not_started"
+              ? `Kl ${selectedMatch.time}`
+              : "Stilling kommer"}
           </p>
 
           <span className="lp-title">{awayName}</span>
@@ -183,12 +163,10 @@ export default function MatchPage() {
         </p>
       </div>
 
-      {/* ⭐ COUNTDOWN KUN FØR KAMPEN ER FERDIG */}
       {!isFinished && selectedMatch.status !== "live" && (
         <Countdown match={selectedMatch} />
       )}
 
-      {/* ⭐ Rapport */}
       <main className="page">
         <Tabs
           activeTab={activeTab}
@@ -198,11 +176,11 @@ export default function MatchPage() {
 
         <section className="content-box">
           {activeTab === "rapport" && (
-            events.length > 0 ? (
-              <MatchReport match={selectedMatch} events={events} />
-            ) : (
-              <p className="no-live">Det har ikke vært noe live i denne kampen.</p>
-            )
+            <MatchReport
+              match={selectedMatch}
+              events={events}
+              matchId={selectedMatch.id}
+            />
           )}
 
           {activeTab === "tabell" && (
@@ -210,7 +188,10 @@ export default function MatchPage() {
           )}
 
           {activeTab === "lag" && (
-            <LagComponent division={selectedMatch.division} season={selectedMatch.season} />
+            <LagComponent
+              division={selectedMatch.division}
+              season={selectedMatch.season}
+            />
           )}
         </section>
       </main>

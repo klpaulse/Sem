@@ -52,9 +52,10 @@ export default function EventForm({
 
   const current = titles[type];
 
-  if (!homeTeam || !awayTeam) {
-    return <div>Laster lag...</div>;
-  }
+  const needsTeams = ["goal", "yellow", "red", "sub", "whistle", "corner", "injury"].includes(type);
+if (needsTeams && (!homeTeam || !awayTeam)) {
+  return <div>Laster lag...</div>;
+}
 
   return (
     <div className="event-form"  key={type} >

@@ -126,15 +126,6 @@ export default function BeforeMatchInfo({
               })}
           </span>
         </div>
-
-        <div className="kampinfo-row">
-          <span className="kampinfo-value">{match.round}</span>
-        </div>
-
-        <div className="kampinfo-row">
-          <span className="kampinfo-label">Sesong:</span>
-          <span className="kampinfo-value">2026</span>
-        </div>
       </div>
     </section>
   );

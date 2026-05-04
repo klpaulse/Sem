@@ -1,169 +1,234 @@
 import { useEffect, useState } from "react";
 import { db } from "../../config/Firebase";
-import { doc, updateDoc, collection, addDoc } from "firebase/firestore";
+import { doc, updateDoc, collection, addDoc, getDocs, deleteDoc } from "firebase/firestore";
 import { getTeam } from "../../services/TeamService";
 
-export default function ResultsForm({
-  editingMatch,
-  setEditingMatch,
-  homeScore,
-  setHomeScore,
-  awayScore,
-  setAwayScore,
-  location,
-  setLocation
-}) {
+export default function ResultsForm({ editingMatch, setEditingMatch }) {
   const [homeTeam, setHomeTeam] = useState(null);
   const [awayTeam, setAwayTeam] = useState(null);
-
   const [homePlayers, setHomePlayers] = useState([]);
   const [awayPlayers, setAwayPlayers] = useState([]);
 
-  const [homeScorers, setHomeScorers] = useState([]);
-  const [awayScorers, setAwayScorers] = useState([]);
+  const [homeScore, setHomeScore] = useState(0);
+  const [awayScore, setAwayScore] = useState(0);
+
+  // Liste av { playerId, playerName, teamId }
+  const [goals, setGoals] = useState([]);
+
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!editingMatch) return;
 
+    // Sett eksisterende score hvis den finnes
+    setHomeScore(editingMatch.homeScore ?? 0);
+    setAwayScore(editingMatch.awayScore ?? 0);
+    setGoals([]);
+
     async function load() {
       const home = await getTeam(editingMatch.homeTeamId);
       const away = await getTeam(editingMatch.awayTeamId);
-
       setHomeTeam(home);
       setAwayTeam(away);
-
-      // samme logikk som du bruker i LiveControls
-      setHomePlayers(home.players || []);
-      setAwayPlayers(away.players || []);
+      setHomePlayers(home?.players || []);
+      setAwayPlayers(away?.players || []);
     }
 
     load();
   }, [editingMatch]);
 
-  function addHomeScorer() {
-    setHomeScorers([...homeScorers, ""]);
+  function addGoal(teamId, players) {
+    setGoals([...goals, { teamId, playerId: "", players }]);
+
+    // Oppdater score automatisk
+    if (teamId === editingMatch.homeTeamId) {
+      setHomeScore((s) => s + 1);
+    } else {
+      setAwayScore((s) => s + 1);
+    }
   }
 
-  function addAwayScorer() {
-    setAwayScorers([...awayScorers, ""]);
+  function removeGoal(index) {
+    const goal = goals[index];
+
+    // Reduser score
+    if (goal.teamId === editingMatch.homeTeamId) {
+      setHomeScore((s) => Math.max(0, s - 1));
+    } else {
+      setAwayScore((s) => Math.max(0, s - 1));
+    }
+
+    setGoals(goals.filter((_, i) => i !== index));
   }
 
-  function updateHomeScorer(i, value) {
-    const updated = [...homeScorers];
-    updated[i] = value;
-    setHomeScorers(updated);
-  }
-
-  function updateAwayScorer(i, value) {
-    const updated = [...awayScorers];
-    updated[i] = value;
-    setAwayScorers(updated);
+  function updateGoalPlayer(index, playerId) {
+    const updated = [...goals];
+    updated[index].playerId = playerId;
+    setGoals(updated);
   }
 
   async function saveResult() {
+    setSaving(true);
+
     const matchRef = doc(db, "matches", editingMatch.id);
 
     await updateDoc(matchRef, {
       homeScore: Number(homeScore),
       awayScore: Number(awayScore),
-      status: "finished"
+      played: true,
+      status: "finished",
     });
 
+    // Slett gamle events
     const eventsRef = collection(db, "matches", editingMatch.id, "events");
+    const oldEvents = await getDocs(eventsRef);
+    for (const e of oldEvents.docs) {
+      await deleteDoc(e.ref);
+    }
 
-    for (const scorer of homeScorers) {
-      if (scorer) {
+    // Legg til nye målscorer-events
+    for (const goal of goals) {
+      if (goal.playerId) {
         await addDoc(eventsRef, {
           type: "goal",
-          teamId: editingMatch.homeTeamId,
-          playerId: scorer,
-          timestamp: new Date()
+          teamId: goal.teamId,
+          playerId: goal.playerId,
+          timestamp: new Date(),
         });
       }
     }
 
-    for (const scorer of awayScorers) {
-      if (scorer) {
-        await addDoc(eventsRef, {
-          type: "goal",
-          teamId: editingMatch.awayTeamId,
-          playerId: scorer,
-          timestamp: new Date()
-        });
-      }
-    }
-
+    setSaving(false);
     setEditingMatch(null);
   }
 
-  if (!homeTeam || !awayTeam) {
-    return <p>Laster lag...</p>;
-  }
+  if (!homeTeam || !awayTeam) return <p>Laster...</p>;
+
+  const homeGoals = goals.filter((g) => g.teamId === editingMatch.homeTeamId);
+  const awayGoals = goals.filter((g) => g.teamId === editingMatch.awayTeamId);
 
   return (
-    <section>
+    <div className="results-form">
       <h2>Legg inn resultat</h2>
 
-      <p>
-        {homeTeam.name} vs {awayTeam.name}
-      </p>
+      {/* SCOREBOARD */}
+      <div className="results-scoreboard">
+        <div className="results-team">
+          <span className="results-team-name">{homeTeam.name}</span>
+          <div className="results-score-controls">
+            <button
+              className="score-btn minus"
+              onClick={() => setHomeScore((s) => Math.max(0, s - 1))}
+            >−</button>
+            <span className="results-score">{homeScore}</span>
+            <button
+              className="score-btn plus"
+              onClick={() => setHomeScore((s) => s + 1)}
+            >+</button>
+          </div>
+        </div>
 
-      <input
-        type="number"
-        inputMode="numeric"
-        pattern="[0-9]*"
-        min="0"
-        placeholder="Hjemmelag score"
-        value={homeScore}
-        onChange={(e) => setHomeScore(e.target.value)}
-      />
+        <span className="results-vs">–</span>
 
-      <input
-        type="number"
-        inputMode="numeric"
-        pattern="[0-9]*"
-        min="0"
-        placeholder="Bortelag score"
-        value={awayScore}
-        onChange={(e) => setAwayScore(e.target.value)}
-      />
+        <div className="results-team">
+          <span className="results-team-name">{awayTeam.name}</span>
+          <div className="results-score-controls">
+            <button
+              className="score-btn minus"
+              onClick={() => setAwayScore((s) => Math.max(0, s - 1))}
+            >−</button>
+            <span className="results-score">{awayScore}</span>
+            <button
+              className="score-btn plus"
+              onClick={() => setAwayScore((s) => s + 1)}
+            >+</button>
+          </div>
+        </div>
+      </div>
 
-      <h3>Målscorere – {homeTeam.name}</h3>
-      {homeScorers.map((scorer, i) => (
-        <select
-          key={i}
-          value={scorer}
-          onChange={(e) => updateHomeScorer(i, e.target.value)}
+      {/* MÅLSCORERE */}
+      <div className="results-scorers">
+        <div className="results-scorers-col">
+          <h3>{homeTeam.name}</h3>
+
+          {homeGoals.map((goal, i) => {
+            const globalIndex = goals.indexOf(goal);
+            return (
+              <div key={i} className="scorer-row">
+                <select
+                  value={goal.playerId}
+                  onChange={(e) => updateGoalPlayer(globalIndex, e.target.value)}
+                >
+                  <option value="">Velg spiller</option>
+                  {homePlayers.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+                <button
+                  className="remove-scorer"
+                  onClick={() => removeGoal(globalIndex)}
+                >✕</button>
+              </div>
+            );
+          })}
+
+          <button
+            className="add-scorer-btn"
+            onClick={() => addGoal(editingMatch.homeTeamId, homePlayers)}
+          >
+            + Mål
+          </button>
+        </div>
+
+        <div className="results-scorers-col">
+          <h3>{awayTeam.name}</h3>
+
+          {awayGoals.map((goal, i) => {
+            const globalIndex = goals.indexOf(goal);
+            return (
+              <div key={i} className="scorer-row">
+                <select
+                  value={goal.playerId}
+                  onChange={(e) => updateGoalPlayer(globalIndex, e.target.value)}
+                >
+                  <option value="">Velg spiller</option>
+                  {awayPlayers.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+                <button
+                  className="remove-scorer"
+                  onClick={() => removeGoal(globalIndex)}
+                >✕</button>
+              </div>
+            );
+          })}
+
+          <button
+            className="add-scorer-btn"
+            onClick={() => addGoal(editingMatch.awayTeamId, awayPlayers)}
+          >
+            + Mål
+          </button>
+        </div>
+      </div>
+
+      {/* HANDLINGER */}
+      <div className="results-actions">
+        <button
+          className="save-btn"
+          onClick={saveResult}
+          disabled={saving}
         >
-          <option value="">Velg spiller</option>
-          {homePlayers.map((p) => (
-            <option key={p.id} value={p.id}>{p.name}</option>
-          ))}
-        </select>
-      ))}
-      <button onClick={addHomeScorer}>+ Legg til målscorer</button>
-
-      <h3>Målscorere – {awayTeam.name}</h3>
-      {awayScorers.map((scorer, i) => (
-        <select
-          key={i}
-          value={scorer}
-          onChange={(e) => updateAwayScorer(i, e.target.value)}
+          {saving ? "Lagrer..." : "Lagre resultat"}
+        </button>
+        <button
+          className="cancel-btn"
+          onClick={() => setEditingMatch(null)}
         >
-          <option value="">Velg spiller</option>
-          {awayPlayers.map((p) => (
-            <option key={p.id} value={p.id}>{p.name}</option>
-          ))}
-        </select>
-      ))}
-      <button onClick={addAwayScorer}>+ Legg til målscorer</button>
-
-      <br /><br />
-      <button onClick={saveResult}>Lagre resultat</button>
-      <button onClick={() => setEditingMatch(null)}>Avbryt</button>
-    </section>
+          Avbryt
+        </button>
+      </div>
+    </div>
   );
 }
-
-
-

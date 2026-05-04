@@ -107,6 +107,7 @@ export function useEventActions(match, liveMatch) {
   ------------------------------ */
   async function addEvent(type, data, setText, resetData) {
     const minute = getMinute();
+    const isPreMatch = liveMatch?.status === "not_started";
     let imageUrl = null;
 
     if (type === "image" && data.image) {
@@ -224,7 +225,8 @@ export function useEventActions(match, liveMatch) {
         type: "comment",
         text: data.text || "",
         imageUrl,
-        minute,
+        minute: isPreMatch ? null : minute,         // ⭐ ingen minutt før kamp
+        ...(isPreMatch && {preMatch: true}),    // ⭐ flagg for pre-match
         createdAt: serverTimestamp(),
       });
       resetData();
@@ -237,7 +239,8 @@ export function useEventActions(match, liveMatch) {
         type: "image",
         imageUrl,
         text: data.comment || "",
-        minute,
+        minute: isPreMatch ? null : minute,         // ⭐ ingen minutt før kamp
+        ...(isPreMatch && { preMatch: true}),    // ⭐ flagg for pre-match
         createdAt: serverTimestamp(),
       });
       resetData();
