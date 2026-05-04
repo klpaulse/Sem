@@ -23,7 +23,7 @@ export default function LiveControls({ match, onBack }) {
   const { liveMatch } = useLiveMatch(match);
   const { homeTeam, awayTeam } = useMatchTeams(match);
 
-  const [activeTab, setActiveTab] = useState("events");
+  const [activeTab, setActiveTab] = useState("prematch");
   const [formationStep, setFormationStep] = useState("squad");
   const [currentMatch, setCurrentMatch] = useState(match);
   const [formationSaved, setFormationSaved] = useState(false);
@@ -39,7 +39,7 @@ export default function LiveControls({ match, onBack }) {
     return () => unsub();
   }, [match?.id]);
 
-  const [type, setType] = useState("goal");
+  const [type, setType] = useState("comment");
   const [text, setText] = useState("");
   const [goalData, setGoalData] = useState({ team: "", player: "", assist: "" });
   const [cardData, setCardData] = useState({ team: "", player: "" });
@@ -63,7 +63,7 @@ export default function LiveControls({ match, onBack }) {
   } = useEventActions(match, liveMatch);
 
   function addEvent() {
-    const isPreMatch = liveMatch.status === "not_started"
+    const isPreMatch = liveMatch.status === "not_started";
     const dataMap = {
       goal:      { ...goalData, text },
       yellow:    { ...cardData, text },
@@ -74,7 +74,7 @@ export default function LiveControls({ match, onBack }) {
       injury:    { ...simpleData, text },
       addedTime: { ...simpleData, text },
       comment:   { text, ...(isPreMatch ? { preMatch: true } : {}) },
-      image:     { ...simpleData, ...(isPreMatch ? {preMatch: true} : {}) },
+      image:     { ...simpleData, ...(isPreMatch ? { preMatch: true } : {}) },
     };
 
     const resetMap = {
@@ -104,21 +104,62 @@ export default function LiveControls({ match, onBack }) {
       <LiveHeader liveMatch={liveMatch} onBack={onBack} />
 
       {/* -------------------------------------------------------
-          FØR KAMP – vises direkte uten faner
+          FØR KAMP
       ------------------------------------------------------- */}
       {isPreMatch && (
         <>
-          <PreMatchPanel
-           matchId={match.id} 
-           match={liveMatch}
-           type={type}
-           setType={setType}
-           text={text}
-          setText={setText}
-         simpleData={simpleData}
-          setSimpleData={setSimpleData}
-         addEvent={addEvent}
+          <div className="live-tabs">
+            <button
+              className={activeTab === "prematch" ? "active" : ""}
+              onClick={() => setActiveTab("prematch")}
+            >
+              Før kampen
+            </button>
+            <button
+              className={activeTab === "formation" ? "active" : ""}
+              onClick={() => setActiveTab("formation")}
+            >
+              Formasjon
+            </button>
+          </div>
+
+          {activeTab === "prematch" && (
+            <PreMatchPanel
+              matchId={match.id}
+              match={liveMatch}
+              type={type}
+              setType={setType}
+              text={text}
+              setText={setText}
+              simpleData={simpleData}
+              setSimpleData={setSimpleData}
+              addEvent={addEvent}
             />
+          )}
+
+          {activeTab === "formation" && (
+            <div>
+              {formationStep === "squad" && !formationSaved && (
+                <SquadSelector
+                  match={currentMatch}
+                  onConfirm={(selectedIds) => {
+                    setCurrentMatch((prev) => ({ ...prev, squad: selectedIds }));
+                    setFormationStep("formation");
+                  }}
+                />
+              )}
+              {(formationStep === "formation" || formationSaved) && (
+                <FormationAdmin
+                  match={{
+                    ...currentMatch,
+                    homeTeamName: homeTeam?.name,
+                    awayTeamName: awayTeam?.name,
+                  }}
+                  onClose={() => setActiveTab("prematch")}
+                />
+              )}
+            </div>
+          )}
 
           <MatchControls
             onStart={() => {
@@ -154,7 +195,6 @@ export default function LiveControls({ match, onBack }) {
             </button>
           </div>
 
-          {/* Hendelser */}
           {activeTab === "events" && (
             <>
               <EventButtons activeType={type} onSelect={setType} />
@@ -197,7 +237,6 @@ export default function LiveControls({ match, onBack }) {
             </>
           )}
 
-          {/* Formasjon */}
           {activeTab === "formation" && (
             <div>
               {formationStep === "squad" && !formationSaved && (
@@ -209,7 +248,6 @@ export default function LiveControls({ match, onBack }) {
                   }}
                 />
               )}
-
               {(formationStep === "formation" || formationSaved) && (
                 <FormationAdmin
                   match={{
