@@ -270,6 +270,8 @@ body{
   opacity: 0.9;
   padding-right: 5px;
   color: #ffffff66;
+  font-size: 12px; 
+  white-space: nowrap;
   
 }
 
