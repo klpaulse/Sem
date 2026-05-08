@@ -246,6 +246,30 @@ export function useEventActions(match, liveMatch) {
       resetData();
       return;
     }
+if (type === "poll") {
+  const pollRef = collection(db, "matches", match.id, "polls");
+
+  await addDoc(pollRef, {
+    question: data.question,
+    options: data.options.map((o) => ({
+      text: o,
+      votes: 0
+    })),
+    voters: [],
+    active: true,
+    createdAt: serverTimestamp(),
+
+    // ⭐ Poll skal ALDRI ha minutt
+    minute: null,
+
+    // ⭐ Sticky før kamp
+  preMatch: isPreMatch ?  true : false
+  });
+
+  resetData();
+  return;
+}
+
   }
 
   return {

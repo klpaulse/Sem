@@ -1,4 +1,3 @@
-
 :root{
     --background: #0D1117;
     --nextmatch-text: #ffff;
@@ -20,60 +19,52 @@
     );
     --card-bg: #ffffff0d ; 
     --calandar-style: ; 
-  
 }
 
 body{
     background-color: var(--background);
 }
-  .header{
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    gap: 12px;
-    padding: 1rem 0;
-    margin-bottom: 1.5rem; 
- 
-  }
 
-   .next-match * {
-    text-align: center; 
-    font-size: 1rem; 
+.header{
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 12px;
+  padding: 1rem 0;
+  margin-bottom: 1.5rem; 
+}
+
+.next-match * {
+  text-align: center; 
+  font-size: 1rem; 
   font-weight: 600; 
-    
-   
-  
-  }
+}
 
-  .match-title{
+.match-title{
   color: var(--nextmatch-text);
   border-top: 1px solid rgba(255, 255, 255, 0.2);
   padding-top: 0.6rem; 
   margin-bottom: 0.2rem; 
- 
-  }
+}
 
-  .dato{
-    color: var(--nextmatch-text);
-  }
+.dato{
+  color: var(--nextmatch-text);
+}
 
-/*Kommende kamp*/
-  .countdown{
-     display: flex; 
-    flex-direction: row;
-     text-align: center;
-     justify-content: center;
+.countdown{
+  display: flex; 
+  flex-direction: row;
+  text-align: center;
+  justify-content: center;
   font-size: 13px;
   font-weight: 500;
   color: #ccc;
   margin-top: 6px;
   opacity: 0.9;
-   
+}
 
-  }
-
-  .knapp-kampdetaljer{
- background: none;
+.knapp-kampdetaljer{
+  background: none;
   border: none;
   color: var(--countdown-bottom);
   font-size: 1rem;
@@ -81,11 +72,11 @@ body{
   cursor: pointer;
   position: relative;
   padding: 0.3rem 0; 
- margin-top: -0.2rem;
- margin-bottom: -1.5rem; 
+  margin-top: -0.2rem;
+  margin-bottom: -1.5rem; 
+}
 
-
-  .knapp-kampdetaljer::after{
+.knapp-kampdetaljer::after{
   content: "";
   position: absolute;
   left: 0;
@@ -97,66 +88,53 @@ body{
   transform: scaleX(0.35);
   transform-origin: left;
   transition: 0.18s ease;
-
-  }
-
+}
 
 .knapp-kampdetaljer:hover{
-   color: #ff3b3b;
+  color: #ff3b3b;
 }
 
 .knapp-kampdetaljer:hover::after{
   opacity: 1;
   transform: scaleX(1);
-
 }
 
-   
+.knapp-linje{
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 1rem;
 }
 
-  .knapp-linje{
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    padding-bottom: 1rem;   /* luft før streken */
-  
-
-
-  }
-
-  /*last-played-card*/
- .last-played-card { 
+.last-played-card { 
   padding: 1.2rem;
   border-radius: 12px;
- background: var(--plen-gradient);
- border-bottom: 1px solid #ffffff33; 
+  background: var(--plen-gradient);
+  border-bottom: 1px solid #ffffff33; 
   text-align: center;
 }
 
 .lp-row{
-   display: flex;
+  display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
-
 }
 
 .lp-title{
   font-size: 1rem;
   font-weight: 700;
   color: var(--nextmatch-text);
-  white-space:normal;
+  white-space: normal;
   text-align: center; 
   max-width: 120px; 
   word-break: break-word; 
-  line-height:1.1; 
+  line-height: 1.1; 
 }
-
 
 .lp-result{
   font-size: 1.4rem;
   font-weight: 700;
   color: var(--nextmatch-text);
   margin: 0.6rem 0 0.8rem 0;
- 
 }
 
 .dato {
@@ -167,7 +145,7 @@ body{
 }
 
 .lp-status{
-display: inline-block;
+  display: inline-block;
   background: var(--status-gradient);
   padding: 0.25rem 1.4rem;
   border-radius: 4px;
@@ -179,7 +157,6 @@ display: inline-block;
   margin-bottom: 0.8rem; 
   opacity: 0.9;
   margin-right: 2rem;
-
 }
 
 .lp-goals{
@@ -187,7 +164,6 @@ display: inline-block;
   flex-direction: column;
   gap: 0.3rem;
   margin-bottom: 1rem;
-
 }
 
 .lp-goal-item{
@@ -205,23 +181,22 @@ display: inline-block;
   margin-right: 2rem; 
 }
 
-
-/*main*/
 .content-box{
   margin: 1rem; 
-        margin-top: 1rem;
-        background: var(--card-bg);
-        padding: 1rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        backdrop-filter: blur(4px);
+  margin-top: 1.5rem;
+  background: var(--card-bg);
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  backdrop-filter: blur(4px);
+  overflow: visible !important;
 }
 
 .nav{
   display: flex; 
   justify-content: center; 
   gap: 1.5rem; 
-  margin: 1.2rem 0; 
+  margin: 1.2rem 0 0; 
 }
 
 .nav-btn {
@@ -240,21 +215,22 @@ display: inline-block;
   text-decoration: underline; 
 }
 
-/*matchreport*/
 .report-container{
-  margin: -1rem; ; 
-  
+  margin: 0;
+  padding: 0;
+  overflow: visible !important;
 }
+
 .report-feed{
   padding: 0;
   margin: 0; 
- 
+  overflow: visible !important;
 }
 
 .event {
- background: var(--card-bg);
+  background: var(--card-bg);
   padding: 10px 12px;
-  border-bottom: 1px solid #FFFFFF0F;  /* VG Live bruker linje, ikke skygge */
+  border-bottom: 1px solid #FFFFFF0F;
   border-top: 1px solid #FFFFFF0F; 
   display: grid;
   grid-template-columns: 30px 1fr 30px; 
@@ -278,34 +254,33 @@ display: inline-block;
 }
 
 .event-text p {
-   margin: 0;
+  margin: 0;
   font-size: 15px;
   line-height: 1.3;
   text-align: left;
   word-break: break-word;
-
 }
+
 .event-minute {
   text-align: right;
   font-weight: 600;
   opacity: 0.9;
   padding-right: 5px;
 }
+
 .event-system {
   display: flex; 
-   justify-content: center;
+  justify-content: center;
   align-items: center;
   text-align: center;
-  grid-template-columns: 1fr !important; /* overstyr grid */
+  grid-template-columns: 1fr !important;
   padding: 12px 0;
   font-style: italic;
   color: #ccc;
   border-bottom: 1px solid #FFFFFF0F;
   background: none;
-
 }
 
-/* Generell tittel for alle eventtyper */
 .event-text p:first-child {
   color: #ffffff;
   font-weight: 700;
@@ -314,13 +289,11 @@ display: inline-block;
 }
 
 .event-text p:not(:first-child) {
- color: #d0d0d0;
+  color: #d0d0d0;
   font-weight: 400;
   font-size: 14px;
   opacity: 0.85;
-
 }
-
 
 /* ================================
    MÅL
@@ -332,57 +305,43 @@ display: inline-block;
 }
 
 .event-goal .event-icon {
-  color: #0f2f0f; /* mørk grønn */
+  color: #0f2f0f;
   font-size: 20px;
 }
 
-/* TITTEL */
 .event-goal .event-text .goal-title {
   color: #0f2f0f;
 }
 
-/* STILLING */
 .event-goal .event-text .goal-score {
   color: #0f2f0f;
 }
 
-/* DETALJER */
 .event-goal .event-text .goal-detail {
   color: #1a3d1a;
 }
 
-/* KOMMENTAR */
 .event-goal .event-text .goal-comment {
   color: #2a4d2a;
 }
 
-
 /* ================================
    SPILLERBYTTE
 ================================ */
-
-/* Grønn pil opp */
 .event-sub .sub-in svg {
   color: #2ecc71 !important;
 }
 
-/* Rød pil ned */
 .event-sub .sub-out svg {
   color: #e74c3c !important;
 }
 
-
 /* ================================
-   GULT KORT
+   GULT / RØDT KORT
 ================================ */
-
 .yellow-card {
   color: #f4d03f;
 }
-
-/* ================================
-   RØDT KORT
-================================ */
 
 .red-card {
   color: #e74c3c;
@@ -400,34 +359,374 @@ display: inline-block;
 .event-injury .event-icon {
   color: #c0392b;
 }
+
 .event-injury .event-text p:first-child {
   color: #2a002a;
 }
 
 .event-injury .event-text p:not(:first-child) {
-  color: #4d003d; /* mørkere lilla */
+  color: #4d003d;
   font-weight: 500;
   opacity: 0.9;
 }
 
-
 /* ================================
-   CORNER
+   CORNER / FRISPARK
 ================================ */
-
 .event-corner .event-icon {
   color: #3498db;
 }
-
-/* ================================
-   FRISPARK
-================================ */
-
 
 .event-whistle .event-icon {
   color: #e67e22;
 }
 
+/* ================================
+   BILDE-EVENT
+================================ */
+.event-image {
+  background: var(--card-bg);
+  border-top: 1px solid #FFFFFF0F;
+  border-bottom: 1px solid #FFFFFF0F;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: 30px 1fr 30px;
+  align-items: start;
+  gap: 8px;
+  border-radius: 6px;
+}
+
+.event-image .event-icon {
+  font-size: 16px;
+  color: #ffffff66;
+  padding-top: 2px;
+}
+
+.event-image .event-image-img {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 8px;
+  margin-top: 6px;
+  display: block;
+}
+
+.event-image .event-text p {
+  margin: 0 0 2px 0;
+  font-size: 14px;
+  color: #ffffffcc;
+  font-style: italic;
+}
+
+.event-image-img {
+  width: 100%;
+  max-width: 300px;
+  border-radius: 6px;
+  margin-top: 6px;
+}
+
+/* ================================
+   SPØRSMÅL/SVAR
+================================ */
+.event-question {
+  background: #2a2a2a !important;
+  border-top: 1px solid #3a3a3a !important;
+  border-bottom: 1px solid #3a3a3a !important;
+  padding: 10px 12px;
+  border-radius: 6px;
+  display: grid;
+  grid-template-columns: 30px 1fr 30px;
+  align-items: center;
+  gap: 10px;
+}
+
+.event-question .event-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: #e5e5e5;
+}
+
+.event-question .event-text p {
+  margin: 2px 0;
+  color: #f0f0f0 !important;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.event-question .question-block {
+  background: #2a2a2a;
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid #3a3a3a;
+  margin-bottom: 6px;
+}
+
+.event-question .question-line {
+  font-weight: 600;
+  color: #ffffff !important;
+  margin-bottom: 2px;
+}
+
+.event-question .answer-block {
+  background: #1f1f1f;
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid #333;
+  margin-top: 6px;
+}
+
+.event-question .answer-line {
+  font-weight: 600;
+  color: #4ecf7a !important;
+  margin-bottom: 2px;
+}
+
+/* ================================
+   ASK BUTTON
+================================ */
+.ask-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid #3a3a3a;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s ease;
+  padding: 0;
+}
+
+.ask-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ================================
+   POPUP
+================================ */
+.question-popup {
+  margin-top: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px;
+  border-radius: 10px;
+  backdrop-filter: blur(4px);
+  position: relative;
+}
+
+.question-popup label {
+  display: block;
+  margin-bottom: 4px;
+  color: #ddd;
+  font-size: 14px;
+}
+
+.question-popup input,
+.question-popup textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  color: #fff;
+  font-size: 14px;
+  margin-bottom: 12px;
+  outline: none;
+}
+
+.question-popup input:focus,
+.question-popup textarea:focus {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.question-popup textarea {
+  min-height: 80px;
+  resize: none;
+}
+
+.question-popup button[type="submit"] {
+  width: 100%;
+  background: #2b7cff;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.question-popup button[type="submit"]:hover {
+  background: #1f63d1;
+}
+
+.close-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #aaa;
+  transition: 0.2s ease;
+}
+
+.close-btn:hover {
+  color: #fff;
+}
+
+.close-icon {
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 300;
+}
+
+/* ================================
+   POLL EVENT – minimalistisk feed-stil
+================================ */
+
+/* Nullstill ALT inni poll slik at den ikke arver event-styling */
+.poll-event * {
+  all: unset;
+  display: block;
+  box-sizing: border-box;
+}
+
+/* Selve poll-containeren */
+.poll-event {
+  background: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: block;
+  width: 100%;
+}
+
+/* Sticky før kampstart */
+.poll-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: #000 !important;   /* svart bakgrunn */
+  padding: 14px 0 !important;
+  border-bottom: 1px solid #FFFFFF22;
+}
+
+/* Pre-match: fjern boks rundt alternativer */
+.pre-match .poll-event-option {
+  background: none !important;
+  padding: 4px 0 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Pre-match: fjern hover også */
+.pre-match .poll-event-option:hover {
+  background: none !important;
+}
+
+/* Spørsmål */
+.poll-event-question {
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+/* Alternativer (LIVE) */
+.poll-event-option {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+
+.poll-event-option:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.poll-event-option.voted {
+  background: none;
+  padding: 4px 8px;
+}
+
+/* Tekst + prosent */
+.poll-event-option-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.poll-event-option-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffffee;
+}
+
+.poll-event-option-pct {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffffbb;
+}
+
+/* Bar */
+.poll-event-bar-bg {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.poll-event-bar-fill {
+  height: 100%;
+  background: var(--countdown-text);
+  border-radius: 4px;
+  transition: width 0.35s ease;
+}
+
+/* Stemmetall */
+.poll-event-total {
+  font-size: 12px;
+  color: #ffffff66;
+  margin-top: 6px;
+}
+
+
+
+
+
+/* ================================
+   REPORT HEADER
+================================ */
+.report-title-row {
+  position: relative;
+  padding: 6px 0;
+  margin-bottom: 8px;
+  min-height: 32px; 
+}
+
+.report-title-row .audience-questions {
+  display: flex; 
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0; 
+  padding: 0; 
+  align-items: center; 
+}
+
+/* ================================
+   MATCH CLICKABLE
+================================ */
 .match-clickable {
   cursor: pointer;
   padding: 6px 0;
@@ -437,6 +736,9 @@ display: inline-block;
   opacity: 0.7;
 }
 
+/* ================================
+   TIMELINE
+================================ */
 .timeline-container {
   display: flex;
   gap: 10px;
@@ -492,14 +794,13 @@ display: inline-block;
 }
 
 .timeline-box.not-played {
-  background: #d5d5d5; /* lys grå */
+  background: #d5d5d5;
   color: #555;
 }
 
-
-
-
-
+/* ================================
+   BEFORE MATCH
+================================ */
 .beforematch {
   color: #ffffffcc;
   font-size: 1.4rem;
@@ -539,6 +840,9 @@ display: inline-block;
   margin-top: 20px;
 }
 
+/* ================================
+   H2H
+================================ */
 .h2h-card {
   background: #111;
   padding: 10px 14px;
@@ -577,6 +881,9 @@ display: inline-block;
   margin-top: 4px;
 }
 
+/* ================================
+   KAMPINFO
+================================ */
 .kampinfo-row {
   display: flex;
   justify-content: space-between;
@@ -596,199 +903,17 @@ display: inline-block;
   color: #ffffffdd;
 }
 
-.event-image-img {
-  width: 100%;
-  max-width: 300px;
-  border-radius: 6px;
-  margin-top: 6px;
-}
-
-/* Hele eventen */
-.event-question {
-  background: #2a2a2a !important;   /* litt lysere enn card-bg */
-  border-top: 1px solid #3a3a3a !important;
-  border-bottom: 1px solid #3a3a3a !important;
-  padding: 10px 12px;
-  border-radius: 6px;
-  display: grid;
-  grid-template-columns: 30px 1fr 30px;
-  align-items: center;
-  gap: 10px;
-}
-
-/* Ikonet – midtstilt */
-.event-question .event-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  font-size: 22px;
-  color: #e5e5e5;
-}
-
-/* TEKST */
-.event-question .event-text p {
-  margin: 2px 0;
-  color: #f0f0f0 !important;
-  font-size: 15px;
-  line-height: 1.35;
-}
-
-/* SPØRSMÅLSBOKS */
-.event-question .question-block {
-  background: #2a2a2a;       /* samme som eventen → subtil */
-  padding: 6px 8px;
-  border-radius: 4px;
-  border: 1px solid #3a3a3a; /* lett markering */
-  margin-bottom: 6px;
-}
-
-.event-question .question-line {
-  font-weight: 600;
-  color: #ffffff !important;
-  margin-bottom: 2px;
-}
-
-/* SVARSBOKS */
-.event-question .answer-block {
-  background: #1f1f1f;       /* litt mørkere → tydelig skille */
-  padding: 6px 8px;
-  border-radius: 4px;
-  border: 1px solid #333;
-  margin-top: 6px;
-}
-
-.event-question .answer-line {
-  font-weight: 600;
-  color: #4ecf7a !important;
-  margin-bottom: 2px;
-}
-
-.audience-questions {
-  margin-top: 1.5rem;
-}
-
-/* Ask button */
-.ask-btn {
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
-  padding: 10px 14px;
-  border-radius: 8px;
-  border: none;
-  font-size: 15px;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.ask-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-/* Popup container */
-.question-popup {
-  margin-top: 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 16px;
-  border-radius: 10px;
-  backdrop-filter: blur(4px);
-  animation: fadeIn 0.25s ease;
-}
-
-/* Labels */
-.question-popup label {
-  display: block;
-  margin-bottom: 4px;
-  color: #ddd;
-  font-size: 14px;
-}
-
-/* Inputs */
-.question-popup input,
-.question-popup textarea {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.08);
-  border: none;
-  border-radius: 8px;
-  padding: 10px;
-  color: #fff;
-  font-size: 14px;
-  margin-bottom: 12px;
-  outline: none;
-}
-
-.question-popup input:focus,
-.question-popup textarea:focus {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-/* Textarea */
-.question-popup textarea {
-  min-height: 80px;
-  resize: none;
-}
-
-/* Submit button */
-.question-popup button[type="submit"] {
-  width: 100%;
-  background: #2b7cff;
-  color: #fff;
-  padding: 10px 14px;
-  border-radius: 8px;
-  border: none;
-  font-size: 15px;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.question-popup button[type="submit"]:hover {
-  background: #1f63d1;
-}
-
-.question-popup {
-  position: relative;
-}
-
-/* Minimalistisk X-knapp */
-.close-btn {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-
-  background: none;
-  border: none;
-  padding: 4px;
-  cursor: pointer;
-  color: #aaa;
-  transition: 0.2s ease;
-}
-
-.close-btn:hover {
-  color: #fff;
-}
-
-/* Selve X-ikonet */
-.close-icon {
-  font-size: 18px;
-  line-height: 1;
-  font-weight: 300;
-}
-
-/* ============================
-   FOTBALLBANE – REALISTISK
-   ============================ */
-   
-
+/* ================================
+   FOTBALLBANE
+================================ */
 .formation-field {
   position: relative;
   width: 100%;
   aspect-ratio: 3/4;
-  position: relative;
   background: #1a3d1a;
   border: 2px solid #2e5c2e;
   border-radius: 12px;
   overflow: hidden;
-  
-  /* Subtil gress-tekstur */
   background-image:
     repeating-linear-gradient(
       90deg,
@@ -799,79 +924,28 @@ display: inline-block;
     );
 }
 
-/* Admin-modus */
 .formation-field.interactive {
   pointer-events: auto !important; 
   touch-action: none !important;
 }
 
-/* Visningsmodus */
 .formation-field.no-interaction {
   touch-action: pan-y !important;
   pointer-events: none !important;
 }
-
-/* ============================
-   BANESTREKER (linjer)
-   ============================ */
 
 .formation-field::before {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-
   background-image:
-
-    /* 5-meter linje hjemmelag (ca. 8%) */
-    linear-gradient(
-      to bottom,
-      transparent 0%,
-      transparent 8%,
-      rgba(255,255,255,0.25) 8%,
-      transparent 9%
-    ),
-
-    /* 16-meter linje hjemmelag (ca. 18%) */
-    linear-gradient(
-      to bottom,
-      transparent 0%,
-      transparent 18%,
-      rgba(255,255,255,0.25) 18%,
-      transparent 19%
-    ),
-
-    /* Midtlinje (50%) */
-    linear-gradient(
-      to bottom,
-      transparent 0%,
-      transparent 50%,
-      rgba(255,255,255,0.35) 50%,
-      transparent 51%
-    ),
-
-    /* 16-meter linje bortelag (ca. 82%) */
-    linear-gradient(
-      to bottom,
-      transparent 0%,
-      transparent 82%,
-      rgba(255,255,255,0.25) 82%,
-      transparent 83%
-    ),
-
-    /* 5-meter linje bortelag (ca. 92%) */
-    linear-gradient(
-      to bottom,
-      transparent 0%,
-      transparent 92%,
-      rgba(255,255,255,0.25) 92%,
-      transparent 93%
-    );
+    linear-gradient(to bottom, transparent 0%, transparent 8%, rgba(255,255,255,0.25) 8%, transparent 9%),
+    linear-gradient(to bottom, transparent 0%, transparent 18%, rgba(255,255,255,0.25) 18%, transparent 19%),
+    linear-gradient(to bottom, transparent 0%, transparent 50%, rgba(255,255,255,0.35) 50%, transparent 51%),
+    linear-gradient(to bottom, transparent 0%, transparent 82%, rgba(255,255,255,0.25) 82%, transparent 83%),
+    linear-gradient(to bottom, transparent 0%, transparent 92%, rgba(255,255,255,0.25) 92%, transparent 93%);
 }
-
-/* ============================
-   MIDTSIRKEL
-   ============================ */
 
 .formation-field::after {
   content: "";
@@ -886,10 +960,6 @@ display: inline-block;
   pointer-events: none;
 }
 
-/* ============================
-   KEEPERFELT (øverst og nederst)
-   ============================ */
-
 .keeper-box {
   position: absolute;
   left: 20%;
@@ -899,17 +969,8 @@ display: inline-block;
   pointer-events: none;
 }
 
-.keeper-box--top {
-  top: 6%;
-}
-
-.keeper-box--bottom {
-  bottom: 6%;
-}
-
-/* ============================
-   CORNER ARCS
-   ============================ */
+.keeper-box--top { top: 6%; }
+.keeper-box--bottom { bottom: 6%; }
 
 .corner-arc {
   position: absolute;
@@ -925,10 +986,6 @@ display: inline-block;
 .corner-arc--bl { bottom: -4%; left: -4%; }
 .corner-arc--br { bottom: -4%; right: -4%; }
 
-/* ============================
-   MÅLSTREKER
-   ============================ */
-
 .goal-line {
   position: absolute;
   left: 0;
@@ -941,8 +998,9 @@ display: inline-block;
 .goal-line--top { top: 0; }
 .goal-line--bottom { bottom: 0; }
 
-
-
+/* ================================
+   PLAYER CHIP
+================================ */
 .player-chip {
   display: flex;
   flex-direction: column;
@@ -1026,42 +1084,21 @@ display: inline-block;
   opacity: 0.9;
 }
 
-
-
-
 .lagoppstilling-container {
   background: transparent !important;
 }
 
-
-
-/* ============================
-   MOBILVERSJON AV PLAYERCHIP
-   ============================ */
-
-@media (max-width: 600px) {
-  .player-chip {
-    transform: scale(0.75);
-    gap: 1px;
-  }
-
-  .player-chip__avatar {
-    width: 20px;
-    height: 20px;
-    border-width: 1px;
-  }
-
-  .player-chip__number {
-    font-size: 8px;
-  }
-
-  .player-chip__name {
-    font-size: 8px;
-    padding: 1px 3px;
-    border-radius: 3px;
-  }
+.prematch-section {
+  background: #111;
+  padding: 20px;
+  border-radius: 12px;
+  color: #fff;
+  margin-top: 20px;
 }
 
+/* ================================
+   TABELL
+================================ */
 .league-table {
   width: 100%;
   background: #ffffff;
@@ -1108,52 +1145,47 @@ display: inline-block;
   transition: 0.2s;
 }
 
-/* Førsteplass */
 .table-row:first-child {
   background: #e8ffe8;
   font-weight: 600;
 }
 
-/* Sisteplass */
 .table-row:last-child {
   background: #ffecec;
 }
 
-/* Lag-navn venstrejustert */
 .table-row span:nth-child(2),
 .table-header span:nth-child(2) {
   justify-content: flex-start;
 }
 
-/* Tall høyrejustert */
 .table-row span:not(:nth-child(2)),
 .table-header span:not(:nth-child(2)) {
   justify-content: center;
 }
 
+/* ================================
+   MOBIL
+================================ */
+@media (max-width: 600px) {
+  .player-chip {
+    transform: scale(0.75);
+    gap: 1px;
+  }
 
+  .player-chip__avatar {
+    width: 20px;
+    height: 20px;
+    border-width: 1px;
+  }
 
+  .player-chip__number {
+    font-size: 8px;
+  }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
-    
-
+  .player-chip__name {
+    font-size: 8px;
+    padding: 1px 3px;
+    border-radius: 3px;
+  }
+}

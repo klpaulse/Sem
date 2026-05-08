@@ -11,7 +11,6 @@ import SquadSelector from "../SquadSelector";
 import LiveHeader from "./LiveHeader";
 import EventButtons from "./EventButtons";
 import MatchControls from "./MatchControls";
-import PreMatchPanel from "./PreMatchPanel";
 
 import { useLiveMatch } from "../livekontroll/useLiveMatch";
 import { useMatchTeams } from "../livekontroll/useMatchTeams";
@@ -45,11 +44,23 @@ export default function LiveControls({ match, onBack }) {
   const [cardData, setCardData] = useState({ team: "", player: "" });
   const [subData, setSubData] = useState({ team: "", in: "", out: "", comment: "" });
   const [fkData, setFkData] = useState({ team: "", player: "", comment: "" });
-  const [simpleData, setSimpleData] = useState({ team: "", minutes: "", image: null, comment: "" });
+  const [simpleData, setSimpleData] = useState({
+    team: "",
+    minutes: "",
+    image: null,
+    comment: "",
+    options: ["", ""], // ⭐ poll-alternativer
+  });
 
   useEffect(() => {
     setText("");
-    setSimpleData({ team: "", minutes: "", image: null, comment: "" });
+    setSimpleData({
+      team: "",
+      minutes: "",
+      image: null,
+      comment: "",
+      options: ["", ""],
+    });
   }, [type]);
 
   const {
@@ -64,6 +75,7 @@ export default function LiveControls({ match, onBack }) {
 
   function addEvent() {
     const isPreMatch = liveMatch.status === "not_started";
+
     const dataMap = {
       goal:      { ...goalData, text },
       yellow:    { ...cardData, text },
@@ -75,6 +87,13 @@ export default function LiveControls({ match, onBack }) {
       addedTime: { ...simpleData, text },
       comment:   { text, ...(isPreMatch ? { preMatch: true } : {}) },
       image:     { ...simpleData, ...(isPreMatch ? { preMatch: true } : {}) },
+
+      // ⭐ Poll
+      poll: {
+        question: simpleData.question,
+        options: simpleData.options,
+        preMatch: isPreMatch,
+      },
     };
 
     const resetMap = {
@@ -83,11 +102,17 @@ export default function LiveControls({ match, onBack }) {
       red:       () => setCardData({ team: "", player: "" }),
       sub:       () => setSubData({ team: "", in: "", out: "", comment: "" }),
       whistle:   () => setFkData({ team: "", player: "", comment: "" }),
-      corner:    () => { setSimpleData({ team: "", minutes: "", image: null, comment: "" }); setText(""); },
-      injury:    () => { setSimpleData({ team: "", minutes: "", image: null, comment: "" }); setText(""); },
-      addedTime: () => { setSimpleData({ team: "", minutes: "", image: null, comment: "" }); setText(""); },
+      corner:    () => { setSimpleData({ team: "", minutes: "", image: null, comment: "", options: ["", ""] }); setText(""); },
+      injury:    () => { setSimpleData({ team: "", minutes: "", image: null, comment: "", options: ["", ""] }); setText(""); },
+      addedTime: () => { setSimpleData({ team: "", minutes: "", image: null, comment: "", options: ["", ""] }); setText(""); },
       comment:   () => setText(""),
-      image:     () => setSimpleData({ team: "", minutes: "", image: null, comment: "" }),
+      image:     () => setSimpleData({ team: "", minutes: "", image: null, comment: "", options: ["", ""] }),
+
+      // ⭐ Poll reset
+      poll: () => {
+        setText("");
+        setSimpleData({ options: ["", ""] });
+      },
     };
 
     addEventAction(type, dataMap[type], setText, resetMap[type]);
@@ -124,17 +149,43 @@ export default function LiveControls({ match, onBack }) {
           </div>
 
           {activeTab === "prematch" && (
-            <PreMatchPanel
-              matchId={match.id}
-              match={liveMatch}
-              type={type}
-              setType={setType}
-              text={text}
-              setText={setText}
-              simpleData={simpleData}
-              setSimpleData={setSimpleData}
-              addEvent={addEvent}
-            />
+            <>
+              <EventButtons
+                activeType={type}
+                onSelect={setType}
+                onlyTypes={["comment", "image", "poll"]} // ⭐ KUN disse før kamp
+              />
+
+              <EventForm
+                type={type}
+                text={text}
+                setText={setText}
+                goalData={goalData}
+                setGoalData={setGoalData}
+                cardData={cardData}
+                setCardData={setCardData}
+                subData={subData}
+                setSubData={setSubData}
+                fkData={fkData}
+                setFkData={setFkData}
+                simpleData={simpleData}
+                setSimpleData={setSimpleData}
+                liveMatch={liveMatch}
+                homeTeam={homeTeam}
+                awayTeam={awayTeam}
+                addEvent={addEvent}
+              />
+
+              {/* ⭐ ADMIN SER FØR-KAMP FEED I MATCHREPORT-STIL */}
+              <EventList
+                match={{
+                  ...liveMatch,
+                  events: (liveMatch.events || []).filter((e) => e.preMatch === true),
+                  polls: (liveMatch.polls || []).filter((p) => p.active),
+                }}
+                isPreMatch={liveMatch?.status === "not_started"}
+              />
+            </>
           )}
 
           {activeTab === "formation" && (
@@ -176,7 +227,7 @@ export default function LiveControls({ match, onBack }) {
       )}
 
       {/* -------------------------------------------------------
-          LIVE – faner vises kun etter kampstart
+          UNDER KAMP
       ------------------------------------------------------- */}
       {!isPreMatch && (
         <>
@@ -228,10 +279,7 @@ export default function LiveControls({ match, onBack }) {
                 liveMatch={liveMatch}
               />
 
-              <AdminQuestions
-                matchId={match.id}
-                getMinute={getMinute}
-              />
+              <AdminQuestions matchId={match.id} getMinute={getMinute} />
 
               <EventList match={liveMatch} />
             </>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import { db } from "../../config/Firebase";
 import { getTeam } from "../../services/TeamService";
 
@@ -19,11 +19,15 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-export default function EventList({ match }) {
+export default function EventList({ match, isPreMatch = false }) {
   const [events, setEvents] = useState([]);
+  const [polls, setPolls] = useState([]);
   const [homeTeam, setHomeTeam] = useState(null);
   const [awayTeam, setAwayTeam] = useState(null);
 
+  /* -----------------------------
+      HENT LAG
+  ------------------------------ */
   useEffect(() => {
     if (!match) return;
 
@@ -37,30 +41,65 @@ export default function EventList({ match }) {
     loadTeams();
   }, [match]);
 
+  /* -----------------------------
+      HENT EVENTS
+  ------------------------------ */
   useEffect(() => {
     if (!match) return;
 
     const eventsRef = collection(db, "matches", match.id, "events");
+    const qEvents = query(eventsRef, orderBy("createdAt", "asc"));
 
-    const unsub = onSnapshot(eventsRef, (snap) => {
+    const unsub = onSnapshot(qEvents, (snap) => {
       const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
-      list.sort((a, b) => {
-        // Pre-match events (ingen minute) kommer først
-        if (a.minute == null && b.minute == null) {
-          return (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0);
-        }
-        if (a.minute == null) return -1;
-        if (b.minute == null) return 1;
-        return a.minute - b.minute;
-      });
-
-      setEvents(list);
+      if (isPreMatch) {
+        setEvents(list.filter((e) => e.preMatch === true));
+      } else {
+        setEvents(list);
+      }
     });
 
     return () => unsub();
-  }, [match]);
+  }, [match, isPreMatch]);
 
+  /* -----------------------------
+      HENT POLLS
+  ------------------------------ */
+  useEffect(() => {
+    if (!match) return;
+
+    const pollsRef = collection(db, "matches", match.id, "polls");
+    const unsub = onSnapshot(pollsRef, (snap) => {
+      const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+      if (isPreMatch) {
+        setPolls(list.filter((p) => p.preMatch === true && p.active));
+      } else {
+        setPolls(list.filter((p) => !p.preMatch));
+      }
+    });
+
+    return () => unsub();
+  }, [match, isPreMatch]);
+
+  /* -----------------------------
+      KOMBINERT FEED (kun under kamp)
+  ------------------------------ */
+  const combinedFeed = isPreMatch
+    ? events
+    : [
+        ...events,
+        ...polls.map((p) => ({ ...p, _isPoll: true })),
+      ].sort((a, b) => {
+        const aTime = a.createdAt?.seconds ?? 0;
+        const bTime = b.createdAt?.seconds ?? 0;
+        return aTime - bTime;
+      });
+
+  /* -----------------------------
+      HJELPEFUNKSJONER
+  ------------------------------ */
   function getPlayerName(teamId, playerId) {
     const team =
       teamId === match.homeTeamId
@@ -95,7 +134,7 @@ export default function EventList({ match }) {
   }
 
   function getDisplayMinute(minute) {
-    if (minute == null) return ""; // ingen minutt for pre-match
+    if (minute == null) return "";
     if (!match?.secondHalfStarted) {
       if (minute <= 45) return `${minute}'`;
       return `45+${minute - 45}`;
@@ -106,19 +145,18 @@ export default function EventList({ match }) {
 
   function getIcon(ev) {
     switch (ev.type) {
-      case "goal":        return <FontAwesomeIcon icon={faFutbol} />;
-      case "yellow":      return <FontAwesomeIcon icon={faSquare} className="yellow-card" />;
-      case "red":         return <FontAwesomeIcon icon={faSquare} className="red-card" />;
-      case "injury":      return <FontAwesomeIcon icon={faUserInjured} />;
-      case "sub":         return <FontAwesomeIcon icon={faArrowsRotate} />;
-      case "comment":     return <FontAwesomeIcon icon={faComment} />;
-      case "corner":      return <FontAwesomeIcon icon={faFlag} />;
-      case "whistle":     return <FontAwesomeIcon icon={faBullhorn} />;
-      case "addedTime":   return <FontAwesomeIcon icon={faClock} />;
-      case "image":       return <FontAwesomeIcon icon={faImage} />;
-      case "system":      return <FontAwesomeIcon icon={faCog} />;
-      case "questionAnswer": return <FontAwesomeIcon icon={faComment} />;
-      default:            return null;
+      case "goal":      return <FontAwesomeIcon icon={faFutbol} />;
+      case "yellow":    return <FontAwesomeIcon icon={faSquare} className="yellow-card" />;
+      case "red":       return <FontAwesomeIcon icon={faSquare} className="red-card" />;
+      case "injury":    return <FontAwesomeIcon icon={faUserInjured} />;
+      case "sub":       return <FontAwesomeIcon icon={faArrowsRotate} />;
+      case "comment":   return <FontAwesomeIcon icon={faComment} />;
+      case "corner":    return <FontAwesomeIcon icon={faFlag} />;
+      case "whistle":   return <FontAwesomeIcon icon={faBullhorn} />;
+      case "addedTime": return <FontAwesomeIcon icon={faClock} />;
+      case "image":     return <FontAwesomeIcon icon={faImage} />;
+      case "system":    return <FontAwesomeIcon icon={faCog} />;
+      default:          return null;
     }
   }
 
@@ -131,122 +169,101 @@ export default function EventList({ match }) {
       <div className="report-feed">
         <h3>Hendelser</h3>
 
-        {events.map((ev) => {
-          const minute = getDisplayMinute(ev.minute);
+        {/* ⭐ STICKY POLL FØR KAMP */}
+        {isPreMatch && polls.length > 0 && (
+          <div className="event event-poll sticky">
+            <h4>{polls[0].question}</h4>
+            {polls[0].options.map((opt, i) => (
+              <p key={i} className="poll-option">{opt.text}</p>
+            ))}
+          </div>
+        )}
+
+        {/* ⭐ KOMBINERT FEED – polls interleaved med events under kamp */}
+        {combinedFeed.map((item) => {
+          if (item._isPoll) {
+  return (
+    <div key={item.id} className="event event-comment">
+      <span className="event-icon">
+        <FontAwesomeIcon icon={faComment} />
+      </span>
+
+      <div className="event-text">
+        <p><strong>{item.question}</strong></p>
+        {item.options.map((opt, i) => (
+          <p key={i}>• {opt.text}</p>
+        ))}
+      </div>
+
+      {/* ⭐ Tom kolonne – ingen minutt, men riktig layout */}
+      <span className="event-minute"></span>
+    </div>
+  );
+}
+
+
+          const minute = getDisplayMinute(item.minute);
 
           return (
-            <div key={ev.id} className={`event event-${ev.type}`}>
-
-              <span className="event-icon">{getIcon(ev)}</span>
+            <div key={item.id} className={`event event-${item.type}`}>
+              <span className="event-icon">{getIcon(item)}</span>
 
               <div className="event-text">
+                {item.type === "comment" && <p>{item.text}</p>}
 
-                {ev.type === "system" && (
-                  <p className="system-text">{ev.text}</p>
-                )}
-
-                {ev.type === "goal" && (
+                {item.type === "image" && (
                   <>
-                    <p className="goal-title">{getTeamName(ev.team)} SCORER!</p>
-                    <p className="goal-score">{ev.homeScore}-{ev.awayScore}</p>
-                    <p className="goal-detail">Mål: {getPlayerName(ev.team, ev.player)}</p>
-                    {ev.assist && (
-                      <p className="goal-detail">
-                        Målgivende: {getPlayerName(ev.team, ev.assist)}
-                      </p>
-                    )}
-                    {ev.text && <p className="goal-comment">{ev.text}</p>}
-                  </>
-                )}
-
-                {ev.type === "sub" && (
-                  <>
-                    <p className="sub-title">Spillerbytte – {getTeamName(ev.team)}</p>
-                    <p className="sub-in">
-                      <FontAwesomeIcon icon={faArrowUp} /> Inn: {getPlayerName(ev.team, ev.in)}
-                    </p>
-                    <p className="sub-out">
-                      <FontAwesomeIcon icon={faArrowDown} /> Ut: {getPlayerName(ev.team, ev.out)}
-                    </p>
-                    {ev.comment && <p className="sub-comment">{ev.comment}</p>}
-                  </>
-                )}
-
-                {ev.type === "yellow" && (
-                  <>
-                    <p>Gult kort – {getTeamName(ev.team)}</p>
-                    <p>{getPlayerName(ev.team, ev.player)}</p>
-                    {ev.text && <p>{ev.text}</p>}
-                  </>
-                )}
-
-                {ev.type === "red" && (
-                  <>
-                    <p>Rødt kort – {getTeamName(ev.team)}</p>
-                    <p>{getPlayerName(ev.team, ev.player)}</p>
-                    {ev.text && <p>{ev.text}</p>}
-                  </>
-                )}
-
-                {ev.type === "injury" && (
-                  <>
-                    <p>Skade – {getTeamName(ev.team)}</p>
-                    {ev.text && <p>{ev.text}</p>}
-                  </>
-                )}
-
-                {ev.type === "corner" && (
-                  <>
-                    <p>Hjørnespark – {getTeamName(ev.team)}</p>
-                    {ev.player && (
-                      <p>{getPlayerName(ev.team, ev.player)} tar corneren</p>
-                    )}
-                    {ev.text && <p>{ev.text}</p>}
-                  </>
-                )}
-
-                {ev.type === "whistle" && (
-                  <>
-                    <p>Frispark – {getTeamName(ev.team)}</p>
-                    {ev.player && <p>{getPlayerName(ev.team, ev.player)}</p>}
-                    {ev.comment && <p>{ev.comment}</p>}
-                  </>
-                )}
-
-                {ev.type === "addedTime" && (
-                  <>
-                    <p>Det er lagt til <strong>{ev.minutes}</strong> minutter</p>
-                    {ev.text && <p>{ev.text}</p>}
-                  </>
-                )}
-
-                {ev.type === "comment" && <p>{ev.text}</p>}
-
-                {ev.type === "image" && (
-                  <>
-                    {ev.text && <p>{ev.text}</p>}
-                    {ev.imageUrl && (
-                      <img
-                        src={ev.imageUrl}
-                        alt="Hendelsesbilde"
-                        className="event-image-img"
-                      />
+                    {item.text && <p>{item.text}</p>}
+                    {item.imageUrl && (
+                      <img src={item.imageUrl} alt="" className="event-image-img" />
                     )}
                   </>
                 )}
 
-                {ev.type === "questionAnswer" && (
-                  <>
-                    <p><strong>{ev.name} spør:</strong> {ev.question}</p>
-                    <p><strong>Svar:</strong> {ev.answer}</p>
-                  </>
+                {item.type === "goal" && (
+                  <p>
+                    ⚽ {getPlayerName(item.team, item.player)}
+                    {item.assist && ` (assist: ${getPlayerName(item.team, item.assist)})`}
+                    {" – "}{getTeamName(item.team)}
+                    {" "}{item.homeScore}–{item.awayScore}
+                  </p>
                 )}
+
+                {(item.type === "yellow" || item.type === "red") && (
+                  <p>{getPlayerName(item.team, item.player)} – {getTeamName(item.team)}</p>
+                )}
+
+                {item.type === "sub" && (
+                  <p>
+                    Inn: {getPlayerName(item.team, item.in)} /
+                    Ut: {getPlayerName(item.team, item.out)}
+                    {item.comment && ` – ${item.comment}`}
+                  </p>
+                )}
+
+                {item.type === "whistle" && (
+                  <p>
+                    {getTeamName(item.team)}
+                    {item.player && ` – ${getPlayerName(item.team, item.player)}`}
+                    {item.comment && ` – ${item.comment}`}
+                  </p>
+                )}
+
+                {(item.type === "corner" || item.type === "injury") && (
+                  <p>
+                    {getTeamName(item.team)}
+                    {item.text && ` – ${item.text}`}
+                  </p>
+                )}
+
+                {item.type === "addedTime" && (
+                  <p>+{item.minutes} min{item.text && ` – ${item.text}`}</p>
+                )}
+
+                {item.type === "system" && <p>{item.text}</p>}
               </div>
 
-              {/* Vis kun minutt hvis det finnes */}
-              {minute && (
-                <span className="event-minute">{minute}</span>
-              )}
+              {minute && <span className="event-minute">{minute}</span>}
             </div>
           );
         })}

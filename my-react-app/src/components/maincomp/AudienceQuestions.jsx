@@ -27,7 +27,7 @@ export default function AudienceQuestions({ matchId }) {
     <div className="audience-questions">
 
       <button className="ask-btn" onClick={() => setShowBox(!showBox)}>
-        Still et spørsmål
+        ?
       </button>
 
       {showBox && (

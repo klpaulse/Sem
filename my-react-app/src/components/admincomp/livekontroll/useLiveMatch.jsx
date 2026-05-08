@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { doc, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  onSnapshot,
+  query,
+  orderBy
+} from "firebase/firestore";
 import { db } from "../../../config/Firebase";
 
 export function useLiveMatch(match) {
@@ -8,15 +14,59 @@ export function useLiveMatch(match) {
   useEffect(() => {
     if (!match?.id) return;
 
-    const ref = doc(db, "matches", match.id);
-
-    const unsub = onSnapshot(ref, (snap) => {
+    /* -----------------------------
+        HENT MATCH-DATA
+    ------------------------------ */
+    const matchRef = doc(db, "matches", match.id);
+    const unsubMatch = onSnapshot(matchRef, (snap) => {
       if (snap.exists()) {
-        setLiveMatch({ id: snap.id, ...snap.data() });
+        setLiveMatch((prev) => ({
+          ...prev,
+          ...snap.data(),
+          id: match.id
+        }));
       }
     });
 
-    return () => unsub();
+    /* -----------------------------
+        HENT EVENTS
+    ------------------------------ */
+    const eventsRef = collection(db, "matches", match.id, "events");
+    const qEvents = query(eventsRef, orderBy("createdAt", "asc"));
+
+    const unsubEvents = onSnapshot(qEvents, (snap) => {
+      const events = snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data()
+      }));
+
+      setLiveMatch((prev) => ({
+        ...prev,
+        events
+      }));
+    });
+
+    /* -----------------------------
+        HENT POLLS
+    ------------------------------ */
+    const pollsRef = collection(db, "matches", match.id, "polls");
+    const unsubPolls = onSnapshot(pollsRef, (snap) => {
+      const polls = snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data()
+      }));
+
+      setLiveMatch((prev) => ({
+        ...prev,
+        polls
+      }));
+    });
+
+    return () => {
+      unsubMatch();
+      unsubEvents();
+      unsubPolls();
+    };
   }, [match?.id]);
 
   return { liveMatch };

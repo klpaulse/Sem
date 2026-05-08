@@ -47,20 +47,25 @@ export default function EventForm({
     whistle: { icon: faBullhorn, label: "Frispark" },
     comment: { icon: faComment, label: "Kommentar" },
     addedTime: { icon: faClock, label: "Tilleggstid" },
-    image: { icon: faImage, label: "Legg til bilde" }
+    image: { icon: faImage, label: "Legg til bilde" },
+
+    // ⭐ Poll uten ikon
+    poll: { icon: null, label: "Avstemning" },
   };
 
   const current = titles[type];
 
   const needsTeams = ["goal", "yellow", "red", "sub", "whistle", "corner", "injury"].includes(type);
-if (needsTeams && (!homeTeam || !awayTeam)) {
-  return <div>Laster lag...</div>;
-}
+  if (needsTeams && (!homeTeam || !awayTeam)) {
+    return <div>Laster lag...</div>;
+  }
 
   return (
-    <div className="event-form"  key={type} >
+    <div className="event-form" key={type}>
       <h4 className="form-title">
-        <FontAwesomeIcon icon={current.icon} className={current.className} />
+        {current.icon && (
+          <FontAwesomeIcon icon={current.icon} className={current.className} />
+        )}
         {current.label}
       </h4>
 
@@ -123,7 +128,8 @@ if (needsTeams && (!homeTeam || !awayTeam)) {
         type === "injury" ||
         type === "whistle" ||
         type === "addedTime" ||
-        type === "image"
+        type === "image" ||
+        type === "poll"
       ) && (
         <textarea
           placeholder="Kommentar (valgfritt)"
@@ -132,7 +138,7 @@ if (needsTeams && (!homeTeam || !awayTeam)) {
         />
       )}
 
-      {/* ⭐ BILDEOPPLASTING – KUN FOR TYPE === "image" */}
+      {/* ⭐ BILDEOPPLASTING */}
       {type === "image" && (
         <div className="image-upload">
           <label>Bilde:</label>
@@ -155,13 +161,70 @@ if (needsTeams && (!homeTeam || !awayTeam)) {
         </div>
       )}
 
+      {/* ⭐ AVSTEMNING */}
+      {type === "poll" && (
+        <div className="poll-form">
+          <label>Spørsmål:</label>
+          <input
+  type="text"
+  placeholder="F.eks. 'Hvem vinner i dag?'"
+  value={simpleData.question || ""}
+  onChange={(e) =>
+    setSimpleData({ ...simpleData, question: e.target.value })
+  }
+/>
+
+          <label>Alternativer:</label>
+          {simpleData.options?.map((opt, i) => (
+            <div key={i} className="poll-option-input">
+              <input
+                type="text"
+                placeholder={`Alternativ ${i + 1}`}
+                value={opt}
+                onChange={(e) => {
+                  const updated = [...simpleData.options];
+                  updated[i] = e.target.value;
+                  setSimpleData({ ...simpleData, options: updated });
+                }}
+              />
+
+              {simpleData.options.length > 2 && (
+                <button
+                  type="button"
+                  className="remove-option"
+                  onClick={() =>
+                    setSimpleData({
+                      ...simpleData,
+                      options: simpleData.options.filter((_, idx) => idx !== i),
+                    })
+                  }
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          ))}
+
+          {simpleData.options?.length < 4 && (
+            <button
+              type="button"
+              className="add-option"
+              onClick={() =>
+                setSimpleData({
+                  ...simpleData,
+                  options: [...simpleData.options, ""],
+                })
+              }
+            >
+              + Legg til alternativ
+            </button>
+          )}
+        </div>
+      )}
+
       <button className="submit-event" onClick={addEvent}>
         Legg til hendelse
       </button>
     </div>
   );
 }
-
-
-
-         

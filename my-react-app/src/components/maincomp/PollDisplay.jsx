@@ -18,7 +18,7 @@ function getVoterId() {
   return id;
 }
 
-export default function PollDisplay({ matchId }) {
+export default function PollDisplay({ matchId, sticky = false, singlePollId = null }) {
   const [polls, setPolls] = useState([]);
   const voterId = getVoterId();
 
@@ -29,11 +29,11 @@ export default function PollDisplay({ matchId }) {
       setPolls(
         snap.docs
           .map((d) => ({ id: d.id, ...d.data() }))
-          .filter((p) => p.active)
+          .filter((p) => p.active && (!singlePollId || p.id === singlePollId))
       );
     });
     return () => unsub();
-  }, [matchId]);
+  }, [matchId, singlePollId]);
 
   async function vote(poll, optionIndex) {
     const alreadyVoted = poll.voters?.includes(voterId);
@@ -41,7 +41,6 @@ export default function PollDisplay({ matchId }) {
 
     const pollRef = doc(db, "matches", matchId, "polls", poll.id);
 
-    // Oppdater votes på riktig alternativ
     const updatedOptions = poll.options.map((opt, i) =>
       i === optionIndex ? { ...opt, votes: (opt.votes || 0) + 1 } : opt
     );
@@ -55,7 +54,7 @@ export default function PollDisplay({ matchId }) {
   if (polls.length === 0) return null;
 
   return (
-    <div className="poll-display">
+    <>
       {polls.map((poll) => {
         const hasVoted = poll.voters?.includes(voterId);
         const totalVotes = poll.options.reduce(
@@ -63,11 +62,17 @@ export default function PollDisplay({ matchId }) {
           0
         );
 
-        return (
-          <div key={poll.id} className="poll-display-card">
-            <p className="poll-display-question">{poll.question}</p>
+        const isPreMatchPoll = poll.preMatch === true;
 
-            <div className="poll-display-options">
+        /* ⭐ FØR KAMPSTART – FLAT, INGEN BOKS */
+        if (isPreMatchPoll) {
+          return (
+            <div
+              key={poll.id}
+              className={`poll-event pre-match ${sticky ? "poll-sticky" : ""}`}
+            >
+              <p className="poll-event-question">{poll.question}</p>
+
               {poll.options.map((opt, i) => {
                 const pct =
                   totalVotes > 0
@@ -77,19 +82,21 @@ export default function PollDisplay({ matchId }) {
                 return (
                   <button
                     key={i}
-                    className={`poll-display-option ${hasVoted ? "voted" : ""}`}
+                    className={`poll-event-option ${hasVoted ? "voted" : ""}`}
                     onClick={() => vote(poll, i)}
                     disabled={hasVoted}
                   >
-                    <div className="poll-display-option-top">
-                      <span>{opt.text}</span>
-                      {hasVoted && <span>{pct}%</span>}
+                    <div className="poll-event-option-top">
+                      <span className="poll-event-option-text">{opt.text}</span>
+                      {hasVoted && (
+                        <span className="poll-event-option-pct">{pct}%</span>
+                      )}
                     </div>
 
                     {hasVoted && (
-                      <div className="poll-display-bar-bg">
+                      <div className="poll-event-bar-bg">
                         <div
-                          className="poll-display-bar-fill"
+                          className="poll-event-bar-fill"
                           style={{ width: `${pct}%` }}
                         />
                       </div>
@@ -97,14 +104,65 @@ export default function PollDisplay({ matchId }) {
                   </button>
                 );
               })}
+
+              {hasVoted && (
+                <p className="poll-event-total">{totalVotes} stemmer</p>
+              )}
+            </div>
+          );
+        }
+
+        /* ⭐ UNDER KAMP – I EVENT-BOKS */
+        return (
+          <div key={poll.id} className="event event-comment">
+            <span className="event-icon"></span>
+
+            <div className="event-text">
+              <div className="poll-event">
+                <p className="poll-event-question">{poll.question}</p>
+
+                {poll.options.map((opt, i) => {
+                  const pct =
+                    totalVotes > 0
+                      ? Math.round((opt.votes / totalVotes) * 100)
+                      : 0;
+
+                  return (
+                    <button
+                      key={i}
+                      className={`poll-event-option ${hasVoted ? "voted" : ""}`}
+                      onClick={() => vote(poll, i)}
+                      disabled={hasVoted}
+                    >
+                      <div className="poll-event-option-top">
+                        <span className="poll-event-option-text">{opt.text}</span>
+                        {hasVoted && (
+                          <span className="poll-event-option-pct">{pct}%</span>
+                        )}
+                      </div>
+
+                      {hasVoted && (
+                        <div className="poll-event-bar-bg">
+                          <div
+                            className="poll-event-bar-fill"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+
+                {hasVoted && (
+                  <p className="poll-event-total">{totalVotes} stemmer</p>
+                )}
+              </div>
             </div>
 
-            {hasVoted && (
-              <p className="poll-display-total">{totalVotes} stemmer</p>
-            )}
+            <span className="event-minute"></span>
           </div>
         );
       })}
-    </div>
+    </>
   );
 }

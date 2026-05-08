@@ -24,6 +24,7 @@ export default function MatchPage() {
   const [allMatches, setAllMatches] = useState([]);
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [events, setEvents] = useState([]);
+  const [polls, setPolls] = useState([]);
   const [activeTab, setActiveTab] = useState("rapport");
 
   const [homeName, setHomeName] = useState("Hjemmelag");
@@ -31,6 +32,20 @@ export default function MatchPage() {
 
   const [hasFormation, setHasFormation] = useState(false);
 
+  // POLLS
+  useEffect(() => {
+    if (!selectedMatch?.id) return;
+
+    const ref = collection(db, "matches", selectedMatch.id, "polls");
+    const unsub = onSnapshot(ref, (snap) => {
+      const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      setPolls(list.filter((p) => p.active));
+    });
+
+    return () => unsub();
+  }, [selectedMatch]);
+
+  // MATCH DATA
   useEffect(() => {
     if (!id) return;
     async function load() {
@@ -40,6 +55,7 @@ export default function MatchPage() {
     load();
   }, [id]);
 
+  // ALL MATCHES
   useEffect(() => {
     const fetchAll = async () => {
       const ref = collection(db, "matches");
@@ -50,6 +66,7 @@ export default function MatchPage() {
     fetchAll();
   }, []);
 
+  // EVENTS
   useEffect(() => {
     if (!selectedMatch) return;
 
@@ -69,6 +86,7 @@ export default function MatchPage() {
     return () => unsub();
   }, [selectedMatch]);
 
+  // TEAM NAMES
   useEffect(() => {
     async function loadNames() {
       if (!selectedMatch) return;
@@ -84,6 +102,7 @@ export default function MatchPage() {
     loadNames();
   }, [selectedMatch]);
 
+  // FORMATION
   useEffect(() => {
     if (!selectedMatch?.id) return;
     const ref = doc(db, "matches", selectedMatch.id, "formations", "home");
@@ -95,17 +114,12 @@ export default function MatchPage() {
 
   if (!selectedMatch) return <p>Laster kamp...</p>;
 
-  const now = new Date();
-  const matchDate = selectedMatch.date?.toDate
-    ? selectedMatch.date.toDate()
-    : new Date(selectedMatch.date);
-  const matchTimePassed = now > matchDate;
-  const isFinished = selectedMatch.status === "finished" || matchTimePassed;
+  // STATUS LOGIKK (fikset)
+  const isFinished = selectedMatch.status === "finished";
+  const hasPreMatchContent = events.length > 0 || polls.length > 0;
 
-  // ⭐ Vis BeforeMatch kun hvis ingen events finnes ennå
-  const hasEvents = events.length > 0;
-
-  if (selectedMatch.status === "not_started" && !matchTimePassed && !hasEvents) {
+  // BEFORE MATCH VISNING
+  if (selectedMatch.status === "not_started" && !hasPreMatchContent) {
     return (
       <BeforeMatch
         match={selectedMatch}
@@ -133,9 +147,7 @@ export default function MatchPage() {
             ? "Slutt"
             : selectedMatch.status === "live"
             ? "Live"
-            : isFinished
-            ? "Slutt"
-            : selectedMatch.status === "not_started" && hasEvents
+            : selectedMatch.status === "not_started" && hasPreMatchContent
             ? "Før kamp"
             : "Kamp"}
         </p>
@@ -146,10 +158,8 @@ export default function MatchPage() {
           <p className="lp-result">
             {selectedMatch.status === "live"
               ? `${selectedMatch.homeScore ?? 0} - ${selectedMatch.awayScore ?? 0}`
-              : isFinished
-              ? selectedMatch.homeScore !== null && selectedMatch.awayScore !== null
-                ? `${selectedMatch.homeScore} - ${selectedMatch.awayScore}`
-                : "Stilling kommer"
+              : selectedMatch.status === "finished"
+              ? `${selectedMatch.homeScore ?? 0} - ${selectedMatch.awayScore ?? 0}`
               : selectedMatch.status === "not_started"
               ? `Kl ${selectedMatch.time}`
               : "Stilling kommer"}
@@ -163,11 +173,13 @@ export default function MatchPage() {
         </p>
       </div>
 
-      {!isFinished && selectedMatch.status !== "live" && (
+      {/* COUNTDOWN – vises kun når kampen ikke har startet og ingen pre-match content */}
+      {selectedMatch.status === "not_started" && !hasPreMatchContent && (
         <Countdown match={selectedMatch} />
       )}
 
       <main className="page">
+
         <Tabs
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -194,6 +206,7 @@ export default function MatchPage() {
             />
           )}
         </section>
+
       </main>
     </>
   );
