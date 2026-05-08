@@ -233,24 +233,27 @@ body{
   border-bottom: 1px solid #FFFFFF0F;
   border-top: 1px solid #FFFFFF0F; 
   display: grid;
-  grid-template-columns: 30px 1fr 30px; 
+  grid-template-columns: 30px 1fr 40px; 
   align-items: center;
   gap: 8px;
   border-radius: 6px; 
   box-sizing: border-box; 
-  margin: 0; 
+  margin: 0 -1rem ; 
 }
 
 .event-icon {
-  font-size: 18px;
+  font-size: 16px;
   display: flex;
   justify-content: center;
   align-items: center;
   padding-left: 5px; 
+  color: #ffffff66;
+
 }
 
 .event-text{
   text-align: left; 
+   
 }
 
 .event-text p {
@@ -266,6 +269,8 @@ body{
   font-weight: 600;
   opacity: 0.9;
   padding-right: 5px;
+  color: #ffffff66;
+  
 }
 
 .event-system {
@@ -277,23 +282,38 @@ body{
   padding: 12px 0;
   font-style: italic;
   color: #ccc;
-  border-bottom: 1px solid #FFFFFF0F;
+  border-bottom: 1px solid #ffffff22;
+  border-top: 1px solid #ffffff22;
   background: none;
+  letter-spacing: 0.5px; 
+  font-size: 13px; 
 }
 
 .event-text p:first-child {
   color: #ffffff;
-  font-weight: 700;
+  font-weight: 400;
   font-size: 16px;
   margin-bottom: 4px;
+  
 }
 
 .event-text p:not(:first-child) {
   color: #d0d0d0;
-  font-weight: 400;
+  font-weight: 700;
   font-size: 14px;
   opacity: 0.85;
 }
+
+.event-comment .event-text p {
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  color: #ffffffbb;
+  line-height: 1.5;
+  letter-spacing: 0.2px;
+   font-family: 'Inter', sans-serif;
+}
+
+
 
 /* ================================
    MÅL
@@ -324,6 +344,13 @@ body{
 .event-goal .event-text .goal-comment {
   color: #2a4d2a;
 }
+
+.event-goal .event-minute {
+  color: #0f2f0f;
+
+}
+
+
 
 /* ================================
    SPILLERBYTTE
@@ -368,6 +395,10 @@ body{
   color: #4d003d;
   font-weight: 500;
   opacity: 0.9;
+}
+
+.event-injury .event-minute{
+  color: #c0392b;
 }
 
 /* ================================
@@ -588,72 +619,62 @@ body{
 /* ================================
    POLL EVENT – minimalistisk feed-stil
 ================================ */
-
-/* Nullstill ALT inni poll slik at den ikke arver event-styling */
-.poll-event * {
-  all: unset;
-  display: block;
-  box-sizing: border-box;
-}
-
-/* Selve poll-containeren */
 .poll-event {
   background: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  display: block;
+  padding: 4px 0 !important;
+  margin: 0 !important; 
+  display: block; 
   width: 100%;
 }
 
 /* Sticky før kampstart */
 .poll-sticky {
-  position: sticky;
+  position: relative;
   top: 0;
   z-index: 50;
-  background: #000 !important;   /* svart bakgrunn */
-  padding: 14px 0 !important;
-  border-bottom: 1px solid #FFFFFF22;
-}
-
-/* Pre-match: fjern boks rundt alternativer */
-.pre-match .poll-event-option {
-  background: none !important;
-  padding: 4px 0 !important;
+  padding: 12px 2px!important;
+  margin: 0 !important;
   border-radius: 0 !important;
-  border: none !important;
   box-shadow: none !important;
-}
-
-/* Pre-match: fjern hover også */
-.pre-match .poll-event-option:hover {
-  background: none !important;
+  backdrop-filter: none !important;
 }
 
 /* Spørsmål */
-.poll-event-question {
-  font-size: 15px;
-  font-weight: 600;
-  color: #ffffff;
-  margin-bottom: 8px;
-  line-height: 1.3;
+ .poll-event-question {
+  font-size: 11px !important;
+  font-weight: 700;
+  color:var(--countdown-text) !important;
+  text-transform: uppercase; 
+  letter-spacing: 1px; 
+  margin-bottom: 10px;
+  display: block; 
+
 }
 
 /* Alternativer (LIVE) */
 .poll-event-option {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
-  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.08)  !important;
+  border-radius: 6px !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important; 
+  box-shadow: none !important; 
+  padding: 8px 12px !important;
   margin-bottom: 6px;
   cursor: pointer;
+  display: block; 
+  width: 100%; 
+  text-align: left; 
 }
 
 .poll-event-option:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: none !important; 
 }
 
 .poll-event-option.voted {
-  background: none;
-  padding: 4px 8px;
+  cursor: default; 
+  background: none !important;
+   border: none !important;
+  padding: 4px 0 !important;
+  
 }
 
 /* Tekst + prosent */
@@ -661,18 +682,21 @@ body{
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%; 
 }
 
 .poll-event-option-text {
   font-size: 14px;
   font-weight: 500;
   color: #ffffffee;
+  display: block; 
 }
 
 .poll-event-option-pct {
   font-size: 13px;
   font-weight: 600;
   color: #ffffffbb;
+  display: block; 
 }
 
 /* Bar */
@@ -683,6 +707,7 @@ body{
   border-radius: 4px;
   overflow: hidden;
   margin-top: 4px;
+  display: block; 
 }
 
 .poll-event-bar-fill {
@@ -690,6 +715,7 @@ body{
   background: var(--countdown-text);
   border-radius: 4px;
   transition: width 0.35s ease;
+  display: block; 
 }
 
 /* Stemmetall */
@@ -697,6 +723,7 @@ body{
   font-size: 12px;
   color: #ffffff66;
   margin-top: 6px;
+  display: block; 
 }
 
 

@@ -16,6 +16,7 @@ import LagComponent from "../components/maincomp/LagComponent";
 
 import { loadOrCreateMatchData } from "../components/admincomp/useMatchData";
 import TabellComponent from "../components/maincomp/TabellComponent";
+import PollDisplay from "../components/maincomp/PollDisplay";
 
 export default function MatchPage() {
   const { id } = useParams();
@@ -185,6 +186,7 @@ export default function MatchPage() {
           setActiveTab={setActiveTab}
           hasFormation={hasFormation}
         />
+       
 
         <section className="content-box">
           {activeTab === "rapport" && (

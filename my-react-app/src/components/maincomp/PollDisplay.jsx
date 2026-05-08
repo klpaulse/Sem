@@ -21,6 +21,7 @@ function getVoterId() {
 export default function PollDisplay({ matchId, sticky = false, singlePollId = null }) {
   const [polls, setPolls] = useState([]);
   const voterId = getVoterId();
+  
 
   useEffect(() => {
     if (!matchId) return;
@@ -52,6 +53,7 @@ export default function PollDisplay({ matchId, sticky = false, singlePollId = nu
   }
 
   if (polls.length === 0) return null;
+  
 
   return (
     <>
@@ -63,6 +65,7 @@ export default function PollDisplay({ matchId, sticky = false, singlePollId = nu
         );
 
         const isPreMatchPoll = poll.preMatch === true;
+        console.log("poll data:", poll.id, poll.preMatch, poll);
 
         /* ⭐ FØR KAMPSTART – FLAT, INGEN BOKS */
         if (isPreMatchPoll) {
@@ -106,7 +109,7 @@ export default function PollDisplay({ matchId, sticky = false, singlePollId = nu
               })}
 
               {hasVoted && (
-                <p className="poll-event-total">{totalVotes} stemmer</p>
+                <p className="poll-event-total">{totalVotes} {totalVotes === 1 ? "stemme" : "stemmer"}</p>
               )}
             </div>
           );
@@ -117,7 +120,7 @@ export default function PollDisplay({ matchId, sticky = false, singlePollId = nu
           <div key={poll.id} className="event event-comment">
             <span className="event-icon"></span>
 
-            <div className="event-text">
+            <div className="event-text" style={{width: "100%"}}>
               <div className="poll-event">
                 <p className="poll-event-question">{poll.question}</p>
 
@@ -133,6 +136,7 @@ export default function PollDisplay({ matchId, sticky = false, singlePollId = nu
                       className={`poll-event-option ${hasVoted ? "voted" : ""}`}
                       onClick={() => vote(poll, i)}
                       disabled={hasVoted}
+                      style={{width: "100%" , textAlign: "left", cursor: hasVoted ? "default" : "pointer"}}
                     >
                       <div className="poll-event-option-top">
                         <span className="poll-event-option-text">{opt.text}</span>

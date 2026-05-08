@@ -48,14 +48,19 @@ export function useEventActions(match, liveMatch) {
   /* -----------------------------
       SYSTEMHENDELSE
   ------------------------------ */
-  async function addSystemEvent(text) {
+  async function addSystemEvent(text, includeMinute = true) {
     await addDoc(eventsRef, {
       id: crypto.randomUUID(),
       type: "system",
       text,
-      minute: getMinute(),
+      minute: includeMinute ? getMinute() : null,
       createdAt: serverTimestamp(),
     });
+  }
+
+  async function pauseMatch(){
+    await updateDoc(matchRef, { status: "halftime"})
+    addSystemEvent("Pause (slutt 1.omgang"), false
   }
 
   /* -----------------------------
@@ -82,7 +87,7 @@ export function useEventActions(match, liveMatch) {
       secondHalfStarted: true,
       secondHalfStartTime: new Date().toISOString(),
     });
-    addSystemEvent("2. omgang har startet");
+    addSystemEvent("2. omgang har startet", false);
   }
 
   async function endMatch() {
@@ -247,6 +252,7 @@ export function useEventActions(match, liveMatch) {
       return;
     }
 if (type === "poll") {
+    console.log("isPreMatch når poll lagres:", isPreMatch, "status:", liveMatch?.status)
   const pollRef = collection(db, "matches", match.id, "polls");
 
   await addDoc(pollRef, {
@@ -258,12 +264,8 @@ if (type === "poll") {
     voters: [],
     active: true,
     createdAt: serverTimestamp(),
-
-    // ⭐ Poll skal ALDRI ha minutt
     minute: null,
-
-    // ⭐ Sticky før kamp
-  preMatch: isPreMatch ?  true : false
+  preMatch: liveMatch?.status === "not_started" ?  true : false
   });
 
   resetData();

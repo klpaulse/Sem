@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faFutbol,
@@ -20,7 +20,6 @@ import AudienceQuestions from "./maincomp/AudienceQuestions";
 import PollDisplay from "./maincomp/PollDisplay";
 
 export default function MatchReport({ match, events, matchId }) {
-  if (!match) return null;
 
   const [homeTeam, setHomeTeam] = useState(null);
   const [awayTeam, setAwayTeam] = useState(null);
@@ -47,7 +46,6 @@ export default function MatchReport({ match, events, matchId }) {
     return () => unsub();
   }, [id]);
 
-  if (!homeTeam || !awayTeam) return <div>Laster kampdata...</div>;
 
   function getPlayerName(teamId, playerId) {
     const team = teamId === match.homeTeamId ? homeTeam : awayTeam;
@@ -78,28 +76,38 @@ export default function MatchReport({ match, events, matchId }) {
     return `90+${minute - 90}`;
   };
 
-  /* -----------------------------
-      BYGG KOMBINERT FEED
-  ------------------------------ */
-  const stickyPolls = polls.filter((p) => p.preMatch === true && p.active);
-  const livePolls = polls.filter((p) => !p.preMatch && p.active);
+  const stickyPolls = useMemo(
+    () => polls.filter((p) => p.preMatch !== false && p.active !== false),
+    [polls]
+  );
+  
 
-  const sortedEvents = [...events].sort((a, b) => {
-    if (!a.createdAt) return 1;
-    if (!b.createdAt) return -1;
-    return a.createdAt.seconds - b.createdAt.seconds;
-  });
+  const livePolls = useMemo(
+    () => polls.filter((p) => p.preMatch === false && p.active),
+    [polls]
+  );
 
-  const combinedFeed = isPreMatch
-    ? sortedEvents
-    : [
-        ...sortedEvents,
-        ...livePolls.map((p) => ({ ...p, _isPoll: true })),
-      ].sort((a, b) => (a.createdAt?.seconds ?? 0) - (b.createdAt?.seconds ?? 0));
+  const sortedEvents = useMemo(
+    () =>
+      [...events].sort((a, b) => {
+        if (!a.createdAt) return 1;
+        if (!b.createdAt) return -1;
+        return a.createdAt.seconds - b.createdAt.seconds;
+      }),
+    [events]
+  );
 
-  /* -----------------------------
-      RENDER EVENT
-  ------------------------------ */
+  const combinedFeed = useMemo(() => {
+    if (isPreMatch) return sortedEvents;
+    return [
+      ...sortedEvents,
+      ...livePolls.map((p) => ({ ...p, _isPoll: true })),
+    ].sort((a, b) => (a.createdAt?.seconds ?? 0) - (b.createdAt?.seconds ?? 0));
+  }, [isPreMatch, sortedEvents, livePolls]);
+
+    if (!match) return null;
+     if (!homeTeam || !awayTeam) return <div>Laster kampdata...</div>;
+
   function renderEvent(e) {
     const showMinute = !e.preMatch && e.minute != null;
 
@@ -257,31 +265,20 @@ export default function MatchReport({ match, events, matchId }) {
 
   return (
     <div className="report-container">
+      <header className="report-title-row">
+        <AudienceQuestions matchId={match.id} />
+      </header>
+
+      {stickyPolls.map((p) => (
+        <PollDisplay key={p.id} matchId={id} sticky={true} singlePollId={p.id} />
+      ))}
+
       <div className="report-feed">
-
-        <header className="report-title-row">
-          <AudienceQuestions matchId={match.id} />
-        </header>
-
-        {/* ⭐ STICKY POLLS FØR KAMP */}
-        {isPreMatch && stickyPolls.map((p) => (
-          <PollDisplay key={p.id} matchId={id} sticky={true} singlePollId={p.id} />
-        ))}
-
-        {/* ⭐ KOMBINERT FEED */}
- {combinedFeed.map((item) =>
-  item._isPoll
-    ? (
-        <PollDisplay
-          key={item.id}
-          matchId={id}
-          singlePollId={item.id}
-        />
-      )
-    : renderEvent(item)
-)}
-
-
+        {combinedFeed.map((item) =>
+          item._isPoll
+            ? <PollDisplay key={item.id} matchId={id} singlePollId={item.id} />
+            : renderEvent(item)
+        )}
       </div>
     </div>
   );
