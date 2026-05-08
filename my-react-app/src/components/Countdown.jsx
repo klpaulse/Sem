@@ -42,18 +42,10 @@ export default function Countdown({date, time}){
             return( 
                 <section className="countdown">
                 <p>Kampstart om: </p>
-                <div>
-                {days.toString().padStart(2, "0")} <span>d</span>
-                </div>
-                <div>
-                {hours.toString().padStart(2, "0")} <span>t</span>
-                </div>
-                <div>
-                {minutes.toString().padStart(2, "0")} <span>m</span>
-                </div>
-                <div>
-                {seconds.toString().padStart(2, "0")} <span>s</span>
-                </div>
+                <div>{days.toString().padStart(2, "0")} <span>d</span> </div>
+                <div>{hours.toString().padStart(2, "0")} <span>t</span></div>
+                <div>{minutes.toString().padStart(2, "0")} <span>m</span></div>
+                <div>{seconds.toString().padStart(2, "0")} <span>s</span></div>
                 </section>
 
             )

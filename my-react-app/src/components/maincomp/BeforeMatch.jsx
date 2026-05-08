@@ -81,7 +81,7 @@ export default function BeforeMatch({ match, allMatches}) {
   }, [match]);
 
   return (
-    <section className="page">
+    <>
       <h1
         className="live-header"
         onClick={() => navigate("/")}
@@ -93,23 +93,25 @@ export default function BeforeMatch({ match, allMatches}) {
 
       {/* Kampkort */}
       <div className="last-played-card">
+        <p className="lp-status">Før kamp</p>
         <div className="lp-row">
           <span className="lp-title">{homeName}</span>
-          <span className="lp-title">{awayName}</span>
-        </div>
-
-        <p className="dato">
+        <p className="lp-result">
           {match.time ||
             matchDate.toLocaleTimeString("no-NO", {
               hour: "2-digit",
               minute: "2-digit",
             })}
         </p>
-        <div className="countdown">
+        <span className="lp-title">{awayName}</span>
+        </div>
+
+       
+
         <Countdown date={matchDate} />
       </div>
-      </div>
 
+<section className="page">
        {hasFormation && (
     <nav className="nav">
       <button
@@ -141,5 +143,6 @@ export default function BeforeMatch({ match, allMatches}) {
   )}
 
 </section>
+</>
   );
 }

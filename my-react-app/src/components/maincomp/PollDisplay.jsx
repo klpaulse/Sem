@@ -158,7 +158,7 @@ export default function PollDisplay({ matchId, sticky = false, singlePollId = nu
                 })}
 
                 {hasVoted && (
-                  <p className="poll-event-total">{totalVotes} stemmer</p>
+                  <p className="poll-event-total">{totalVotes}  {totalVotes === 1 ? "stemme" : "stemmer"}</p>
                 )}
               </div>
             </div>
