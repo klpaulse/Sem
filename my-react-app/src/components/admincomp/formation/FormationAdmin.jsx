@@ -17,7 +17,7 @@ export default function FormationAdmin({ match, onClose }) {
   const [activeSide, setActiveSide] = useState("home");
   const [homePositions, setHomePositions] = useState([]);
   const [awayPositions, setAwayPositions] = useState([]);
-  const [mode, setMode] = useState("preview");
+  const [mode, setMode] = useState("edit");
   const [showSavedToast, setShowSavedToast] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isEditingExisting, setIsEditingExisting] = useState(false);
@@ -70,6 +70,7 @@ export default function FormationAdmin({ match, onClose }) {
   ------------------------------ */
   function applyFormation(formationName) {
     setSelectedFormation(formationName);
+    setPlayers([])
 
     const preset = FORMATIONS[formationName];
     if (!preset) return;
@@ -166,6 +167,7 @@ export default function FormationAdmin({ match, onClose }) {
             setActiveSide("home");
             setMode("edit");
           }}
+          isExisting={true}
           
         />
       )}

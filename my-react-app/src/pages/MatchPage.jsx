@@ -108,7 +108,9 @@ export default function MatchPage() {
     if (!selectedMatch?.id) return;
     const ref = doc(db, "matches", selectedMatch.id, "formations", "home");
     const unsub = onSnapshot(ref, (snap) => {
-      setHasFormation(snap.exists());
+      const data = snap.data()
+      setHasFormation(
+        snap.exists() && Object.keys(data?.positions || {}.length > 0));
     });
     return () => unsub();
   }, [selectedMatch]);
@@ -188,7 +190,7 @@ export default function MatchPage() {
         />
        
 
-        <section className="content-box">
+        <section className={`content-box ${activeTab === "lag" ? "content-box--lag" : ""}`}>
           {activeTab === "rapport" && (
             <MatchReport
               match={selectedMatch}
@@ -203,8 +205,7 @@ export default function MatchPage() {
 
           {activeTab === "lag" && (
             <LagComponent
-              division={selectedMatch.division}
-              season={selectedMatch.season}
+             match={selectedMatch}
             />
           )}
         </section>

@@ -7,6 +7,7 @@ export default function FormationPreview({
   awayPlayers,
   showSavedToast,
   onEdit,
+  isExisting
 }) {
   return (
     <div className="formation-preview">
@@ -41,9 +42,11 @@ export default function FormationPreview({
       </FormationField>
 
       <div className="formation-preview__actions">
+        {isExisting &&(
         <button onClick={onEdit} className="formation-preview__edit-button">
           Rediger formasjon
         </button>
+        )}
       </div>
     </div>
   );

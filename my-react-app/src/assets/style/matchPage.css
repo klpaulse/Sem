@@ -565,13 +565,26 @@ body{
 /* ================================
    POPUP
 ================================ */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 99;
+}
+
 .question-popup {
-  margin-top: 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 16px;
-  border-radius: 10px;
-  backdrop-filter: blur(4px);
-  position: relative;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  width: calc(100% - 2rem);
+  max-width: 360px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  padding: 20px;
+  border-radius: 12px;
+  box-sizing: border-box;
 }
 
 .question-popup label {
@@ -1103,42 +1116,54 @@ body{
   border-radius: 4px;
 }
 
-.bench-container {
+.bench-section {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 8px;
-  padding: 10px;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 0 1rem;
 }
 
-.bench-card {
-  background: #1a1a1a;
-  color: white;
-  padding: 8px 10px;
-  border-radius: 8px;
+.bench-team-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffffffaa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #ffffff22;
+  padding-bottom: 4px;
+}
+
+.bench-player {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  cursor: grab;
-  user-select: none;
-  transition: background 0.15s ease;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid #ffffff0f;
 }
 
-.bench-card:hover {
-  background: #2a2a2a;
+.bench-player-number {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff66;
+  min-width: 24px;
 }
 
-.bench-number {
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.bench-name {
+.bench-player-name {
   font-size: 13px;
-  opacity: 0.9;
+  color: #ffffffcc;
+}
+
+.bench-empty {
+  font-size: 12px;
+  color: #ffffff44;
+  font-style: italic;
 }
 
 .lagoppstilling-container {
   background: transparent !important;
+  padding: 0;
 }
 
 .prematch-section {
@@ -1147,6 +1172,14 @@ body{
   border-radius: 12px;
   color: #fff;
   margin-top: 20px;
+}
+
+.content-box--lag {
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  border: none !important;
 }
 
 /* ================================

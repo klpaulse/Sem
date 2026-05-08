@@ -1,16 +1,31 @@
-// src/components/maincomp/LagComponent.jsx
 import { useEffect, useState } from "react";
 import FormationField from "./FormationField";
 import PlayerChip from "./PlayerChip";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../../config/Firebase";
+import { getTeam } from "../../services/TeamService";
 
 export default function LagComponent({ match }) {
   const [homePlayers, setHomePlayers] = useState([]);
   const [awayPlayers, setAwayPlayers] = useState([]);
-
   const [homeBench, setHomeBench] = useState([]);
   const [awayBench, setAwayBench] = useState([]);
+  const [homeName, setHomeName] = useState("Hjemmelag");
+  const [awayName, setAwayName] = useState("Bortelag");
+
+  useEffect(() => {
+    async function loadNames() {
+      if (match?.homeTeamId) {
+        const home = await getTeam(match.homeTeamId);
+        setHomeName(home?.name || "Hjemmelag");
+      }
+      if (match?.awayTeamId) {
+        const away = await getTeam(match.awayTeamId);
+        setAwayName(away?.name || "Bortelag");
+      }
+    }
+    loadNames();
+  }, [match]);
 
   useEffect(() => {
     if (!match?.id) return;
@@ -23,7 +38,6 @@ export default function LagComponent({ match }) {
         const data = snap.data();
         const pos = data.positions || {};
         const bench = data.bench || [];
-
         const loaded = Object.keys(pos)
           .map((key) => ({
             id: key,
@@ -34,7 +48,6 @@ export default function LagComponent({ match }) {
             img: pos[key].img || "",
           }))
           .filter((p) => p.x !== undefined && p.y !== undefined);
-
         setHomePlayers(loaded);
         setHomeBench(bench);
       } else {
@@ -48,7 +61,6 @@ export default function LagComponent({ match }) {
         const data = snap.data();
         const pos = data.positions || {};
         const bench = data.bench || [];
-
         const loaded = Object.keys(pos)
           .map((key) => ({
             id: key,
@@ -59,7 +71,6 @@ export default function LagComponent({ match }) {
             img: pos[key].img || "",
           }))
           .filter((p) => p.x !== undefined && p.y !== undefined);
-
         setAwayPlayers(loaded);
         setAwayBench(bench);
       } else {
@@ -76,9 +87,6 @@ export default function LagComponent({ match }) {
 
   return (
     <div className="lagoppstilling-container">
-      
-
-      {/* ⭐ Formasjonen på banen */}
       <FormationField interactive={false}>
         {homePlayers.map((p) => (
           <div
@@ -90,12 +98,7 @@ export default function LagComponent({ match }) {
               transform: "translate(-50%, -50%)",
             }}
           >
-            <PlayerChip
-              name={p.name}
-              number={p.number}
-              img={p.img}
-              team="home"
-            />
+            <PlayerChip name={p.name} number={p.number} img={p.img} team="home" />
           </div>
         ))}
 
@@ -109,37 +112,38 @@ export default function LagComponent({ match }) {
               transform: "translate(-50%, -50%)",
             }}
           >
-            <PlayerChip
-              name={p.name}
-              number={p.number}
-              img={p.img}
-              team="away"
-            />
+            <PlayerChip name={p.name} number={p.number} img={p.img} team="away" />
           </div>
         ))}
       </FormationField>
 
-      {/* ⭐ Benkspillere under banen */}
-{/* ⭐ Benkspillere under banen */}
-<div className="bench-list">
-  <h3>Benk</h3>
+      <div className="bench-section">
+        <div className="bench-team">
+          <h4 className="bench-team-title">Benk – {homeName}</h4>
+          {homeBench.length === 0
+            ? <p className="bench-empty">Ingen registrert</p>
+            : homeBench.map((p) => (
+                <div key={"hbench-" + p.id} className="bench-player">
+                  <span className="bench-player-number">#{p.number}</span>
+                  <span className="bench-player-name">{p.name}</span>
+                </div>
+              ))
+          }
+        </div>
 
-  {homeBench.length === 0 && awayBench.length === 0 && (
-    <p style={{ opacity: 0.7 }}>Ingen benk registrert</p>
-  )}
-
-  {[...homeBench, ...awayBench].map((p) => (
-    <div key={"bench-" + p.id} className="bench-player">
-      {p.img && <img src={p.img} alt="" className="bench-avatar" />}
-      <span className="bench-name">{p.number} – {p.name}</span>
-    </div>
-  ))}
-</div>
-
+        <div className="bench-team">
+          <h4 className="bench-team-title">Benk – {awayName}</h4>
+          {awayBench.length === 0
+            ? <p className="bench-empty">Ingen registrert</p>
+            : awayBench.map((p) => (
+                <div key={"abench-" + p.id} className="bench-player">
+                  <span className="bench-player-number">#{p.number}</span>
+                  <span className="bench-player-name">{p.name}</span>
+                </div>
+              ))
+          }
+        </div>
+      </div>
     </div>
   );
 }
-
-
-
-
