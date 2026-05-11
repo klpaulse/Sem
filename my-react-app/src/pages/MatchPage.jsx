@@ -10,6 +10,7 @@ import MatchReport from "../components/MatchReport";
 import Tabs from "../components/Tabs";
 
 import { getTeam } from "../services/TeamService";
+import {getSeasonMatches} from "../services/MatchService"
 
 import "../assets/style/matchPage.css";
 import LagComponent from "../components/maincomp/LagComponent";
@@ -17,6 +18,7 @@ import LagComponent from "../components/maincomp/LagComponent";
 import { loadOrCreateMatchData } from "../components/admincomp/useMatchData";
 import TabellComponent from "../components/maincomp/TabellComponent";
 import PollDisplay from "../components/maincomp/PollDisplay";
+import BeforeMatchInfo from "../components/maincomp/BeforeMatchInfo";
 
 export default function MatchPage() {
   const { id } = useParams();
@@ -27,26 +29,34 @@ export default function MatchPage() {
   const [events, setEvents] = useState([]);
   const [polls, setPolls] = useState([]);
   const [activeTab, setActiveTab] = useState("rapport");
-
   const [homeName, setHomeName] = useState("Hjemmelag");
   const [awayName, setAwayName] = useState("Bortelag");
-
   const [hasFormation, setHasFormation] = useState(false);
+  const [homeSeason, setHomeSeason] = useState([])
+  const [awaySeason, setAwaySeason] = useState([])
 
-  // POLLS
-  useEffect(() => {
-    if (!selectedMatch?.id) return;
+  // ⭐ ALLE HOOKS FØRST – før enhver return
+useEffect(() => {
+  if (!selectedMatch) return;
+  
+  const matchDate = selectedMatch.date?.toDate 
+    ? selectedMatch.date.toDate() 
+    : new Date(selectedMatch.date);
+  const isPast = matchDate && matchDate < new Date();
+  const isFinished = selectedMatch.status === "finished" || 
+    (selectedMatch.status === "not_started" && isPast);
 
-    const ref = collection(db, "matches", selectedMatch.id, "polls");
-    const unsub = onSnapshot(ref, (snap) => {
-      const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      setPolls(list.filter((p) => p.active));
-    });
+  if (!isFinished) return;
 
-    return () => unsub();
-  }, [selectedMatch]);
+  async function loadSeason() {
+    const home = await getSeasonMatches(selectedMatch.homeTeamId, "2026");
+    const away = await getSeasonMatches(selectedMatch.awayTeamId, "2026");
+    setHomeSeason(home);
+    setAwaySeason(away);
+  }
+  loadSeason();
+}, [selectedMatch]);
 
-  // MATCH DATA
   useEffect(() => {
     if (!id) return;
     async function load() {
@@ -56,7 +66,6 @@ export default function MatchPage() {
     load();
   }, [id]);
 
-  // ALL MATCHES
   useEffect(() => {
     const fetchAll = async () => {
       const ref = collection(db, "matches");
@@ -67,27 +76,29 @@ export default function MatchPage() {
     fetchAll();
   }, []);
 
-  // EVENTS
+  useEffect(() => {
+    if (!selectedMatch?.id) return;
+    const ref = collection(db, "matches", selectedMatch.id, "polls");
+    const unsub = onSnapshot(ref, (snap) => {
+      const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      setPolls(list.filter((p) => p.active));
+    });
+    return () => unsub();
+  }, [selectedMatch]);
+
   useEffect(() => {
     if (!selectedMatch) return;
-
     const q = query(
       collection(db, "matches", selectedMatch.id, "events"),
       orderBy("createdAt", "asc")
     );
-
     const unsub = onSnapshot(q, (snapshot) => {
-      const list = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setEvents(list);
     });
-
     return () => unsub();
   }, [selectedMatch]);
 
-  // TEAM NAMES
   useEffect(() => {
     async function loadNames() {
       if (!selectedMatch) return;
@@ -103,26 +114,34 @@ export default function MatchPage() {
     loadNames();
   }, [selectedMatch]);
 
-  // FORMATION
   useEffect(() => {
     if (!selectedMatch?.id) return;
     const ref = doc(db, "matches", selectedMatch.id, "formations", "home");
     const unsub = onSnapshot(ref, (snap) => {
-      const data = snap.data()
+      const data = snap.data();
       setHasFormation(
-        snap.exists() && Object.keys(data?.positions || {}.length > 0));
+        snap.exists() && Object.keys(data?.positions || {}).length > 0
+      );
     });
     return () => unsub();
   }, [selectedMatch]);
 
+  // ⭐ TIDLIG RETURN ETTER ALLE HOOKS
   if (!selectedMatch) return <p>Laster kamp...</p>;
 
-  // STATUS LOGIKK (fikset)
-  const isFinished = selectedMatch.status === "finished";
+  function normalizeDate(d) {
+    if (!d) return null;
+    if (d.toDate) return d.toDate();
+    return new Date(d);
+  }
+
+  const matchDate = normalizeDate(selectedMatch.date);
+  const isPastMatch = matchDate && matchDate < new Date();
+  const effectivelyFinished = selectedMatch.status === "finished" ||
+    (selectedMatch.status === "not_started" && isPastMatch);
   const hasPreMatchContent = events.length > 0 || polls.length > 0;
 
-  // BEFORE MATCH VISNING
-  if (selectedMatch.status === "not_started" && !hasPreMatchContent) {
+  if (selectedMatch.status === "not_started" && !hasPreMatchContent && !isPastMatch) {
     return (
       <BeforeMatch
         match={selectedMatch}
@@ -134,40 +153,28 @@ export default function MatchPage() {
 
   return (
     <>
-      <header className="header">
-        <h1
-          className="live-header"
-          onClick={() => navigate("/")}
-          style={{ cursor: "pointer" }}
-        >
+      <header className="site-header">
+        <h1 className="live-header" onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
           Breddefotball live
         </h1>
       </header>
 
       <div className="last-played-card">
         <p className="lp-status">
-          {selectedMatch.status === "finished"
-            ? "Slutt"
-            : selectedMatch.status === "live"
-            ? "Live"
-            : selectedMatch.status === "not_started" && hasPreMatchContent
-            ? "Før kamp"
-            : "Kamp"}
+          {effectivelyFinished ? "Slutt" : selectedMatch.status === "live" ? "Live" : "Før kamp"}
         </p>
 
         <div className="lp-row">
           <span className="lp-title">{homeName}</span>
-
-          <p className="lp-result">
-            {selectedMatch.status === "live"
+          <p className={`lp-result ${effectivelyFinished && selectedMatch.homeScore == null ? "lp-result--text" : ""}`}>
+            {effectivelyFinished
+              ? (selectedMatch.homeScore != null
+                  ? `${selectedMatch.homeScore} - ${selectedMatch.awayScore}`
+                  : "Ikke registrert")
+              : selectedMatch.status === "live"
               ? `${selectedMatch.homeScore ?? 0} - ${selectedMatch.awayScore ?? 0}`
-              : selectedMatch.status === "finished"
-              ? `${selectedMatch.homeScore ?? 0} - ${selectedMatch.awayScore ?? 0}`
-              : selectedMatch.status === "not_started"
-              ? `Kl ${selectedMatch.time}`
-              : "Stilling kommer"}
+              : `Kl ${selectedMatch.time}`}
           </p>
-
           <span className="lp-title">{awayName}</span>
         </div>
 
@@ -176,41 +183,39 @@ export default function MatchPage() {
         </p>
       </div>
 
-      {/* COUNTDOWN – vises kun når kampen ikke har startet og ingen pre-match content */}
-      {selectedMatch.status === "not_started" && !hasPreMatchContent && (
+      {selectedMatch.status === "not_started" && !hasPreMatchContent && !effectivelyFinished && (
         <Countdown match={selectedMatch} />
       )}
 
       <main className="page">
-
-        <Tabs
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          hasFormation={hasFormation}
-        />
-       
+        <Tabs activeTab={activeTab} setActiveTab={setActiveTab} hasFormation={hasFormation} />
 
         <section className={`content-box ${activeTab === "lag" ? "content-box--lag" : ""}`}>
           {activeTab === "rapport" && (
             <MatchReport
-              match={selectedMatch}
+              match={{...selectedMatch, status: effectivelyFinished ? "finished" : selectedMatch.status}}
               events={events}
               matchId={selectedMatch.id}
+              allMatches={allMatches}
+              isFinished={effectivelyFinished}
             />
           )}
-
-          {activeTab === "tabell" && (
-            <TabellComponent match={selectedMatch} />
-          )}
-
-          {activeTab === "lag" && (
-            <LagComponent
-             match={selectedMatch}
-            />
-          )}
+          {activeTab === "tabell" && <TabellComponent match={selectedMatch} />}
+          {activeTab === "lag" && <LagComponent match={selectedMatch} />}
         </section>
+        
 
-      </main>
+        {activeTab === "rapport" && effectivelyFinished && events.length === 0  &&(
+          <BeforeMatchInfo
+          match={selectedMatch}
+          allMatches={allMatches}
+          homeSeason={homeSeason}
+          awaySeason={awaySeason}
+          hideTitle={true}
+          />
+        )}
+        </main>
+      
     </>
   );
 }

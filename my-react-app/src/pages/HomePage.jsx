@@ -57,11 +57,15 @@ export default function HomePage() {
   }, {});
 
   return (
-    <main className="page">
+    <>
+      <header className="site-header">
       <h1 className="live-header">
         Breddefotball Live
       </h1>
+      </header>
+    
 
+       <main className="page">
       <section className="calandar-section">
         <Calandar
           selectedDate={selectedDate}
@@ -77,5 +81,6 @@ export default function HomePage() {
         />
       </section>
     </main>
+    </>
   );
 }

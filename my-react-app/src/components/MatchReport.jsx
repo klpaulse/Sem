@@ -16,19 +16,25 @@ import {
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../config/Firebase";
 import { getTeam } from "../services/TeamService";
+import { getSeasonMatches } from "../services/MatchService";
 import AudienceQuestions from "./maincomp/AudienceQuestions";
 import PollDisplay from "./maincomp/PollDisplay";
+import BeforeMatchInfo from "./maincomp/BeforeMatchInfo";
 
-export default function MatchReport({ match, events, matchId }) {
+export default function MatchReport({ match, events, matchId, allMatches = [], isFinished = false }) {
 
   const [homeTeam, setHomeTeam] = useState(null);
   const [awayTeam, setAwayTeam] = useState(null);
   const [polls, setPolls] = useState([]);
+  const [homeSeason, setHomeSeason] = useState([]);
+  const [awaySeason, setAwaySeason] = useState([]);
 
-  const id = matchId || match.id;
-  const isPreMatch = match.status === "not_started";
+  const id = matchId || match?.id;
+  const isPreMatch = match?.status === "not_started";
+
 
   useEffect(() => {
+    if (!match) return;
     async function loadTeams() {
       const home = await getTeam(match.homeTeamId);
       const away = await getTeam(match.awayTeamId);
@@ -46,6 +52,49 @@ export default function MatchReport({ match, events, matchId }) {
     return () => unsub();
   }, [id]);
 
+  useEffect(() => {
+    if (!match || !isFinished) return;
+    async function loadSeason() {
+      const home = await getSeasonMatches(match.homeTeamId, "2026");
+      const away = await getSeasonMatches(match.awayTeamId, "2026");
+      setHomeSeason(home);
+      setAwaySeason(away);
+    }
+    loadSeason();
+  }, [match, isFinished]);
+
+  const stickyPolls = useMemo(
+    () => polls.filter((p) => p.preMatch !== false && p.active !== false),
+    [polls]
+  );
+
+  const livePolls = useMemo(
+    () => polls.filter((p) => p.preMatch === false && p.active),
+    [polls]
+  );
+
+  const sortedEvents = useMemo(
+    () =>
+      [...events].sort((a, b) => {
+        if (!a.createdAt) return 1;
+        if (!b.createdAt) return -1;
+        return a.createdAt.seconds - b.createdAt.seconds;
+      }),
+    [events]
+  );
+
+  const combinedFeed = useMemo(() => {
+    if (isPreMatch) return sortedEvents;
+    return [
+      ...sortedEvents,
+      ...livePolls.map((p) => ({ ...p, _isPoll: true })),
+    ].sort((a, b) => (a.createdAt?.seconds ?? 0) - (b.createdAt?.seconds ?? 0));
+  }, [isPreMatch, sortedEvents, livePolls]);
+
+  const hasContent = combinedFeed.length > 0 || stickyPolls.length > 0;
+
+  if (!match) return null;
+  if (!homeTeam || !awayTeam) return <div>Laster kampdata...</div>;
 
   function getPlayerName(teamId, playerId) {
     const team = teamId === match.homeTeamId ? homeTeam : awayTeam;
@@ -76,46 +125,12 @@ export default function MatchReport({ match, events, matchId }) {
     return `90+${minute - 90}`;
   };
 
-  const stickyPolls = useMemo(
-    () => polls.filter((p) => p.preMatch !== false && p.active !== false),
-    [polls]
-  );
-  
-
-  const livePolls = useMemo(
-    () => polls.filter((p) => p.preMatch === false && p.active),
-    [polls]
-  );
-
-  const sortedEvents = useMemo(
-    () =>
-      [...events].sort((a, b) => {
-        if (!a.createdAt) return 1;
-        if (!b.createdAt) return -1;
-        return a.createdAt.seconds - b.createdAt.seconds;
-      }),
-    [events]
-  );
-
-  const combinedFeed = useMemo(() => {
-    if (isPreMatch) return sortedEvents;
-    return [
-      ...sortedEvents,
-      ...livePolls.map((p) => ({ ...p, _isPoll: true })),
-    ].sort((a, b) => (a.createdAt?.seconds ?? 0) - (b.createdAt?.seconds ?? 0));
-  }, [isPreMatch, sortedEvents, livePolls]);
-
-    if (!match) return null;
-     if (!homeTeam || !awayTeam) return <div>Laster kampdata...</div>;
-
   function renderEvent(e) {
     const showMinute = !e.preMatch && e.minute != null;
 
     if (e.type === "system") {
       return (
-        <div key={e.id} className="event event-system">
-          {e.text}
-        </div>
+        <div key={e.id} className="event event-system">{e.text}</div>
       );
     }
 
@@ -266,7 +281,7 @@ export default function MatchReport({ match, events, matchId }) {
   return (
     <div className="report-container">
       <header className="report-title-row">
-        <AudienceQuestions matchId={match.id} />
+        {!isFinished && <AudienceQuestions matchId={match.id} />}
       </header>
 
       {stickyPolls.map((p) => (
@@ -274,10 +289,19 @@ export default function MatchReport({ match, events, matchId }) {
       ))}
 
       <div className="report-feed">
-        {combinedFeed.map((item) =>
-          item._isPoll
-            ? <PollDisplay key={item.id} matchId={id} singlePollId={item.id} />
-            : renderEvent(item)
+        {!hasContent ? (
+          <>
+            <div className="no-live-report">
+              <p>Ingen live-rapport for denne kampen</p>
+            </div>
+          
+          </>
+        ) : (
+          combinedFeed.map((item) =>
+            item._isPoll
+              ? <PollDisplay key={item.id} matchId={id} singlePollId={item.id} />
+              : renderEvent(item)
+          )
         )}
       </div>
     </div>

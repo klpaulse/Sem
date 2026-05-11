@@ -82,6 +82,7 @@ export default function BeforeMatch({ match, allMatches}) {
 
   return (
     <>
+    <header className="site-header">
       <h1
         className="live-header"
         onClick={() => navigate("/")}
@@ -89,6 +90,7 @@ export default function BeforeMatch({ match, allMatches}) {
       >
         Breddefotball Live
       </h1>
+      </header>
       
 
       {/* Kampkort */}

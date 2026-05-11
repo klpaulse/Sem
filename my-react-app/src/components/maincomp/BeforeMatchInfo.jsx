@@ -15,6 +15,7 @@ export default function BeforeMatchInfo({
   allMatches,
   homeSeason,
   awaySeason,
+  hideTitle = false 
 }) {
   if (!match) return null;
 
@@ -55,7 +56,7 @@ export default function BeforeMatchInfo({
 
   return (
     <section className="before-match-info">
-      <h2 className="beforematch">Før kampen</h2>
+     {!hideTitle && <h2 className="beforematch">Før kampen</h2>}
 
       {/* ⭐ TIMELINE FOR BEGGE LAG – ALLTID VIST */}
       <div className="info-block">
@@ -101,6 +102,7 @@ export default function BeforeMatchInfo({
       </div>
 
       {/* ⭐ KAMPINFO */}
+      {!hideTitle && (
       <div className="info-block">
         <h3>Kampinfo</h3>
 
@@ -127,6 +129,7 @@ export default function BeforeMatchInfo({
           </span>
         </div>
       </div>
+      )}
     </section>
   );
 }
