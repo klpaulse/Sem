@@ -1,6 +1,9 @@
+import { useNavigate } from "react-router-dom";
 import { getMatchOutcome } from "../../services/MatchService";
 
 export default function SeasonTimeline({ matches, teamId, currentMatchId }) {
+  const navigate = useNavigate();
+
   if (!matches || matches.length === 0) {
     return (
       <div className="timeline-empty">
@@ -37,6 +40,7 @@ export default function SeasonTimeline({ matches, teamId, currentMatchId }) {
             className={`timeline-box ${
               isPlayed ? `form-${outcome}` : "not-played"
             } ${isCurrent ? "timeline-current" : ""}`}
+            onClick={() => navigate(`/match/${m.id}`)}   // ⭐ KLIKK → GÅ TIL KAMP
           >
             <span className="timeline-result">
               {displayFor}-{displayAgainst}

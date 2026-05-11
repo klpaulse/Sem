@@ -170,7 +170,7 @@ body {
 }
 
 .lp-result--text {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   letter-spacing: 0;
 }
@@ -657,14 +657,28 @@ body {
 .beforematch:hover::after { width: 100%; }
 
 .timeline-header {
-  color: #ffffffaa;
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
-  margin-top: 12px;
-  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #ffffffdd;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 25px 0 15px;
+}
+
+.timeline-header::before,
+.timeline-header::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid #ffffff22;
+}
+
+.timeline-header::before {
+  margin-right: 12px;
+}
+
+.timeline-header::after {
+  margin-left: 12px;
 }
 
 .timeline-container {
@@ -676,9 +690,9 @@ body {
 }
 
 .timeline-box {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
+  width: 34px;
+  height: 28px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -687,17 +701,49 @@ body {
   color: white;
   flex-shrink: 0;
   scroll-snap-align: center;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+  box-shadow:none; 
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.timeline-wrapper {
+  background: #111;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #ffffff10;
+  margin-bottom: 10px;
 }
 
 .timeline-box:hover { transform: translateY(-4px); box-shadow: 0 6px 14px rgba(0,0,0,0.35); }
 .timeline-empty { padding: 12px 0; color: #aaa; font-size: 14px; text-align: center; font-style: italic; }
-.timeline-box.not-played { background: #d5d5d5; color: #555; }
+.timeline-box.not-played { background: #3a3a3a; color: #ccc; }
 .timeline-current { border: 3px solid #3498db; box-shadow: 0 0 12px rgba(52,152,219,0.7); }
-.form-W { background: linear-gradient(135deg, #2ecc71, #27ae60); }
-.form-D { background: linear-gradient(135deg, #bdc3c7, #95a5a6); }
-.form-L { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+.form-W { background: linear-gradient(135deg, #1f8f55, #166b3f); }
+.form-D {
+  background: #f2f2f2;
+   color: #111; 
+  }
+.form-L { background: linear-gradient(135deg, #b8323a, #8e272e); }
+
+.timeline-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-x: auto;
+  width: 100%;
+}
+
+.timeline-team {
+  padding: 8px 12px;
+  font-weight: 700;
+  font-size: 0.7rem;
+  color: #FFFFFFCC;
+  text-transform: uppercase;
+
+              /* full bredde på mobil */
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.2;
+}
 
 /* ================================
    H2H
@@ -710,13 +756,67 @@ body {
 .h2h-division { font-size: 0.8rem; color: #ffffff55; margin-top: 4px; }
 
 /* ================================
+   Siste møter – kort-stil
+================================ */
+
+.h2h-card {
+  background: #111;
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #ffffff10;
+}
+
+.h2h-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.h2h-date {
+  font-size: 0.8rem;
+  color: #ffffff66;
+}
+
+.h2h-matchup {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffffdd;
+}
+
+.h2h-result {
+  font-size: 1.1rem;
+  font-weight: 800;
+  min-width: 48px;
+  text-align: right;
+}
+
+/* Fargekoder */
+.h2h-result.win {
+  color: #1f8f55; /* ny grønn */
+}
+
+.h2h-result.loss {
+  color: #b8323a; /* ny rød */
+}
+
+.h2h-result.draw {
+  color: #f2f2f2; /* hvit uavgjort */
+}
+
+
+/* ================================
    KAMPINFO
 ================================ */
 .kampinfo-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #ffffff22; color: #ffffffcc; font-size: 0.95rem; }
 .kampinfo-label { color: #ffffff88; font-weight: 500; }
 .kampinfo-value { font-weight: 600; color: #ffffffdd; }
 .info-block{
-  margin-bottom: 0.8rem; 
+  margin-bottom: 20px; 
 }
 
 /* ================================

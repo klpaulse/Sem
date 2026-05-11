@@ -56,28 +56,36 @@ export default function BeforeMatchInfo({
 
   return (
     <section className="before-match-info">
-     {!hideTitle && <h2 className="beforematch">Før kampen</h2>}
 
       {/* ⭐ TIMELINE FOR BEGGE LAG – ALLTID VIST */}
       <div className="info-block">
-        <h3 className="timeline-header">{homeName}</h3>
+        <h3 className="timeline-header">Sesongforløp</h3>
+
+        
+        <div className="timeline-row">
+          <span className="timeline-team">{homeName}</span>
         <SeasonTimeline
           matches={homeSeason}
           teamId={homeId}
           currentMatchId={match.id}
         />
+        </div>
 
-        <h3 className="timeline-header">{awayName}</h3>
+        <div className="timeline-row">
+          <span className="timeline-team">{awayName}</span>
         <SeasonTimeline
           matches={awaySeason}
           teamId={awayId}
           currentMatchId={match.id}
         />
       </div>
+      </div>
+      
+    
 
       {/* ⭐ HEAD TO HEAD */}
       <div className="info-block">
-        <h3>Siste møter</h3>
+        <h3 className="timeline-header">Siste møter</h3>
 
         {headToHead.map((m) => {
           const date = normalizeDate(m.date).toLocaleDateString("no-NO");
@@ -87,15 +95,23 @@ export default function BeforeMatchInfo({
           const aName = m.awayTeamId === awayId ? awayName : homeName;
 
           return (
-            <div key={m.id} className="h2h-match">
+            <div key={m.id} className="h2h-card">
               <div className="h2h-left">
                 <span className="h2h-date">{date}</span>
-                <span className="h2h-teams">
-                  {hName} {m.homeScore}-{m.awayScore} {aName}
+                <span className="h2h-matchup">
+                  {hName} - {aName}
                 </span>
               </div>
 
-              <span className="h2h-division">{division}</span>
+              <span className={`h2h-result ${
+                m.homeScore === m.awayScore
+                ? "draw"
+                : m.homeScore > m.awayScore
+                ? (m.homeTeamId === homeId ? "win" : "loss")
+                : (m.homeTeamId === homeId ? "loss" : "win")
+              }`}
+              >
+                {m.homeScore}-{m.awayScore}</span>
             </div>
           );
         })}
@@ -104,7 +120,7 @@ export default function BeforeMatchInfo({
       {/* ⭐ KAMPINFO */}
       {!hideTitle && (
       <div className="info-block">
-        <h3>Kampinfo</h3>
+        <h3 className="timeline-header">Kampinfo</h3>
 
         <div className="kampinfo-row">
           <span className="kampinfo-label">Arena:</span>
