@@ -6,7 +6,20 @@ export default function DivisionList({
   navigate,
   selectedDate
 }) {
-  const divisions = useMemo(() => Object.keys(matchesByDivision), [matchesByDivision])
+  const divisionOrder = [
+    "4.div",
+    "5.div",
+    "6.div",
+    "7.div avd 1",
+    "7.div avd 2"
+  ];
+
+  const divisions = useMemo(() => {
+    return Object.keys(matchesByDivision).sort(
+      (a, b) => divisionOrder.indexOf(a) - divisionOrder.indexOf(b)
+    );
+  }, [matchesByDivision]);
+
   const [openDivisions, setOpenDivisions] = useState({});
   const [teamNames, setTeamNames] = useState({});
 
@@ -38,12 +51,12 @@ export default function DivisionList({
   useEffect(() => {
     setOpenDivisions((prev) => {
       const updated = { ...prev };
-      let changed = false
+      let changed = false;
 
       divisions.forEach((d) => {
         if (!(d in updated)) {
           updated[d] = true;
-          changed = true
+          changed = true;
         }
       });
 
@@ -73,8 +86,18 @@ export default function DivisionList({
     return matchDate < now && matchDate.toDateString() !== now.toDateString();
   };
 
+  // ⭐ FINN FEATURED LIVE-KAMP
+  const featuredMatch = useMemo(() => {
+    return Object.values(matchesByDivision)
+      .flat()
+      .find((m) => m.featuredLive === true);
+  }, [matchesByDivision]);
+
   return (
     <section className="division-list">
+
+  
+
       {divisions.map((division) => {
         const matches = (matchesByDivision[division] || []).filter((match) => {
           if (!selectedDate) return true;
@@ -115,10 +138,10 @@ export default function DivisionList({
                   const played =
                     match.homeScore !== null && match.awayScore !== null;
 
-                  const isLive = match.liveStarted === true;
-                  const isPaused = match.livePaused === true;
+                  const isLive = match.status === "live";
+                  const isPaused = match.status === "paused";
 
-                  const endedManually = match.matchEnded === true;
+                  const endedManually = match.status === "finished";
                   const endedAutomatically = isPastMatch(matchDate);
 
                   const homeWon = played && match.homeScore > match.awayScore;
@@ -132,7 +155,7 @@ export default function DivisionList({
                   return (
                     <div
                       key={match.id}
-                      className="match-card"
+                      className={`match-card ${isLive ? "live-glow" : ""}`}
                       onClick={() => navigate(`/match/${match.id}`)}
                     >
                       <div className="match-card-teams">
@@ -177,9 +200,7 @@ export default function DivisionList({
                         ) : isPaused ? (
                           <span className="match-status-pause">Pause</span>
                         ) : isLive ? (
-                          <span className="match-minute-live">
-                            {match.liveMinute}'
-                          </span>
+                          <span className="match-status-live">LIVE</span>
                         ) : (
                           <span className="match-time-box">
                             {matchDate.toLocaleTimeString([], {

@@ -12,6 +12,9 @@ import LoginPage from './pages/LoginPage.jsx'
 import HomePage from './pages/HomePage'
 import LiveControls from './components/admincomp/livekontroll/LiveControls.jsx'
 import ErrorBoundary from './ErrorBoundary.jsx'
+import ProtectedReporterRoute from './components/admincomp/ProtectedReporterRoute.jsx'
+import ReporterPage from './components/admincomp/ReporterPage.jsx'
+import ReporterLivePage from './components/admincomp/livekontroll/ReporterLivePage.jsx'
 
 function App() {
   const [matches, setMatches] = useState([])
@@ -84,6 +87,19 @@ function App() {
             path="/admin"
             element={<AdminPage matches={matches} divisions={divisions} />}
           />
+
+          <Route path="/reporter" element={
+             <ProtectedReporterRoute>
+              <ReporterPage matches={matches} />
+          </ProtectedReporterRoute>}
+          />
+
+          <Route path="/reporter/live/:id" element={
+            <ProtectedReporterRoute matchId={true}>
+              <ReporterLivePage/>
+            </ProtectedReporterRoute>
+          } />
+
         </Routes>
       </ErrorBoundary>
     </>

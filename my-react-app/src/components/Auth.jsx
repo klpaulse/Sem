@@ -2,26 +2,36 @@ import { useState } from 'react'
 import { auth, googleProvider } from '../config/Firebase'
 import { signInWithEmailAndPassword, signInWithPopup, signOut } from 'firebase/auth'
 import { useNavigate } from 'react-router-dom'
+import { checkAdmin } from '../utils/checkAdmin'
 
 export default function Auth() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const navigate = useNavigate()
+    const ADMIN_EMAILS = ["lovise_paulsen@hotmail.com"]
+
+    async function handleAfterLogin(user) {
+  const isAdmin = await checkAdmin(user.uid);
+  if (isAdmin) {
+    navigate("/admin");
+  } else {
+    navigate("/reporter");
+  }
+}
 
     const signIn = async () => {
         try {
-            await signInWithEmailAndPassword(auth, email, password)
-            navigate("/admin")   // ⭐ SEND BRUKEREN TIL ADMIN
+            const result = await signInWithEmailAndPassword(auth, email, password)
+            await handleAfterLogin(result.user)
         } catch (err) {
             alert(err.message)
-            console.error(err)
         }
     }
 
     const signInWithGoogle = async () => {
         try {
-            await signInWithPopup(auth, googleProvider)
-            navigate("/admin")   // ⭐ OGSÅ GOOGLE-BRUKERE SENDES TIL ADMIN
+           const result = await signInWithPopup(auth, googleProvider)
+            await handleAfterLogin(result.user)
         } catch (err) {
             console.error(err)
         }

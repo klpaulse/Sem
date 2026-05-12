@@ -16,6 +16,9 @@ export default function CreateMatchForm() {
   const [time, setTime] = useState("");
   const [venue, setVenue] = useState("");
 
+  const [reporterEmail, setReporterEmail] =useState("")
+  const [reporters, setReporters] = useState([])
+
   const matchesRef = collection(db, "matches");
 
   // Hent alle lag og bygg liste over divisjoner
@@ -82,6 +85,8 @@ export default function CreateMatchForm() {
         played: false,
         goalScorers: [],
         userId: auth?.currentUser?.uid,
+
+        reporters: reporters,
       });
 
       // Reset
@@ -90,6 +95,8 @@ export default function CreateMatchForm() {
       setDate("");
       setTime("");
       setVenue("");
+      setReporters([])
+      setReporterEmail("")
 
       alert("Kamp lagt til!");
     } catch (err) {
@@ -97,6 +104,17 @@ export default function CreateMatchForm() {
       alert("Feil ved lagring av kamp");
     }
   };
+
+  function addReporter (){
+    if (!reporterEmail.trim()) return
+    if(reporters.includes(reporterEmail)) return 
+    setReporters([...reporters, reporterEmail])
+    setReporterEmail("")
+  }
+
+  function removeReporter(email){
+    setReporters(reporters.filter(r => r !== email))
+  }
 
   return (
     <section>
@@ -152,6 +170,25 @@ export default function CreateMatchForm() {
       />
 
       <button onClick={addMatch}>Legg til kamp</button>
+
+      <div>
+        <label>Reportere (kan holde live) :</label>
+        <div style={{display: "flex", gap: "8px"}}>
+        <input
+        placeholder="E-post til reporter"
+        value={reporterEmail}
+        onChange={(e) => setReporterEmail(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && addReporter()}
+        />
+        <button type="button" onClick={addReporter}>Legg til</button>
+        </div>
+        {reporters.map(email => (
+          <div key={email} style={{display: "flex", gap: "8px", marginTop:"4px"}}>
+            <span>{email}</span>
+            <button type="button" onClick={() => removeReporter(email)}>X</button>
+            </div>
+        ))}
+      </div>
     </section>
   );
 }

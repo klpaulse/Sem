@@ -22,27 +22,21 @@ export default function AdminPage() {
   const [user] = useAuthState(auth);
   const [isAdmin, setIsAdmin] = useState(null);
 
-  // Live-modus
   const [inLiveMode, setInLiveMode] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState(null);
 
-  // Sjekk admin
   useEffect(() => {
     const checkAdmin = async () => {
       if (!user) return setIsAdmin(false);
-
       const ref = doc(db, "admins", user.uid);
       const snap = await getDoc(ref);
       setIsAdmin(snap.exists());
     };
-
     checkAdmin();
   }, [user]);
 
-  // Hent divisjoner
   useEffect(() => {
     const teamsRef = collection(db, "teams");
-
     const unsub = onSnapshot(teamsRef, (snapshot) => {
       const allTeams = snapshot.docs.map((doc) => doc.data());
       const uniqueDivs = [...new Set(allTeams.map((t) => t.division))];
@@ -50,7 +44,6 @@ export default function AdminPage() {
       setDivisions(uniqueDivs);
       setLoading(false);
     });
-
     return () => unsub();
   }, []);
 
@@ -60,8 +53,6 @@ export default function AdminPage() {
 
   return (
     <div className="admin-layout">
-
-
       <aside className="admin-sidebar">
         {!inLiveMode && (
           <>
@@ -79,7 +70,6 @@ export default function AdminPage() {
 
         {!loading && (
           <>
-            {/* LIVE-MODUS */}
             {inLiveMode && selectedMatch && (
               <LiveControls
                 match={selectedMatch}
@@ -90,37 +80,20 @@ export default function AdminPage() {
               />
             )}
 
-            {/* NORMAL ADMIN-MODUS */}
             {!inLiveMode && (
               <>
                 {activeTab === "live" && (
                   <LiveAdmin
                     onSelectMatch={async (match) => {
-                      // Hent eller opprett kampdata
                       const fullData = await loadOrCreateMatchData(match.id);
-
-                      // Kombiner fixture-data + kampdata
-                      setSelectedMatch({
-                        id: match.id,
-                        ...match,
-                        ...fullData
-                      });
-
+                      setSelectedMatch({ id: match.id, ...match, ...fullData });
                       setInLiveMode(true);
                     }}
                   />
                 )}
-
-                {activeTab === "teams" && (
-                  <LagAdministrasjon divisions={divisions} />
-                )}
-
-                {activeTab === "matches" && (
-                  <KampAdministrasjon divisions={divisions} />
-                )}
-
+                {activeTab === "teams" && <LagAdministrasjon divisions={divisions} />}
+                {activeTab === "matches" && <KampAdministrasjon divisions={divisions} />}
                 {activeTab === "players" && <PlayerAdmin />}
-
                 {activeTab === "results" && <ResultatAdmin />}
               </>
             )}
