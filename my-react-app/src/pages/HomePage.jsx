@@ -81,19 +81,15 @@ export default function HomePage() {
     return acc;
   }, {});
 
-  // FINN FEATURED MATCH
-  const featuredMatch = useMemo(() => {
-    const fm = matches.find((m) => m.featuredLive === true);
-    if (!fm) return null;
+  // DAGENS LIVEKAMPER (flere)
+  const todaysFeaturedMatches = todaysMatches.filter(
+    (m) =>
+      m.featuredLive === true &&
+      m.status !== "live" &&
+      m.status !== "finished"
+  );
 
-    return {
-      ...fm,
-      homeName: teamNames[fm.homeTeamId],
-      awayName: teamNames[fm.awayTeamId],
-    };
-  }, [matches, teamNames]);
-
-  // FINN DAGENS LIVEKAMPER
+  // LIVE-KAMPER
   const todaysLiveMatches = todaysMatches.filter(
     (m) => m.status === "live"
   );
@@ -106,28 +102,34 @@ export default function HomePage() {
 
       <main className="page">
 
-        {/* ⭐ VIS LIVE-KAMPER HVIS DET FINNES */}
-        {todaysLiveMatches.length > 0 && (
-          <div className="live-banner">
-            {todaysLiveMatches.map((m) => (
-              <div key={m.id} className="live-row">
-                <span className="live-dot"></span>
-                {teamNames[m.homeTeamId]} – {teamNames[m.awayTeamId]}
-              </div>
-            ))}
-          </div>
-        )}
+        {(todaysFeaturedMatches.length > 0 || todaysLiveMatches.length > 0) && (
+  <div className="live-banner">
 
-        {/* ⭐ VIS FEATURED KAMP HVIS INGEN LIVE-KAMPER */}
-        {todaysLiveMatches.length === 0 &&
-          featuredMatch &&
-          featuredMatch.status !== "live" &&
-          featuredMatch.status !== "finished" && (
-            <div className="live-banner">
+    {/* Dagens livekamper */}
+    {todaysFeaturedMatches.length > 0 && (
+      <>
+        <div className="live-row-title">Dagens livekamp:</div>
+        <ul style={{ listStyle: "none", paddingLeft: "0rem", margin: 0 }}>
+          {todaysFeaturedMatches.map((m) => (
+            <li key={m.id} className="live-row">
               <span className="live-dot"></span>
-              Dagens livekamp: {featuredMatch.homeName} – {featuredMatch.awayName}
-            </div>
-          )}
+              {teamNames[m.homeTeamId]} – {teamNames[m.awayTeamId]}
+            </li>
+          ))}
+        </ul>
+      </>
+    )}
+
+    {/* Live-kamper */}
+    {todaysLiveMatches.map((m) => (
+      <div key={m.id} className="live-row">
+        <span className="live-dot"></span>
+        {teamNames[m.homeTeamId]} – {teamNames[m.awayTeamId]}
+      </div>
+    ))}
+
+  </div>
+)}
 
         <section className="calandar-section">
           <Calandar

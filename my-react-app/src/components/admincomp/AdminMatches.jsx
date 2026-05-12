@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { getAllMatches, updateMatchResult } from "../../services/MatchService";
+import { getAllMatches } from "../../services/MatchService";
 import { getTeam } from "../../services/TeamService";
-import ResultsForm from "./ResultsForm";
 import { db } from "../../config/Firebase";
 import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 
@@ -19,6 +18,7 @@ export default function AdminMatches({ selectedDate, onSelectMatch }) {
   const [reporterMatch, setReporterMatch] = useState(null);
   const [reporterEmail, setReporterEmail] = useState("");
 
+  // HENT ALLE KAMPER
   useEffect(() => {
     async function load() {
       const all = await getAllMatches();
@@ -27,6 +27,7 @@ export default function AdminMatches({ selectedDate, onSelectMatch }) {
     load();
   }, []);
 
+  // HENT LAGNAVN
   useEffect(() => {
     async function loadTeams() {
       const cache = {};
@@ -43,50 +44,66 @@ export default function AdminMatches({ selectedDate, onSelectMatch }) {
     if (matches.length > 0) loadTeams();
   }, [matches]);
 
+  // LEGG TIL REPORTER
   async function addReporter() {
     if (!reporterEmail.trim() || !reporterMatch) return;
+
     await updateDoc(doc(db, "matches", reporterMatch.id), {
       reporters: arrayUnion(reporterEmail.trim())
     });
+
     setReporterMatch(prev => ({
       ...prev,
       reporters: [...(prev.reporters || []), reporterEmail.trim()]
     }));
-    setMatches(prev => prev.map(m => 
-      m.id === reporterMatch.id 
-        ? { ...m, reporters: [...(m.reporters || []), reporterEmail.trim()] }
-        : m
-    ));
+
+    setMatches(prev =>
+      prev.map(m =>
+        m.id === reporterMatch.id
+          ? { ...m, reporters: [...(m.reporters || []), reporterEmail.trim()] }
+          : m
+      )
+    );
+
     setReporterEmail("");
   }
 
+  // FJERN REPORTER
   async function removeReporter(email) {
     await updateDoc(doc(db, "matches", reporterMatch.id), {
       reporters: arrayRemove(email)
     });
+
     setReporterMatch(prev => ({
       ...prev,
       reporters: prev.reporters.filter(r => r !== email)
     }));
-    setMatches(prev => prev.map(m =>
-      m.id === reporterMatch.id
-        ? { ...m, reporters: m.reporters.filter(r => r !== email) }
-        : m
-    ));
+
+    setMatches(prev =>
+      prev.map(m =>
+        m.id === reporterMatch.id
+          ? { ...m, reporters: m.reporters.filter(r => r !== email) }
+          : m
+      )
+    );
   }
 
+  // ⭐ SETT KAMP SOM DAGENS LIVEKAMP (FLERE LOV)
   async function setFeatured(matchId) {
     await updateDoc(doc(db, "matches", matchId), {
       featuredLive: true
-    })
+    });
 
-    setMatches(prev => 
-      prev.map(m => 
-        m.id === matchId ? {...m, featuredLive : true } : m
+    setMatches(prev =>
+      prev.map(m =>
+        m.id === matchId
+          ? { ...m, featuredLive: true }
+          : m // ikke rør andre kamper
       )
-    )
+    );
   }
 
+  // DATO-FILTRERING
   if (!selectedDate) return <p>Velg en dato</p>;
 
   const normalizedSelected = normalizeDate(selectedDate);
@@ -107,8 +124,19 @@ export default function AdminMatches({ selectedDate, onSelectMatch }) {
       {matchesForDay.length === 0 && <p>Ingen kamper denne dagen.</p>}
 
       {matchesForDay.map((m) => (
-        <div key={m.id} className="admin-match-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span>{teams[m.homeTeamId]?.name || "?"} – {teams[m.awayTeamId]?.name || "?"}</span>
+        <div
+          key={m.id}
+          className="admin-match-row"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center"
+          }}
+        >
+          <span>
+            {teams[m.homeTeamId]?.name || "?"} – {teams[m.awayTeamId]?.name || "?"}
+          </span>
+
           <div style={{ display: "flex", gap: "8px" }}>
             <button onClick={() => onSelectMatch(m)}>🎙 Start live</button>
             <button onClick={() => setReporterMatch(m)}>👤 Reportere</button>
@@ -119,30 +147,59 @@ export default function AdminMatches({ selectedDate, onSelectMatch }) {
 
       {/* REPORTER-MODAL */}
       {reporterMatch && (
-        <div style={{
-          position: "fixed", inset: 0,
-          background: "rgba(0,0,0,0.7)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          zIndex: 100
-        }}>
-          <div style={{
-            background: "#1a1a1a", padding: "24px",
-            borderRadius: "12px", width: "90%", maxWidth: "400px",
-            border: "1px solid #333"
-          }}>
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.7)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 100
+          }}
+        >
+          <div
+            style={{
+              background: "#1a1a1a",
+              padding: "24px",
+              borderRadius: "12px",
+              width: "90%",
+              maxWidth: "400px",
+              border: "1px solid #333"
+            }}
+          >
             <h3 style={{ color: "#fff", marginBottom: "4px" }}>
-              {teams[reporterMatch.homeTeamId]?.name} – {teams[reporterMatch.awayTeamId]?.name}
+              {teams[reporterMatch.homeTeamId]?.name} –{" "}
+              {teams[reporterMatch.awayTeamId]?.name}
             </h3>
-            <p style={{ color: "#ffffff66", fontSize: "13px", marginBottom: "16px" }}>
+
+            <p
+              style={{
+                color: "#ffffff66",
+                fontSize: "13px",
+                marginBottom: "16px"
+              }}
+            >
               Administrer reportere
             </p>
 
             {(reporterMatch.reporters || []).length === 0 && (
-              <p style={{ color: "#ffffff44", fontStyle: "italic" }}>Ingen reportere lagt til</p>
+              <p style={{ color: "#ffffff44", fontStyle: "italic" }}>
+                Ingen reportere lagt til
+              </p>
             )}
 
-            {(reporterMatch.reporters || []).map(email => (
-              <div key={email} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0", borderBottom: "1px solid #333" }}>
+            {(reporterMatch.reporters || []).map((email) => (
+              <div
+                key={email}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "6px 0",
+                  borderBottom: "1px solid #333"
+                }}
+              >
                 <span style={{ color: "#ffffffcc" }}>{email}</span>
                 <button onClick={() => removeReporter(email)}>Fjern</button>
               </div>
@@ -160,7 +217,10 @@ export default function AdminMatches({ selectedDate, onSelectMatch }) {
             </div>
 
             <button
-              onClick={() => { setReporterMatch(null); setReporterEmail(""); }}
+              onClick={() => {
+                setReporterMatch(null);
+                setReporterEmail("");
+              }}
               style={{ width: "100%", marginTop: "12px" }}
             >
               Lukk

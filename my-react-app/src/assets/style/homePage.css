@@ -372,6 +372,12 @@
   align-items: center;
   margin-bottom: 4px;
 }
+ .live-row-title{
+  display: flex; 
+  justify-content: start;
+ }
+
+
 
 .live-row:last-child {
   margin-bottom: 0;
