@@ -58,17 +58,13 @@ export function useEventActions(match, liveMatch) {
     });
   }
 
-  async function pauseMatch(){
-    await updateDoc(matchRef, { status: "halftime"})
-    addSystemEvent("Pause (slutt 1.omgang"), false
-  }
-
   /* -----------------------------
       KAMPKONTROLL
   ------------------------------ */
   async function startMatch() {
     await updateDoc(matchRef, {
       status: "live",
+      featuredLive: false,
       startTime: new Date().toISOString(),
       secondHalfStarted: false,
       secondHalfStartTime: null,
@@ -106,6 +102,13 @@ export function useEventActions(match, liveMatch) {
     if (qSnap.empty) return;
     await deleteDoc(qSnap.docs[0].ref);
   }
+
+  async function removeFeatured() {
+  await updateDoc(matchRef, {
+    featuredLive: false
+  });
+}
+
 
   /* -----------------------------
       LEGG TIL HENDELSE
@@ -282,5 +285,6 @@ if (type === "poll") {
     endMatch,
     undoLastEvent,
     addEvent,
+    removeFeatured,
   };
 }

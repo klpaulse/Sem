@@ -141,17 +141,17 @@ body {
 }
 
 .lp-row {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   margin-bottom: 1rem;
+  gap: 12px; 
 }
 
 .lp-title {
   font-size: 1rem;
   font-weight: 700;
   color: #ffffffcc;
-  max-width: 90px;
   line-height: 1.2;
   text-align: center;
   display: -webkit-box;
@@ -162,7 +162,7 @@ body {
 }
 
 .lp-result {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 800;
   color: #ffffffcc;
   letter-spacing: 4px;
@@ -170,9 +170,9 @@ body {
 }
 
 .lp-result--text {
-  font-size: 0.95rem;
+  font-size: 1.3rem;
   font-weight: 600;
-  letter-spacing: 0;
+  opacity: 0.6;
 }
 
 .lp-status {
@@ -973,26 +973,80 @@ body {
 /* ================================
    TABELL
 ================================ */
-.league-table { width: 100%; background: #ffffff; border-radius: 10px; overflow: hidden; border: 1px solid #e5e5e5; font-size: 14px; }
+.league-table { 
+  width: 100%;
+   background: #f7f7f7;
+   border-radius: 10px; 
+   overflow: hidden;
+  border: 1px solid #e5e5e5; 
+  font-size: 12px; }
 
 .table-header,
 .table-row {
   display: grid;
-  grid-template-columns: 30px 1fr 30px 30px 30px 30px 70px 40px 30px;
-  padding: 10px;
+  grid-template-columns: 22px 1fr 22px 22px 22px 22px 45px 30px 25px;
+  padding: 6px 8px;
   align-items: center;
 }
 
-.table-header { background: #f4f4f4; font-weight: 600; color: #333; border-bottom: 1px solid #ddd; }
-.table-row { border-bottom: 1px solid #eee; }
-.table-row:last-child { border-bottom: none; }
-.table-row span { display: flex; align-items: center; }
-.table-row:nth-child(odd) { background: #fafafa; }
-.table-row:hover { background: #f0f7ff; transition: 0.2s; }
-.table-row:first-child { background: #e8ffe8; font-weight: 600; }
-.table-row:last-child { background: #ffecec; }
-.table-row span:nth-child(2), .table-header span:nth-child(2) { justify-content: flex-start; }
-.table-row span:not(:nth-child(2)), .table-header span:not(:nth-child(2)) { justify-content: center; }
+.table-header { 
+background: #efefef; 
+font-weight: 700; 
+color: #333; 
+border-bottom: 1px solid #ddd;
+}
+
+.table-row {
+  border-bottom: 1px solid #eaeaea;
+  background: #ffffff;
+}
+
+/* Zebra */
+.table-row:nth-child(odd) {
+  background: #fafafa;
+}
+
+/* Førsteplass */
+.table-row:first-child {
+  background: #e8ffe8;
+  font-weight: 600;
+}
+
+/* Sisteplass */
+.table-row:last-child {
+  background: #ffecec;
+}
+
+/* Lagnavn venstre */
+.table-row span:nth-child(2),
+.table-header span:nth-child(2) {
+  justify-content: flex-start;
+}
+
+/* Tall midt/høyre */
+.table-row span:not(:nth-child(2)),
+.table-header span:not(:nth-child(2)) {
+  justify-content: center;
+}
+
+.reporter-name-input {
+  display: flex;
+  gap: 8px;
+  padding: 8px 0;
+  align-items: center;
+}
+
+.reporter-name-saved {
+  color: #4ecf7a;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.reporter-label {
+  font-size: 12px;
+  color: #ffffffaa;
+  font-style: italic;
+}
 
 /* ================================
    MOBIL

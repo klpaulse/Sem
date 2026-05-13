@@ -103,6 +103,20 @@ export default function AdminMatches({ selectedDate, onSelectMatch }) {
     );
   }
 
+  async function removeFeatured(matchId) {
+  await updateDoc(doc(db, "matches", matchId), {
+    featuredLive: false
+  });
+
+  setMatches(prev =>
+    prev.map(m =>
+      m.id === matchId
+        ? { ...m, featuredLive: false }
+        : m
+    )
+  );
+}
+
   // DATO-FILTRERING
   if (!selectedDate) return <p>Velg en dato</p>;
 
@@ -141,6 +155,8 @@ export default function AdminMatches({ selectedDate, onSelectMatch }) {
             <button onClick={() => onSelectMatch(m)}>🎙 Start live</button>
             <button onClick={() => setReporterMatch(m)}>👤 Reportere</button>
             <button onClick={() => setFeatured(m.id)}>⭐ Dagens livekamp</button>
+            <button onClick={() => removeFeatured(m.id)}>❌ Fjern dagens kamp</button>
+
           </div>
         </div>
       ))}

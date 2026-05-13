@@ -144,7 +144,7 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
               <p>{e.question}</p>
             </div>
             <div className="answer-block">
-              <p className="answer-line">Admin svarer:</p>
+              <p className="answer-line">{e.reporterName || "Admin"} svarer:</p>
               <p>{e.answer}</p>
             </div>
           </div>
@@ -281,6 +281,11 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
   return (
     <div className="report-container">
       <header className="report-title-row">
+        {match.reporterName && (
+          <span className="reporter-label">
+            Live holdes ac {match.reporterName}
+          </span>
+        )}
         {!isFinished && <AudienceQuestions matchId={match.id} />}
       </header>
 

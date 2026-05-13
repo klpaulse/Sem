@@ -86,17 +86,8 @@ export default function DivisionList({
     return matchDate < now && matchDate.toDateString() !== now.toDateString();
   };
 
-  // ⭐ FINN FEATURED LIVE-KAMP
-  const featuredMatch = useMemo(() => {
-    return Object.values(matchesByDivision)
-      .flat()
-      .find((m) => m.featuredLive === true);
-  }, [matchesByDivision]);
-
   return (
     <section className="division-list">
-
-  
 
       {divisions.map((division) => {
         const matches = (matchesByDivision[division] || []).filter((match) => {
@@ -138,10 +129,12 @@ export default function DivisionList({
                   const played =
                     match.homeScore !== null && match.awayScore !== null;
 
-                  const isLive = match.status === "live";
-                  const isPaused = match.status === "paused";
+                  // ⭐ ROBUST STATUS-HÅNDTERING
+                  const status = (match.status || "").toLowerCase();
 
-                  const endedManually = match.status === "finished";
+                  const isLive = status === "live";
+                  const isPaused = status === "paused";
+                  const endedManually = status === "finished";
                   const endedAutomatically = isPastMatch(matchDate);
 
                   const homeWon = played && match.homeScore > match.awayScore;

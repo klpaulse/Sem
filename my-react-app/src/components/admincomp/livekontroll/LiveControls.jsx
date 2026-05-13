@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { db } from "../../../config/Firebase";
 
 import EventForm from "../forms/EventForm";
@@ -26,6 +26,17 @@ export default function LiveControls({ match, onBack }) {
   const [formationStep, setFormationStep] = useState("squad");
   const [currentMatch, setCurrentMatch] = useState(match);
   const [formationSaved, setFormationSaved] = useState(false);
+
+  const [reporterName, setReporterName] = useState("")
+  const [nameSaved, setNameSaved] = useState(false)
+
+  async function saveName() {
+    if (!reporterName.trim()) return 
+    await updateDoc(doc(db, "matches", match.id), {
+      reporterName: reporterName.trim()
+    })
+    setNameSaved(true)
+  }
 
   useEffect(() => {
     if (!match?.id) return;
@@ -188,6 +199,22 @@ export default function LiveControls({ match, onBack }) {
             </>
           )}
 
+          <div className="reporter-name-input">
+          {!nameSaved ? (
+            <>
+            <input
+            placeholder="Ditt navn (vises på live-rapport)"
+            value={reporterName}
+            onChange={(e) => setReporterName(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && saveName()}
+            />
+            <button onClick={saveName}>Lagre</button>
+            </>
+          ) : (
+            <p className="reporter-name-saved">✓ Vises som: {reporterName}</p>
+          )}
+          </div>
+
           {activeTab === "formation" && (
             <div>
               {formationStep === "squad" && !formationSaved && (
@@ -279,7 +306,10 @@ export default function LiveControls({ match, onBack }) {
                 liveMatch={liveMatch}
               />
 
-              <AdminQuestions matchId={match.id} getMinute={getMinute} />
+              <AdminQuestions 
+              matchId={match.id} 
+              getMinute={getMinute}
+              reporterName={liveMatch.reporterName || "Admin"} />
 
               <EventList match={liveMatch} />
             </>

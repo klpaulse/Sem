@@ -12,7 +12,7 @@ import {
   serverTimestamp
 } from "firebase/firestore";
 
-export default function AdminQuestions({ matchId, getMinute }) {
+export default function AdminQuestions({ matchId, getMinute, reporterName = "Admin" }) {
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
 
@@ -47,6 +47,7 @@ export default function AdminQuestions({ matchId, getMinute }) {
       name: question?.name || "Ukjent",
       question: question?.question || "",
       answer,
+      reporterName: reporterName,
       minute: getMinute ? getMinute() : null,
       createdAt: serverTimestamp()
     });

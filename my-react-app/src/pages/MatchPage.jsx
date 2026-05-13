@@ -19,6 +19,7 @@ import { loadOrCreateMatchData } from "../components/admincomp/useMatchData";
 import TabellComponent from "../components/maincomp/TabellComponent";
 import PollDisplay from "../components/maincomp/PollDisplay";
 import BeforeMatchInfo from "../components/maincomp/BeforeMatchInfo";
+import ReactGA from "react-ga4"
 
 export default function MatchPage() {
   const { id } = useParams();
@@ -65,6 +66,13 @@ useEffect(() => {
     }
     load();
   }, [id]);
+
+  useEffect(() => {
+    if (!selectedMatch?.id) return 
+    
+    ReactGA.event("kamp_visning",{
+    })
+  }, [selectedMatch])
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -170,7 +178,7 @@ useEffect(() => {
             {effectivelyFinished
               ? (selectedMatch.homeScore != null
                   ? `${selectedMatch.homeScore} - ${selectedMatch.awayScore}`
-                  : "Ikke registrert")
+                  : "-:-")
               : selectedMatch.status === "live"
               ? `${selectedMatch.homeScore ?? 0} - ${selectedMatch.awayScore ?? 0}`
               : `Kl ${selectedMatch.time}`}

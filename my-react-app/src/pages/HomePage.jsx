@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { db } from "../config/Firebase";
 import { collection, onSnapshot } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
@@ -25,7 +25,7 @@ export default function HomePage() {
         ...doc.data(),
       }));
 
-      // Trygg sortering
+      // Sorter etter dato
       matchesData.sort((a, b) => {
         const da = a.date?.toDate ? a.date.toDate() : new Date(a.date);
         const db = b.date?.toDate ? b.date.toDate() : new Date(b.date);
@@ -70,6 +70,27 @@ export default function HomePage() {
 
     return matchDate.toDateString() === selectedDate.toDateString();
   });
+  todaysMatches.forEach((m) => {
+  console.log("STATUS:", m.status, "FEATURED:", m.featuredLive, m);
+});
+
+  // ⭐ ROBUST STATUS-HÅNDTERING
+  const normalizeStatus = (s) => (s || "").toLowerCase();
+
+  // ⭐ DAGENS LIVEKAMPER (flere, men ikke live/ferdig)
+  const todaysFeaturedMatches = todaysMatches.filter((m) => {
+    const status = normalizeStatus(m.status);
+    return (
+      m.featuredLive === true &&
+      status !== "live" &&
+      status !== "finished"
+    );
+  });
+
+  // ⭐ LIVE-KAMPER
+  const todaysLiveMatches = todaysMatches.filter(
+    (m) => normalizeStatus(m.status) === "live"
+  );
 
   // GRUPPER ETTER DIVISJON
   const matchesByDivision = todaysMatches.reduce((acc, match) => {
@@ -81,19 +102,6 @@ export default function HomePage() {
     return acc;
   }, {});
 
-  // DAGENS LIVEKAMPER (flere)
-  const todaysFeaturedMatches = todaysMatches.filter(
-    (m) =>
-      m.featuredLive === true &&
-      m.status !== "live" &&
-      m.status !== "finished"
-  );
-
-  // LIVE-KAMPER
-  const todaysLiveMatches = todaysMatches.filter(
-    (m) => m.status === "live"
-  );
-
   return (
     <>
       <header className="site-header">
@@ -102,34 +110,31 @@ export default function HomePage() {
 
       <main className="page">
 
-        {(todaysFeaturedMatches.length > 0 || todaysLiveMatches.length > 0) && (
-  <div className="live-banner">
+        {/* ⭐ BANNER: DAGENS LIVEKAMPER + LIVE-KAMPER */}
+        {todaysFeaturedMatches.length > 0  && (
+          <div className="live-banner">
 
-    {/* Dagens livekamper */}
-    {todaysFeaturedMatches.length > 0 && (
-      <>
-        <div className="live-row-title">Dagens livekamp:</div>
-        <ul style={{ listStyle: "none", paddingLeft: "0rem", margin: 0 }}>
-          {todaysFeaturedMatches.map((m) => (
-            <li key={m.id} className="live-row">
-              <span className="live-dot"></span>
-              {teamNames[m.homeTeamId]} – {teamNames[m.awayTeamId]}
-            </li>
-          ))}
-        </ul>
-      </>
-    )}
+            {/* Tittel */}
+            {todaysFeaturedMatches.length > 0 && (
+              <div className="live-row-title">Dagens livekamp:</div>
+            )}
 
-    {/* Live-kamper */}
-    {todaysLiveMatches.map((m) => (
-      <div key={m.id} className="live-row">
-        <span className="live-dot"></span>
-        {teamNames[m.homeTeamId]} – {teamNames[m.awayTeamId]}
-      </div>
-    ))}
+            {/* Liste over dagens livekamper */}
+            {todaysFeaturedMatches.length > 0 && (
+              <ul className="live-list">
+                {todaysFeaturedMatches.map((m) => (
+                  <li key={m.id} className="live-row">
+                    <span className="live-dot"></span>
+                    {teamNames[m.homeTeamId]} – {teamNames[m.awayTeamId]}
+                  </li>
+                ))}
+              </ul>
+            )}
 
-  </div>
-)}
+      
+
+          </div>
+        )}
 
         <section className="calandar-section">
           <Calandar

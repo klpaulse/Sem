@@ -15,6 +15,20 @@ import ErrorBoundary from './ErrorBoundary.jsx'
 import ProtectedReporterRoute from './components/admincomp/ProtectedReporterRoute.jsx'
 import ReporterPage from './components/admincomp/ReporterPage.jsx'
 import ReporterLivePage from './components/admincomp/livekontroll/ReporterLivePage.jsx'
+import AdminLogin from './pages/AdminLogin.jsx'
+import ReactGA from "react-ga4"
+
+function AnalyticsTracker() {
+  const location = useLocation()
+
+  useEffect(() => {
+  ReactGA.send({
+    hitType: "pageview",
+    page: location.pathname
+  })
+  }, [location])
+  return null
+}
 
 function App() {
   const [matches, setMatches] = useState([])
@@ -100,11 +114,13 @@ function App() {
             </ProtectedReporterRoute>
           } />
 
+          <Route path="/admin-login" element={<AdminLogin />} />
+
         </Routes>
       </ErrorBoundary>
     </>
   )
 }
-
+export {AnalyticsTracker}
 export default App
 
