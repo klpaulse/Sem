@@ -2,6 +2,42 @@ import { collection, getDocs, query, where, doc, updateDoc } from "firebase/fire
 import { db } from "../config/Firebase";
 
 /* -------------------------------------------------------
+   HENT ALLE KAMPER FOR ETT LAG (alle sesonger)
+------------------------------------------------------- */
+export async function getTeamMatches(teamId) {
+  const matchesRef = collection(db, "matches");
+  const [homeSnap, awaySnap] = await Promise.all([
+    getDocs(query(matchesRef, where("homeTeamId", "==", teamId))),
+    getDocs(query(matchesRef, where("awayTeamId", "==", teamId))),
+  ]);
+  return [...homeSnap.docs, ...awaySnap.docs]
+    .map(d => {
+      const data = d.data();
+      return { id: d.id, ...data, date: data.date?.toDate ? data.date.toDate() : new Date(data.date) };
+    })
+    .sort((a, b) => a.date - b.date);
+}
+
+/* -------------------------------------------------------
+   HENT KAMP VIA SLUG
+------------------------------------------------------- */
+export async function getMatchBySlug(slug) {
+  try {
+    const q = query(collection(db, "matches"), where("slug", "==", slug));
+    const snap = await getDocs(q);
+    if (snap.empty) return null;
+
+    const d = snap.docs[0];
+    const data = d.data();
+    const date = data.date?.toDate ? data.date.toDate() : new Date(data.date);
+    return { id: d.id, ...data, date };
+  } catch (err) {
+    console.error("Kunne ikke hente kamp via slug:", err);
+    return null;
+  }
+}
+
+/* -------------------------------------------------------
    OPPDATER RESULTAT
 ------------------------------------------------------- */
 export async function updateMatchResult(matchId, homeScore, awayScore, location) {
@@ -57,7 +93,8 @@ export async function getAllMatches() {
 /* -------------------------------------------------------
    HENT SESONGENS KAMPER FOR ETT LAG
 ------------------------------------------------------- */
-export async function getSeasonMatches(teamId, season = "2026") {
+export async function getSeasonMatches(teamId, season) {
+  if (!teamId || !season) return [];
   try {
     const matchesRef = collection(db, "matches");
 

@@ -3,14 +3,14 @@ import { db, auth } from "../config/Firebase";
 import { collection, onSnapshot, doc, getDoc } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 
-import LagAdministrasjon from "../components/admincomp/LagAdministrasjon";
-import KampAdministrasjon from "../components/admincomp/KampAdministrasjon";
-import PlayerAdmin from "../components/admincomp/PlayerAdmin";
-import LiveAdmin from "../components/admincomp/LiveAdmin";
-import ResultatAdmin from "../components/admincomp/ResultatAdmin";
-import LiveControls from "../components/admincomp/livekontroll/LiveControls";
+import LagAdministrasjon from "../components/admin/LagAdministrasjon";
+import KampAdministrasjon from "../components/admin/KampAdministrasjon";
+import PlayerAdmin from "../components/admin/PlayerAdmin";
+import LiveAdmin from "../components/admin/LiveAdmin";
+import ResultatAdmin from "../components/admin/ResultatAdmin";
+import LiveControls from "../components/admin/livekontroll/LiveControls";
 
-import { loadOrCreateMatchData } from "../components/admincomp/useMatchData";
+import { loadOrCreateMatchData } from "../components/admin/useMatchData";
 
 import "../assets/style/adminPage.css";
 

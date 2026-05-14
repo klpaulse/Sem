@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Calandar from "../homecomp/Calandar";
+import Calandar from "../home/Calandar";
 import AdminMatches from "./AdminMatches";
 
 export default function LiveAdmin({ onSelectMatch }) {

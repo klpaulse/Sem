@@ -1,4 +1,4 @@
-import MatchReport from "../MatchReport";
+import MatchReport from "../match/MatchReport";
 
 export default function MatchPreview({ match, events }) {
   if (!match) {

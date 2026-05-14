@@ -1,21 +1,23 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { db } from "../config/Firebase";
 import { collection, onSnapshot } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
 import { getTeam } from "../services/TeamService";
 
-import Calandar from "../components/homecomp/Calandar";
-import DivisionList from "../components/homecomp/DivisionList";
+import Calandar from "../components/home/Calandar";
+import DivisionList from "../components/home/DivisionList";
+import TabellComponent from "../components/match/TabellComponent";
 import "../assets/style/homePage.css";
 
 export default function HomePage() {
   const [matches, setMatches] = useState([]);
   const [teamNames, setTeamNames] = useState({});
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [activeTab, setActiveTab] = useState("kamper");
+  const [activeDivision, setActiveDivision] = useState(null);
   const navigate = useNavigate();
 
-  // LIVE-OPPDATERING AV KAMPER
   useEffect(() => {
     const matchesRef = collection(db, "matches");
 
@@ -25,7 +27,6 @@ export default function HomePage() {
         ...doc.data(),
       }));
 
-      // Sorter etter dato
       matchesData.sort((a, b) => {
         const da = a.date?.toDate ? a.date.toDate() : new Date(a.date);
         const db = b.date?.toDate ? b.date.toDate() : new Date(b.date);
@@ -38,7 +39,6 @@ export default function HomePage() {
     return () => unsubscribe();
   }, []);
 
-  // HENT LAGNAVN
   useEffect(() => {
     async function loadNames() {
       const map = {};
@@ -60,45 +60,36 @@ export default function HomePage() {
     if (matches.length > 0) loadNames();
   }, [matches]);
 
-  // FILTRER DAGENS KAMPER
+  const divisions = useMemo(() => {
+    const seen = new Set();
+    return matches
+      .filter(m => {
+        const div = m.division?.trim();
+        if (!div || !m.season || seen.has(div.toLowerCase())) return false;
+        seen.add(div.toLowerCase());
+        return true;
+      })
+      .map(m => ({ division: m.division.trim(), season: m.season }))
+      .sort((a, b) => a.division.localeCompare(b.division, "no", { numeric: true }));
+  }, [matches]);
+
   const todaysMatches = matches.filter((m) => {
     if (!m.date) return false;
-
-    const matchDate = m.date?.toDate
-      ? m.date.toDate()
-      : new Date(m.date);
-
+    const matchDate = m.date?.toDate ? m.date.toDate() : new Date(m.date);
     return matchDate.toDateString() === selectedDate.toDateString();
   });
-  todaysMatches.forEach((m) => {
-  console.log("STATUS:", m.status, "FEATURED:", m.featuredLive, m);
-});
 
-  // ⭐ ROBUST STATUS-HÅNDTERING
   const normalizeStatus = (s) => (s || "").toLowerCase();
 
-  // ⭐ DAGENS LIVEKAMPER (flere, men ikke live/ferdig)
   const todaysFeaturedMatches = todaysMatches.filter((m) => {
     const status = normalizeStatus(m.status);
-    return (
-      m.featuredLive === true &&
-      (status === "live" || status === "pause")
-    );
+    return m.featuredLive === true && (status === "live" || status === "pause");
   });
 
-  // ⭐ LIVE-KAMPER
-  const todaysLiveMatches = todaysMatches.filter((m) => {
- const status = normalizeStatus(m.status)
- return status === "live" || status === "pause"
-  })
-
-  // GRUPPER ETTER DIVISJON
   const matchesByDivision = todaysMatches.reduce((acc, match) => {
     const division = match.division || "Ukjent divisjon";
-
     if (!acc[division]) acc[division] = [];
     acc[division].push(match);
-
     return acc;
   }, {});
 
@@ -110,46 +101,77 @@ export default function HomePage() {
 
       <main className="page">
 
-        {/* ⭐ BANNER: DAGENS LIVEKAMPER + LIVE-KAMPER */}
-        {todaysFeaturedMatches.length > 0  && (
-          <div className="live-banner">
+        <nav className="home-tabs">
+          <button
+            className={`home-tab ${activeTab === "kamper" ? "active" : ""}`}
+            onClick={() => setActiveTab("kamper")}
+          >
+            Kamper
+          </button>
+          <button
+            className={`home-tab ${activeTab === "tabell" ? "active" : ""}`}
+            onClick={() => setActiveTab("tabell")}
+          >
+            Tabell
+          </button>
+        </nav>
 
-            {/* Tittel */}
+        {activeTab === "kamper" && (
+          <>
             {todaysFeaturedMatches.length > 0 && (
-              <div className="live-row-title">Dagens livekamp:</div>
+              <div className="live-banner">
+                <div className="live-row-title">Dagens livekamp:</div>
+                <ul className="live-list">
+                  {todaysFeaturedMatches.map((m) => (
+                    <li key={m.id} className="live-row">
+                      <span className="live-dot"></span>
+                      {teamNames[m.homeTeamId]} – {teamNames[m.awayTeamId]}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
 
-            {/* Liste over dagens livekamper */}
-            {todaysFeaturedMatches.length > 0 && (
-              <ul className="live-list">
-                {todaysFeaturedMatches.map((m) => (
-                  <li key={m.id} className="live-row">
-                    <span className="live-dot"></span>
-                    {teamNames[m.homeTeamId]} – {teamNames[m.awayTeamId]}
-                  </li>
-                ))}
-              </ul>
-            )}
+            <section className="calandar-section">
+              <Calandar
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
+              />
+            </section>
 
-      
-
-          </div>
+            <section className="division-section">
+              <DivisionList
+                matchesByDivision={matchesByDivision}
+                navigate={navigate}
+                selectedDate={selectedDate}
+              />
+            </section>
+          </>
         )}
 
-        <section className="calandar-section">
-          <Calandar
-            selectedDate={selectedDate}
-            setSelectedDate={setSelectedDate}
-          />
-        </section>
+        {activeTab === "tabell" && (
+          <section className="tabell-section">
+            <nav className="division-tabs">
+              {divisions.map(({ division }) => (
+                <button
+                  key={division}
+                  className={`division-tab ${(activeDivision ?? divisions[0]?.division) === division ? "active" : ""}`}
+                  onClick={() => setActiveDivision(division)}
+                >
+                  {division}
+                </button>
+              ))}
+            </nav>
 
-        <section className="division-section">
-          <DivisionList
-            matchesByDivision={matchesByDivision}
-            navigate={navigate}
-            selectedDate={selectedDate}
-          />
-        </section>
+            {divisions
+              .filter(({ division }) => division === (activeDivision ?? divisions[0]?.division))
+              .map(({ division, season }) => (
+                <TabellComponent key={division} division={division} season={season} title={division} />
+              ))
+            }
+          </section>
+        )}
+
       </main>
     </>
   );

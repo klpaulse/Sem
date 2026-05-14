@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { getTeam } from "../../services/TeamService";
+import MatchCard from "../match/MatchCard";
 
 export default function DivisionList({
   matchesByDivision,
@@ -78,12 +79,6 @@ export default function DivisionList({
     d1.getMonth() === d2.getMonth() &&
     d1.getDate() === d2.getDate();
 
-  const isPastMatch = (matchDate) => {
-    if (!(matchDate instanceof Date) || isNaN(matchDate)) return false;
-    const now = new Date();
-    return matchDate < now && matchDate.toDateString() !== now.toDateString();
-  };
-
   return (
     <section className="division-list">
 
@@ -123,23 +118,6 @@ export default function DivisionList({
             <div className={`division-matches-wrapper ${isOpen ? "open" : ""}`}>
               <ul className="division-matches">
                 {matches.map((match) => {
-                  const matchDate = match.date?.toDate
-                    ? match.date.toDate()
-                    : new Date(match.date);
-
-                  const played =
-                    match.homeScore !== null && match.awayScore !== null;
-
-                  const status = (match.status || "").toLowerCase();
-
-                  const isLive = status === "live" || status === "pause";
-                  const isPaused = status === "pause";
-                  const endedManually = status === "finished";
-                  const endedAutomatically = isPastMatch(matchDate);
-
-                  const homeWon = played && match.homeScore > match.awayScore;
-                  const awayWon = played && match.awayScore > match.homeScore;
-
                   const homeName =
                     teamNames[match.homeTeamId]?.name || "Ukjent lag";
                   const awayName =
@@ -147,63 +125,12 @@ export default function DivisionList({
 
                   return (
                     <li key={match.id}>
-                      <article
-                        className={`match-card ${isLive ? "live-glow" : ""}`}
-                        onClick={() => navigate(`/match/${match.id}`)}
-                      >
-                        <div className="match-card-teams">
-                          <div className="row">
-                            <span
-                              className={`left-col ${
-                                homeWon ? "winner" : awayWon ? "loser" : ""
-                              }`}
-                            >
-                              {played ? match.homeScore : "-"}
-                            </span>
-                            <span
-                              className={`team ${
-                                homeWon ? "winner" : awayWon ? "loser" : ""
-                              }`}
-                            >
-                              {homeName}
-                            </span>
-                          </div>
-
-                          <div className="row">
-                            <span
-                              className={`left-col ${
-                                awayWon ? "winner" : homeWon ? "loser" : ""
-                              }`}
-                            >
-                              {played ? match.awayScore : "-"}
-                            </span>
-                            <span
-                              className={`team ${
-                                awayWon ? "winner" : homeWon ? "loser" : ""
-                              }`}
-                            >
-                              {awayName}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="match-right">
-                          {endedManually || endedAutomatically ? (
-                            <span className="match-status-ended">Slutt</span>
-                          ) : isPaused ? (
-                            <span className="match-status-pause">Pause</span>
-                          ) : isLive ? (
-                            <span className="match-status-live">LIVE</span>
-                          ) : (
-                            <span className="match-time-box">
-                              {matchDate.toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </span>
-                          )}
-                        </div>
-                      </article>
+                      <MatchCard
+                        match={match}
+                        homeName={homeName}
+                        awayName={awayName}
+                        onClick={() => navigate(`/match/${match.slug || match.id}`)}
+                      />
                     </li>
                   );
                 })}

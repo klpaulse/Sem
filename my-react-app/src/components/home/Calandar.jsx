@@ -35,6 +35,11 @@ export default function Calandar({ selectedDate, setSelectedDate }) {
     setShowFullCalandar(false);
   };
 
+  const openFullCalendar = () => {
+    setCurrentMonth(new Date(safeSelectedDate));
+    setShowFullCalandar(true);
+  };
+
   useEffect(() => {
     if (!showFullCalandar && stripRef.current) {
       const todayIndex = 7;
@@ -110,7 +115,7 @@ export default function Calandar({ selectedDate, setSelectedDate }) {
         <div className="calandar-strip" ref={stripRef}>
           <div
             className="calendar-open-btn"
-            onClick={() => setShowFullCalandar(true)}
+            onClick={openFullCalendar}
           >
             <FontAwesomeIcon icon={faCalendar} />
           </div>
@@ -134,7 +139,7 @@ export default function Calandar({ selectedDate, setSelectedDate }) {
 
           <div
             className="calendar-open-btn"
-            onClick={() => setShowFullCalandar(true)}
+            onClick={openFullCalendar}
           >
             <FontAwesomeIcon icon={faCalendar} />
           </div>

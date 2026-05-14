@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { normalizeDate } from "../utils/normalizeDate";
+import { normalizeDate } from "../../utils/normalizeDate";
 
 export default function Countdown({ date }) {
 

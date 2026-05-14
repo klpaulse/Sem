@@ -4,27 +4,27 @@ import { db } from "../config/Firebase";
 
 import { useParams, useNavigate } from "react-router-dom";
 
-import Countdown from "../components/Countdown";
-import BeforeMatch from "../components/maincomp/BeforeMatch";
-import MatchReport from "../components/MatchReport";
-import Tabs from "../components/Tabs";
+import Countdown from "../components/match/Countdown";
+import BeforeMatch from "../components/match/BeforeMatch";
+import MatchReport from "../components/match/MatchReport";
+import Tabs from "../components/shared/Tabs";
 
 import { getTeam } from "../services/TeamService";
-import { getSeasonMatches } from "../services/MatchService";
+import { getSeasonMatches, getMatchBySlug } from "../services/MatchService";
 import { normalizeDate } from "../utils/normalizeDate";
-import { CURRENT_SEASON } from "../config/season";
 
 import "../assets/style/matchPage.css";
-import LagComponent from "../components/maincomp/LagComponent";
+import LagComponent from "../components/match/LagComponent";
 
-import { loadOrCreateMatchData } from "../components/admincomp/useMatchData";
-import TabellComponent from "../components/maincomp/TabellComponent";
-import PollDisplay from "../components/maincomp/PollDisplay";
-import BeforeMatchInfo from "../components/maincomp/BeforeMatchInfo";
+import { loadOrCreateMatchData } from "../components/admin/useMatchData";
+import TabellComponent from "../components/match/TabellComponent";
+import PollDisplay from "../components/match/PollDisplay";
+import BeforeMatchInfo from "../components/match/BeforeMatchInfo";
+import MatchScoreCard from "../components/match/MatchScoreCard";
 import ReactGA from "react-ga4"
 
 export default function MatchPage() {
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
 
   const [allMatches, setAllMatches] = useState([]);
@@ -52,36 +52,39 @@ useEffect(() => {
   if (!isFinished) return;
 
   async function loadSeason() {
-    const home = await getSeasonMatches(selectedMatch.homeTeamId, CURRENT_SEASON);
-    const away = await getSeasonMatches(selectedMatch.awayTeamId, CURRENT_SEASON);
+    const home = await getSeasonMatches(selectedMatch.homeTeamId, selectedMatch.season);
+    const away = await getSeasonMatches(selectedMatch.awayTeamId, selectedMatch.season);
     setHomeSeason(home);
     setAwaySeason(away);
   }
   loadSeason();
 }, [selectedMatch]);
 
+  // Løs slug til kamp (med fallback til Firebase-ID for gamle lenker)
   useEffect(() => {
-    if (!id) return;
+    if (!slug) return;
     async function load() {
-      const data = await loadOrCreateMatchData(id);
-      setSelectedMatch({ id, ...data });
+      let match = await getMatchBySlug(slug);
+      if (!match) {
+        const data = await loadOrCreateMatchData(slug);
+        if (data) match = { id: slug, ...data };
+      }
+      if (match) setSelectedMatch(match);
     }
     load();
-  }, [id]);
+  }, [slug]);
 
+  // Sanntidslytter bruker Firebase-ID fra det løste selectedMatch
   useEffect(() => {
-  if (!id) return;
-
-  const ref = doc(db, "matches", id);
-
-  const unsub = onSnapshot(ref, (snap) => {
-    if (snap.exists()) {
-      setSelectedMatch({ id, ...snap.data() });
-    }
-  });
-
-  return () => unsub();
-}, [id]);
+    if (!selectedMatch?.id) return;
+    const ref = doc(db, "matches", selectedMatch.id);
+    const unsub = onSnapshot(ref, (snap) => {
+      if (snap.exists()) {
+        setSelectedMatch(prev => ({ ...prev, ...snap.data() }));
+      }
+    });
+    return () => unsub();
+  }, [selectedMatch?.id]);
 
 
   useEffect(() => {
@@ -178,34 +181,30 @@ useEffect(() => {
         </h1>
       </header>
 
-      <div className="last-played-card">
-        <p className="lp-status">
-          {effectivelyFinished ? "Slutt" 
-          : selectedMatch.status === "pause"
-          ? "Pause"
-          : selectedMatch.status === "live" 
-          ? "Live" 
-          : "Før kamp"}
-        </p>
-
-        <div className="lp-row">
-          <span className="lp-title">{homeName}</span>
-          <p className={`lp-result ${effectivelyFinished && selectedMatch.homeScore == null ? "lp-result--text" : ""}`}>
-            {effectivelyFinished
-              ? (selectedMatch.homeScore != null
-                  ? `${selectedMatch.homeScore} - ${selectedMatch.awayScore}`
-                  : "-:-")
-              : selectedMatch.status === "live"
-              ? `${selectedMatch.homeScore ?? 0} - ${selectedMatch.awayScore ?? 0}`
-              : `Kl ${selectedMatch.time}`}
-          </p>
-          <span className="lp-title">{awayName}</span>
-        </div>
-
+      <MatchScoreCard
+        status={
+          effectivelyFinished ? "Slutt"
+          : selectedMatch.status === "pause" ? "Pause"
+          : selectedMatch.status === "live" ? "Live"
+          : "Før kamp"
+        }
+        homeName={homeName}
+        awayName={awayName}
+        homeTeamId={selectedMatch.homeTeamId}
+        awayTeamId={selectedMatch.awayTeamId}
+        result={
+          effectivelyFinished
+            ? (selectedMatch.homeScore != null ? `${selectedMatch.homeScore} - ${selectedMatch.awayScore}` : "-:-")
+            : selectedMatch.status === "live"
+            ? `${selectedMatch.homeScore ?? 0} - ${selectedMatch.awayScore ?? 0}`
+            : `Kl ${selectedMatch.time}`
+        }
+        resultClassName={effectivelyFinished && selectedMatch.homeScore == null ? "lp-result--text" : ""}
+      >
         <p className="lp-date">
           {selectedMatch.date?.toDate?.().toLocaleDateString("no-NO")}
         </p>
-      </div>
+      </MatchScoreCard>
 
       {selectedMatch.status === "not_started" && !hasPreMatchContent && !effectivelyFinished && (
         <Countdown date={matchDate} />

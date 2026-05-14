@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getTeam } from "../../services/TeamService";
-import { normalizeDate } from "../utils/normalizeDate";
+import { normalizeDate } from "../../utils/normalizeDate";
 
 export default function Upcoming({ matches }) {
   const [upcomingMatches, setUpcomingMatches] = useState([]);
@@ -66,7 +66,7 @@ export default function Upcoming({ matches }) {
             <li key={m.id}>
               <article
                 className="match-clickable"
-                onClick={() => navigate(`/match/${m.id}`)}
+                onClick={() => navigate(`/match/${m.slug || m.id}`)}
               >
                 <p>
                   {matchDate.toLocaleDateString("no-NO")} – {m.time}

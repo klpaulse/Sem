@@ -14,12 +14,34 @@ import {
 import { getTeam } from "../../services/TeamService";
 import CreateMatchForm from "./CreateMatchForm";
 import BulkImportMatches from "./BulkImportMatches";
+import { generateSlug } from "../../utils/generateSlug";
 
 
+
+async function migrerSlugger() {
+  const snap = await getDocs(collection(db, "matches"));
+  const utenSlug = snap.docs.filter(d => !d.data().slug);
+
+  let count = 0;
+  for (const d of utenSlug) {
+    const data = d.data();
+    const homeTeam = await getTeam(data.homeTeamId);
+    const awayTeam = await getTeam(data.awayTeamId);
+    if (!homeTeam?.name || !awayTeam?.name) continue;
+
+    const date = data.date?.toDate ? data.date.toDate() : new Date(data.date);
+    const slug = generateSlug(homeTeam.name, awayTeam.name, date, data.time);
+
+    await updateDoc(doc(db, "matches", d.id), { slug });
+    count++;
+  }
+  return count;
+}
 
 export default function KampAdministrasjon({ divisions }) {
   const [selectedDivision, setSelectedDivision] = useState("");
   const [matches, setMatches] = useState([]);
+  const [migrering, setMigrering] = useState("idle");
 
   const [teams, setTeams] = useState([]);
 
@@ -117,6 +139,12 @@ export default function KampAdministrasjon({ divisions }) {
 
     const combinedDate = new Date(`${editDate}T${editTime}:00`);
 
+    const homeTeamObj = teams.find(t => t.id === editHomeTeamId);
+    const awayTeamObj = teams.find(t => t.id === editAwayTeamId);
+    const slug = homeTeamObj && awayTeamObj
+      ? generateSlug(homeTeamObj.name, awayTeamObj.name, combinedDate, editTime)
+      : editingMatch.slug;
+
     await updateDoc(matchRef, {
       homeTeamId: editHomeTeamId,
       awayTeamId: editAwayTeamId,
@@ -125,6 +153,7 @@ export default function KampAdministrasjon({ divisions }) {
       arena: editLocation || "",
       division: editingMatch.division || "",
       season: editingMatch.season || "",
+      slug: slug || editingMatch.slug || "",
     });
 
     setEditingMatch(null);
@@ -242,9 +271,41 @@ export default function KampAdministrasjon({ divisions }) {
       </div>
 
       <div className="kampadmin-card">
-  <h3>Bulk-import</h3>
-  <BulkImportMatches />
-</div>
+        <h3>Bulk-import</h3>
+        <BulkImportMatches />
+      </div>
+
+      <div className="kampadmin-card">
+        <h3>Generer slugger for gamle kamper</h3>
+        <p style={{ fontSize: "13px", color: "#ffffffaa", marginBottom: "12px" }}>
+          Én-gangs migrering — gir lesbare URLer til kamper som mangler slug.
+        </p>
+        <button
+          onClick={async () => {
+            setMigrering("laster");
+            try {
+              const antall = await migrerSlugger();
+              setMigrering(`ferdig:${antall}`);
+            } catch {
+              setMigrering("feil");
+            }
+          }}
+          disabled={migrering === "laster"}
+        >
+          {migrering === "laster" ? "Migrerer..." : "Kjør migrering"}
+        </button>
+
+        {migrering.startsWith("ferdig:") && (
+          <p style={{ color: "#4ecf7a", marginTop: "8px", fontSize: "13px" }}>
+            ✓ {migrering.split(":")[1]} kamper fikk slug
+          </p>
+        )}
+        {migrering === "feil" && (
+          <p style={{ color: "#e74c3c", marginTop: "8px", fontSize: "13px" }}>
+            Noe gikk galt — sjekk konsollen
+          </p>
+        )}
+      </div>
 
     </section>
   );

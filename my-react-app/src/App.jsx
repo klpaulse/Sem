@@ -10,12 +10,14 @@ import { collection, onSnapshot } from 'firebase/firestore'
 import { onAuthStateChanged } from 'firebase/auth'
 import LoginPage from './pages/LoginPage.jsx'
 import HomePage from './pages/HomePage'
-import LiveControls from './components/admincomp/livekontroll/LiveControls.jsx'
+import LiveControls from './components/admin/livekontroll/LiveControls.jsx'
 import ErrorBoundary from './ErrorBoundary.jsx'
-import ProtectedReporterRoute from './components/admincomp/ProtectedReporterRoute.jsx'
-import ReporterPage from './components/admincomp/ReporterPage.jsx'
-import ReporterLivePage from './components/admincomp/livekontroll/ReporterLivePage.jsx'
+import ProtectedReporterRoute from './components/admin/ProtectedReporterRoute.jsx'
+import ReporterPage from './components/admin/ReporterPage.jsx'
+import ReporterLivePage from './components/admin/livekontroll/ReporterLivePage.jsx'
 import AdminLogin from './pages/AdminLogin.jsx'
+import TeamPage from './pages/TeamPage.jsx'
+import ProtectedRoute from './ProtectedRoute.jsx'
 import ReactGA from "react-ga4"
 
 function AnalyticsTracker() {
@@ -91,7 +93,7 @@ function App() {
 
           {/* Tving remount når URL endrer seg */}
           <Route
-            path="/match/:id"
+            path="/match/:slug"
             element={<MatchPage key={location.key} />}
           />
 
@@ -99,7 +101,11 @@ function App() {
 
           <Route
             path="/admin"
-            element={<AdminPage matches={matches} divisions={divisions} />}
+            element={
+              <ProtectedRoute>
+                <AdminPage matches={matches} divisions={divisions} />
+              </ProtectedRoute>
+            }
           />
 
           <Route path="/reporter" element={
@@ -115,6 +121,7 @@ function App() {
           } />
 
           <Route path="/admin-login" element={<AdminLogin />} />
+          <Route path="/lag/:teamId" element={<TeamPage />} />
 
         </Routes>
       </ErrorBoundary>

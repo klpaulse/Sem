@@ -40,7 +40,7 @@ export default function SeasonTimeline({ matches, teamId, currentMatchId }) {
             className={`timeline-box ${
               isPlayed ? `form-${outcome}` : "not-played"
             } ${isCurrent ? "timeline-current" : ""}`}
-            onClick={() => navigate(`/match/${m.id}`)}   // ⭐ KLIKK → GÅ TIL KAMP
+            onClick={() => navigate(`/match/${m.slug || m.id}`)}
           >
             <span className="timeline-result">
               {displayFor}-{displayAgainst}

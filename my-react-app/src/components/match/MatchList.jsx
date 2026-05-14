@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import PlayedMatches from "../PlayedMatches";
-import Upcoming from "../Upcoming";
+import PlayedMatches from "./PlayedMatches";
+import Upcoming from "./Upcoming";
 import { getTeam } from "../../services/TeamService";
 
 export default function MatchList({ filteredMatches, matches, played, upcomingRef }) {
@@ -47,7 +47,7 @@ export default function MatchList({ filteredMatches, matches, played, upcomingRe
         return (
           <p
             key={m.id}
-            onClick={() => navigate(`/match/${m.id}`)}
+            onClick={() => navigate(`/match/${m.slug || m.id}`)}
             className="match-clickable"
           >
             <strong>{homeName}</strong> {m.homeScore} - {m.awayScore}{" "}
@@ -76,7 +76,7 @@ export default function MatchList({ filteredMatches, matches, played, upcomingRe
         return (
           <p
             key={m.id}
-            onClick={() => navigate(`/match/${m.id}`)}
+            onClick={() => navigate(`/match/${m.slug || m.id}`)}
             className="match-clickable"
           >
             <strong>{homeName}</strong> {m.homeScore} - {m.awayScore}{" "}

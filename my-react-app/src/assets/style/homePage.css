@@ -1,4 +1,4 @@
-/* ================================
+﻿/* ================================
    VARIABLER (kalender-spesifikke)
 ================================ */
 :root {
@@ -29,13 +29,107 @@
 .site-header {
   padding: 1.2rem 1rem 1rem;
   border-bottom: 1px solid #ffffff11;
+  text-align: center;
 }
 
 /* ================================
-   KALENDER – STRIP
+   KALENDER â€“ STRIP
 ================================ */
 
+/* ================================
+   HJEM-FANER
+================================ */
+.home-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.home-tab {
+  padding: 0.4rem 1.1rem;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: #777;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+  letter-spacing: 0.3px;
+}
+
+.home-tab:hover {
+  color: #ccc;
+}
+
+.home-tab.active {
+  color: #fff;
+  border-bottom: 2px solid rgba(255, 90, 90, 0.8);
+}
+
+.tabell-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.division-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 0.5rem;
+}
+
+.division-tab {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  background: transparent;
+  color: #aaa;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+  white-space: nowrap;
+}
+
+.division-tab:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.division-tab.active {
+  background: rgba(255, 90, 90, 0.2);
+  color: #fff;
+  border-color: rgba(255, 90, 90, 0.4);
+}
+
+.tabell-division-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+/* ================================
+   KALENDER
+================================ */
+.calandar-section {
+  width: 100%;
+}
+
+.calandar-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .calandar-strip {
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -82,7 +176,7 @@
 }
 
 /* ================================
-   KALENDER – DAGSBOKS
+   KALENDER â€“ DAGSBOKS
 ================================ */
 .calendar-day {
   min-width: 70px;
@@ -113,21 +207,18 @@
 }
 
 /* ================================
-   KALENDER – MÅNEDSVISNING
+   KALENDER â€“ MÃ…NEDSVISNING
 ================================ */
 .month-view {
   position: relative;
   background: var(--cal-bg-dark);
   padding: var(--cal-padding-large);
   border-radius: var(--cal-radius-large);
+  box-sizing: border-box;
   width: 100%;
   max-width: 340px;
   margin: 0 auto;
   box-shadow: var(--cal-shadow);
-
-  
-  
-
 }
 
 .month-header {
@@ -171,7 +262,7 @@
 .month-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
+  gap: 4px;
   position: relative;
   transition: transform 0.25s ease, opacity 0.25s ease;
 }
@@ -181,7 +272,7 @@
 .month-grid.slide-right.animating { transform: translateX(40px); }
 
 .month-day {
-  padding: 12px;
+  padding: 8px 4px;
   background: var(--cal-bg-day);
   border-radius: var(--cal-radius-small);
   text-align: center;
@@ -416,6 +507,7 @@
   border-radius: 50%;
   display: inline-block;
 }
+
 
 
 

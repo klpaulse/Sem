@@ -1,38 +1,20 @@
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import { db } from "../../config/Firebase";
+import { getTeam } from "../../services/TeamService";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faFutbol,
-  faSquare,
-  faUserInjured,
-  faComment,
-  faFlag,
-  faBullhorn,
-  faArrowUp,
-  faArrowDown,
-  faQuestion,
-  faArrowsRotate,
-  faImage,
+  faFutbol, faSquare, faUserInjured, faArrowsRotate,
+  faComment, faFlag, faBullhorn, faImage,
+  faArrowUp, faArrowDown, faQuestion,
 } from "@fortawesome/free-solid-svg-icons";
-import { collection, onSnapshot } from "firebase/firestore";
-import { db } from "../config/Firebase";
-import { getTeam } from "../services/TeamService";
-import { getSeasonMatches } from "../services/MatchService";
-import AudienceQuestions from "./maincomp/AudienceQuestions";
-import PollDisplay from "./maincomp/PollDisplay";
-import BeforeMatchInfo from "./maincomp/BeforeMatchInfo";
-import { CURRENT_SEASON } from "../config/season";
+import PollDisplay from "../match/PollDisplay";
 
-export default function MatchReport({ match, events, matchId, allMatches = [], isFinished = false }) {
-
+export default function EventList({ match, isPreMatch = false }) {
+  const [events, setEvents] = useState([]);
+  const [polls, setPolls] = useState([]);
   const [homeTeam, setHomeTeam] = useState(null);
   const [awayTeam, setAwayTeam] = useState(null);
-  const [polls, setPolls] = useState([]);
-  const [homeSeason, setHomeSeason] = useState([]);
-  const [awaySeason, setAwaySeason] = useState([]);
-
-  const id = matchId || match?.id;
-  const isPreMatch = match?.status === "not_started";
-
 
   useEffect(() => {
     if (!match) return;
@@ -46,23 +28,23 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
   }, [match]);
 
   useEffect(() => {
-    if (!id) return;
-    const unsub = onSnapshot(collection(db, "matches", id, "polls"), (snap) => {
-      setPolls(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    if (!match) return;
+    const q = query(collection(db, "matches", match.id, "events"), orderBy("createdAt", "asc"));
+    const unsub = onSnapshot(q, (snap) => {
+      const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      setEvents(isPreMatch ? list.filter((e) => e.preMatch === true) : list);
     });
     return () => unsub();
-  }, [id]);
+  }, [match, isPreMatch]);
 
   useEffect(() => {
-    if (!match || !isFinished) return;
-    async function loadSeason() {
-      const home = await getSeasonMatches(match.homeTeamId, CURRENT_SEASON);
-      const away = await getSeasonMatches(match.awayTeamId, CURRENT_SEASON);
-      setHomeSeason(home);
-      setAwaySeason(away);
-    }
-    loadSeason();
-  }, [match, isFinished]);
+    if (!match) return;
+    const unsub = onSnapshot(collection(db, "matches", match.id, "polls"), (snap) => {
+      const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      setPolls(list);
+    });
+    return () => unsub();
+  }, [match]);
 
   const stickyPolls = useMemo(
     () => polls.filter((p) => p.preMatch !== false && p.active !== false),
@@ -70,17 +52,16 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
   );
 
   const livePolls = useMemo(
-    () => polls.filter((p) => p.preMatch === false && p.active),
+    () => polls.filter((p) => p.preMatch === false && p.active !== false),
     [polls]
   );
 
   const sortedEvents = useMemo(
-    () =>
-      [...events].sort((a, b) => {
-        if (!a.createdAt) return 1;
-        if (!b.createdAt) return -1;
-        return a.createdAt.seconds - b.createdAt.seconds;
-      }),
+    () => [...events].sort((a, b) => {
+      if (!a.createdAt) return 1;
+      if (!b.createdAt) return -1;
+      return a.createdAt.seconds - b.createdAt.seconds;
+    }),
     [events]
   );
 
@@ -91,11 +72,6 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
       ...livePolls.map((p) => ({ ...p, _isPoll: true })),
     ].sort((a, b) => (a.createdAt?.seconds ?? 0) - (b.createdAt?.seconds ?? 0));
   }, [isPreMatch, sortedEvents, livePolls]);
-
-  const hasContent = combinedFeed.length > 0 || stickyPolls.length > 0;
-
-  if (!match) return null;
-  if (!homeTeam || !awayTeam) return <div>Laster kampdata...</div>;
 
   function getPlayerName(teamId, playerId) {
     const team = teamId === match.homeTeamId ? homeTeam : awayTeam;
@@ -116,7 +92,7 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
     (e) => e.type === "system" && (e.text || "").toLowerCase().includes("2. omgang")
   );
 
-  const formatMinute = (minute) => {
+  function formatMinute(minute) {
     if (minute == null) return "";
     if (!isSecondHalf) {
       if (minute <= 45) return minute;
@@ -124,20 +100,20 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
     }
     if (minute <= 90) return minute;
     return `90+${minute - 90}`;
-  };
+  }
 
   function renderEvent(e) {
     const showMinute = !e.preMatch && e.minute != null;
 
     if (e.type === "system") {
       return (
-        <li key={e.id} className="event event-system">{e.text}</li>
+        <div key={e.id} className="event event-system">{e.text}</div>
       );
     }
 
     if (e.type === "questionAnswer") {
       return (
-        <li key={e.id} className="event event-question">
+        <div key={e.id} className="event event-question">
           <span className="event-icon"><FontAwesomeIcon icon={faQuestion} /></span>
           <div className="event-text">
             <div className="question-block">
@@ -145,17 +121,17 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
               <p>{e.question}</p>
             </div>
             <div className="answer-block">
-              <p className="answer-line">{e.reporterName || "Admin"} svarer:</p>
+              <p className="answer-line">Admin svarer:</p>
               <p>{e.answer}</p>
             </div>
           </div>
-        </li>
+        </div>
       );
     }
 
     if (e.type === "goal") {
       return (
-        <li key={e.id} className="event event-goal">
+        <div key={e.id} className="event event-goal">
           <span className="event-icon"><FontAwesomeIcon icon={faFutbol} /></span>
           <div className="event-text">
             <p className="goal-title">{getTeamName(e.team)} SCORER!</p>
@@ -165,13 +141,13 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
             {e.text && <p className="goal-comment">{e.text}</p>}
           </div>
           {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}
-        </li>
+        </div>
       );
     }
 
     if (e.type === "sub") {
       return (
-        <li key={e.id} className="event event-sub">
+        <div key={e.id} className="event event-sub">
           <span className="event-icon"><FontAwesomeIcon icon={faArrowsRotate} /></span>
           <div className="event-text">
             <p className="sub-title">Spillerbytte – {getTeamName(e.team)}</p>
@@ -180,13 +156,13 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
             {e.comment && <p className="sub-comment">{e.comment}</p>}
           </div>
           {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}
-        </li>
+        </div>
       );
     }
 
     if (e.type === "yellow") {
       return (
-        <li key={e.id} className="event event-yellow">
+        <div key={e.id} className="event event-yellow">
           <span className="event-icon"><FontAwesomeIcon icon={faSquare} className="yellow-card" /></span>
           <div className="event-text">
             <p>Gult kort – {getTeamName(e.team)}</p>
@@ -194,13 +170,13 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
             {e.text && <p>{e.text}</p>}
           </div>
           {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}
-        </li>
+        </div>
       );
     }
 
     if (e.type === "red") {
       return (
-        <li key={e.id} className="event event-red">
+        <div key={e.id} className="event event-red">
           <span className="event-icon"><FontAwesomeIcon icon={faSquare} className="red-card" /></span>
           <div className="event-text">
             <p>Rødt kort – {getTeamName(e.team)}</p>
@@ -208,26 +184,26 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
             {e.text && <p>{e.text}</p>}
           </div>
           {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}
-        </li>
+        </div>
       );
     }
 
     if (e.type === "injury") {
       return (
-        <li key={e.id} className="event event-injury">
+        <div key={e.id} className="event event-injury">
           <span className="event-icon"><FontAwesomeIcon icon={faUserInjured} /></span>
           <div className="event-text">
             <p>Skade – {getTeamName(e.team)}</p>
             {e.text && <p>{e.text}</p>}
           </div>
           {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}
-        </li>
+        </div>
       );
     }
 
     if (e.type === "corner") {
       return (
-        <li key={e.id} className="event event-corner">
+        <div key={e.id} className="event event-corner">
           <span className="event-icon"><FontAwesomeIcon icon={faFlag} /></span>
           <div className="event-text">
             <p>Hjørnespark – {getTeamName(e.team)}</p>
@@ -235,13 +211,13 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
             {e.text && <p>{e.text}</p>}
           </div>
           {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}
-        </li>
+        </div>
       );
     }
 
     if (e.type === "whistle") {
       return (
-        <li key={e.id} className="event event-whistle">
+        <div key={e.id} className="event event-whistle">
           <span className="event-icon"><FontAwesomeIcon icon={faBullhorn} /></span>
           <div className="event-text">
             <p>Frispark – {getTeamName(e.team)}</p>
@@ -249,64 +225,52 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
             {e.comment && <p>{e.comment}</p>}
           </div>
           {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}
-        </li>
+        </div>
       );
     }
 
     if (e.type === "image") {
       return (
-        <li key={e.id} className="event event-image">
+        <div key={e.id} className="event event-image">
           <span className="event-icon"><FontAwesomeIcon icon={faImage} /></span>
           <div className="event-text">
             {e.text && <p>{e.text}</p>}
             {e.imageUrl && <img src={e.imageUrl} alt="Hendelsesbilde" className="event-image-img" />}
           </div>
           {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}
-        </li>
+        </div>
       );
     }
 
     if (e.type === "comment") {
       return (
-        <li key={e.id} className="event event-comment">
+        <div key={e.id} className="event event-comment">
           <span className="event-icon"><FontAwesomeIcon icon={faComment} /></span>
           <div className="event-text"><p>{e.text}</p></div>
           {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}
-        </li>
+        </div>
       );
     }
 
     return null;
   }
 
+  if (!homeTeam || !awayTeam) return <div>Laster hendelser...</div>;
+
   return (
     <div className="report-container">
-      <header className="report-title-row">
-        {match.reporterName && (
-          <span className="reporter-label">
-            Live holdes av {match.reporterName}
-          </span>
-        )}
-        {!isFinished && <AudienceQuestions matchId={match.id} />}
-      </header>
-
+      {/* Sticky polls øverst */}
       {stickyPolls.map((p) => (
-        <PollDisplay key={p.id} matchId={id} sticky={true} singlePollId={p.id} />
+        <PollDisplay key={p.id} matchId={match.id} singlePollId={p.id} isAdmin={true}/>
       ))}
 
-      <ol className="report-feed">
-        {!hasContent ? (
-          <li className="no-live-report">
-            <p>Ingen live-rapport for denne kampen</p>
-          </li>
-        ) : (
-          combinedFeed.map((item) =>
-            item._isPoll
-              ? <PollDisplay key={item.id} matchId={id} singlePollId={item.id} />
-              : renderEvent(item)
-          )
+      <div className="report-feed">
+        {combinedFeed.map((item) =>
+          item._isPoll
+            ? <PollDisplay key={item.id} matchId={match.id} singlePollId={item.id} isAdmin={true} />
+            : renderEvent(item)
         )}
-      </ol>
+      </div>
     </div>
   );
 }

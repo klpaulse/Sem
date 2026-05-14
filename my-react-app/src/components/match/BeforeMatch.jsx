@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import Countdown from "../Countdown";
+import Countdown from "./Countdown";
 import "../../assets/style/matchPage.css";
 import BeforeMatchInfo from "./BeforeMatchInfo";
+import MatchScoreCard from "./MatchScoreCard";
 import { getSeasonMatches } from "../../services/MatchService";
 import { getTeam } from "../../services/TeamService";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +10,6 @@ import LagComponent from "./LagComponent";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../../config/Firebase";
 import { normalizeDate } from "../../utils/normalizeDate";
-import { CURRENT_SEASON } from "../../config/season";
 
 export default function BeforeMatch({ match, allMatches}) {
   if (!match) return null;
@@ -58,8 +58,8 @@ export default function BeforeMatch({ match, allMatches}) {
     async function loadSeason() {
       if (!match) return;
 
-      const home = await getSeasonMatches(match.homeTeamId, CURRENT_SEASON);
-      const away = await getSeasonMatches(match.awayTeamId, CURRENT_SEASON);
+      const home = await getSeasonMatches(match.homeTeamId, match.season);
+      const away = await getSeasonMatches(match.awayTeamId, match.season);
       setHomeSeason(home);
       setAwaySeason(away);
     }
@@ -80,25 +80,16 @@ export default function BeforeMatch({ match, allMatches}) {
       </header>
       
 
-      {/* Kampkort */}
-      <div className="last-played-card">
-        <p className="lp-status">Før kamp</p>
-        <div className="lp-row">
-          <span className="lp-title">{homeName}</span>
-        <p className="lp-result">
-          {match.time ||
-            matchDate.toLocaleTimeString("no-NO", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-        </p>
-        <span className="lp-title">{awayName}</span>
-        </div>
-
-       
-
+      <MatchScoreCard
+        status="Før kamp"
+        homeName={homeName}
+        awayName={awayName}
+        homeTeamId={match.homeTeamId}
+        awayTeamId={match.awayTeamId}
+        result={match.time || matchDate.toLocaleTimeString("no-NO", { hour: "2-digit", minute: "2-digit" })}
+      >
         <Countdown date={matchDate} />
-      </div>
+      </MatchScoreCard>
 
 <section className="page">
        {hasFormation && (

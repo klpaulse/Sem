@@ -3,6 +3,7 @@ import { auth, db } from "../../config/Firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { getTeam } from "../../services/TeamService";
+import MatchCard from "../match/MatchCard";
 
 export default function ReporterPage({ matches }) {
   const [myMatches, setMyMatches] = useState([]);
@@ -45,17 +46,13 @@ export default function ReporterPage({ matches }) {
       )}
 
       {myMatches.map(m => (
-        <div
+        <MatchCard
           key={m.id}
-          className="match-card"
+          match={m}
+          homeName={teamNames[m.homeTeamId]?.name || "..."}
+          awayName={teamNames[m.awayTeamId]?.name || "..."}
           onClick={() => navigate(`/reporter/live/${m.id}`)}
-        >
-          <div className="match-card-teams">
-            <span className="team">{teamNames[m.homeTeamId]?.name || "..."}</span>
-            <span className="team">{teamNames[m.awayTeamId]?.name || "..."}</span>
-          </div>
-          <span className="match-time-box">{m.time}</span>
-        </div>
+        />
       ))}
     </main>
   );

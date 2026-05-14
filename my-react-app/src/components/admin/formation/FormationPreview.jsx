@@ -1,5 +1,5 @@
-import FormationField from "../../maincomp/FormationField";
-import PlayerChip from "../../maincomp/PlayerChip";
+import FormationField from "../../match/FormationField";
+import PlayerChip from "../../match/PlayerChip";
 
 export default function FormationPreview({
   match,

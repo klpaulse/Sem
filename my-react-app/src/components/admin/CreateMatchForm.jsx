@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { db, auth } from "../../config/Firebase";
 import { addDoc, Timestamp, collection, getDocs } from "firebase/firestore";
+import { generateSlug } from "../../utils/generateSlug";
 
 export default function CreateMatchForm() {
   const [divisions, setDivisions] = useState([]);
@@ -66,26 +67,24 @@ export default function CreateMatchForm() {
     const homeTeamObj = filteredTeams.find((t) => t.id === selectedHomeTeam);
     const awayTeamObj = filteredTeams.find((t) => t.id === selectedAwayTeam);
 
+    const slug = generateSlug(homeTeamObj.name, awayTeamObj.name, fullDate, time);
+
     try {
       await addDoc(matchesRef, {
         division: selectedDivision,
-
-        // ⭐ Kun ID – ikke navn
         homeTeamId: homeTeamObj.id,
         awayTeamId: awayTeamObj.id,
-
+        slug,
         date: Timestamp.fromDate(fullDate),
         time: time,
         arena: venue,
         status: "not_started",
         events: [],
-
         homeScore: null,
         awayScore: null,
         played: false,
         goalScorers: [],
         userId: auth?.currentUser?.uid,
-
         reporters: reporters,
       });
 

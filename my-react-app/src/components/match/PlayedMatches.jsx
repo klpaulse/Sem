@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getTeam } from "../../services/TeamService";
-import { normalizeDate } from "../utils/normalizeDate";
+import { normalizeDate } from "../../utils/normalizeDate";
 
 export default function PlayedMatches({ matches }) {
   const navigate = useNavigate();
@@ -66,7 +66,7 @@ export default function PlayedMatches({ matches }) {
             <li key={m.id}>
               <article
                 className="match-clickable"
-                onClick={() => navigate(`/match/${m.id}`, { state: { match: m } })}
+                onClick={() => navigate(`/match/${m.slug || m.id}`, { state: { match: m } })}
               >
                 <p>{kampDato.toLocaleDateString("no-NO")} – Ferdig</p>
 

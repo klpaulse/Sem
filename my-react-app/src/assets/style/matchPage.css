@@ -23,8 +23,24 @@ body {
   font-family: 'Inter', sans-serif;
 }
 
-.page{
-  padding: 0 1rem; 
+.page {
+  padding: 0 1rem;
+  text-align: left;
+}
+
+.team-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+.team-link:hover {
+  text-decoration: underline;
+  opacity: 0.85;
 }
 /* ================================
    LAYOUT
@@ -979,11 +995,9 @@ body {
 ================================ */
 .league-table {
   width: 100%;
-  background: #f7f7f7;
   border-radius: 10px;
   overflow: hidden;
-  border: 1px solid #e5e5e5;
-  font-size: 12px;
+  font-size: 13px;
   display: block;
 }
 
@@ -995,8 +1009,8 @@ body {
 .table-header,
 .table-row {
   display: grid;
-  grid-template-columns: 22px 1fr 22px 22px 22px 22px 45px 30px 25px;
-  padding: 6px 8px;
+  grid-template-columns: 20px 1fr 20px 20px 20px 44px 24px;
+  padding: 7px 6px;
   align-items: center;
   width: 100%;
   box-sizing: border-box;
@@ -1010,31 +1024,34 @@ body {
 }
 
 .table-header {
-  background: #efefef;
+  background: transparent;
   font-weight: 700;
-  color: #333;
-  border-bottom: 1px solid #ddd;
+  color: #aaa;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  font-size: 11px;
+  text-transform: uppercase;
 }
 
 .table-row {
-  border-bottom: 1px solid #eaeaea;
-  background: #ffffff;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  background: transparent;
+  color: #fff;
 }
 
 /* Zebra */
 .table-row:nth-child(odd) {
-  background: #fafafa;
+  background: rgba(255,255,255,0.03);
 }
 
 /* Førsteplass */
 .table-row:first-child {
-  background: #e8ffe8;
+  background: rgba(0, 200, 80, 0.08);
   font-weight: 600;
 }
 
 /* Sisteplass */
 .table-row:last-child {
-  background: #ffecec;
+  background: rgba(255, 60, 60, 0.08);
 }
 
 /* Lagnavn venstre */
@@ -1047,6 +1064,8 @@ body {
 .table-row td:not(:nth-child(2)),
 .table-header th:not(:nth-child(2)) {
   justify-content: center;
+  align-self: start;
+  padding-top: 2px;
 }
 
 .reporter-name-input {

@@ -2,8 +2,8 @@ import { useState, useRef } from "react";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../../../config/Firebase";
 
-import FormationField from "../../maincomp/FormationField";
-import PlayerChip from "../../maincomp/PlayerChip";
+import FormationField from "../../match/FormationField";
+import PlayerChip from "../../match/PlayerChip";
 import { FORMATIONS } from "../../../services/formationPresets";
 
 import { useFormationSync } from "./useFormationSync";
