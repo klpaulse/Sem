@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react'
 import { auth, googleProvider } from '../config/Firebase'
 import { 
     signInWithEmailAndPassword, 
-    signInWithRedirect, 
-    getRedirectResult 
+    signInWithPopup 
 } from 'firebase/auth'
 import { useNavigate } from 'react-router-dom'
 import { checkAdmin } from '../utils/checkAdmin'
@@ -23,20 +22,15 @@ export default function Auth() {
         }
     }
 
-    // Håndterer Google redirect etter login
-    useEffect(() => {
-        async function checkRedirect() {
-            try {
-                const result = await getRedirectResult(auth)
-                if (result?.user) {
-                    await handleAfterLogin(result.user)
-                }
-            } catch (err) {
-                console.error(err)
-            }
-        }
-        checkRedirect()
-    }, [])
+ const signInWithGoogle = async () => {
+    try {
+        const result = await signInWithPopup(auth, googleProvider)
+        await handleAfterLogin(result.user)
+    } catch (err) {
+        console.error(err)
+    }
+}
+    
 
     // Email + passord login
     const signIn = async () => {
@@ -48,16 +42,7 @@ export default function Auth() {
         }
     }
 
-    // Google login (redirect)
-    const signInWithGoogle = async () => {
-        try {
-            document.activeElement?.blur()
-            await signInWithRedirect(auth, googleProvider)
-           
-        } catch (err) {
-            console.error(err)
-        }
-    }
+
 
     return (
         <section>

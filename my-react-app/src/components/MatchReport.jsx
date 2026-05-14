@@ -283,7 +283,7 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
       <header className="report-title-row">
         {match.reporterName && (
           <span className="reporter-label">
-            Live holdes ac {match.reporterName}
+            Live holdes av {match.reporterName}
           </span>
         )}
         {!isFinished && <AudienceQuestions matchId={match.id} />}

@@ -82,15 +82,15 @@ export default function HomePage() {
     const status = normalizeStatus(m.status);
     return (
       m.featuredLive === true &&
-      status !== "live" &&
-      status !== "finished"
+      (status === "live" || status === "pause")
     );
   });
 
   // ⭐ LIVE-KAMPER
-  const todaysLiveMatches = todaysMatches.filter(
-    (m) => normalizeStatus(m.status) === "live"
-  );
+  const todaysLiveMatches = todaysMatches.filter((m) => {
+ const status = normalizeStatus(m.status)
+ return status === "live" || status === "pause"
+  })
 
   // GRUPPER ETTER DIVISJON
   const matchesByDivision = todaysMatches.reduce((acc, match) => {

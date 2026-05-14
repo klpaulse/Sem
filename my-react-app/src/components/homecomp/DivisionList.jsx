@@ -132,8 +132,8 @@ export default function DivisionList({
                   // ⭐ ROBUST STATUS-HÅNDTERING
                   const status = (match.status || "").toLowerCase();
 
-                  const isLive = status === "live";
-                  const isPaused = status === "paused";
+                  const isLive = status === "live" || status === "pause";
+                  const isPaused = status === "pause";
                   const endedManually = status === "finished";
                   const endedAutomatically = isPastMatch(matchDate);
 

@@ -16,15 +16,17 @@ export default function MatchControls({
       >
         Start kamp
       </button>
+
       <button
         onClick={onPause}
         disabled={status !== "live"}
       >
         Pause
       </button>
+
       <button
         onClick={onSecondHalf}
-        disabled={status !== "halftime"}
+        disabled={status !== "pause"}
       >
         Start 2. omgang
       </button>

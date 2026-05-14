@@ -261,13 +261,13 @@ export default function EventList({ match, isPreMatch = false }) {
     <div className="report-container">
       {/* Sticky polls øverst */}
       {stickyPolls.map((p) => (
-        <PollDisplay key={p.id} matchId={match.id} singlePollId={p.id} />
+        <PollDisplay key={p.id} matchId={match.id} singlePollId={p.id} isAdmin={true}/>
       ))}
 
       <div className="report-feed">
         {combinedFeed.map((item) =>
           item._isPoll
-            ? <PollDisplay key={item.id} matchId={match.id} singlePollId={item.id} />
+            ? <PollDisplay key={item.id} matchId={match.id} singlePollId={item.id} isAdmin={true} />
             : renderEvent(item)
         )}
       </div>

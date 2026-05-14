@@ -73,7 +73,7 @@ export function useEventActions(match, liveMatch) {
   }
 
   async function pauseMatch() {
-    await updateDoc(matchRef, { status: "halftime" });
+    await updateDoc(matchRef, { status: "pause" });
     addSystemEvent("Pause (slutt 1. omgang)");
   }
 

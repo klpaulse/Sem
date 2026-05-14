@@ -68,6 +68,21 @@ useEffect(() => {
   }, [id]);
 
   useEffect(() => {
+  if (!id) return;
+
+  const ref = doc(db, "matches", id);
+
+  const unsub = onSnapshot(ref, (snap) => {
+    if (snap.exists()) {
+      setSelectedMatch({ id, ...snap.data() });
+    }
+  });
+
+  return () => unsub();
+}, [id]);
+
+
+  useEffect(() => {
     if (!selectedMatch?.id) return 
     
     ReactGA.event("kamp_visning",{
@@ -169,7 +184,12 @@ useEffect(() => {
 
       <div className="last-played-card">
         <p className="lp-status">
-          {effectivelyFinished ? "Slutt" : selectedMatch.status === "live" ? "Live" : "Før kamp"}
+          {effectivelyFinished ? "Slutt" 
+          : selectedMatch.status === "pause"
+          ? "Pause"
+          : selectedMatch.status === "live" 
+          ? "Live" 
+          : "Før kamp"}
         </p>
 
         <div className="lp-row">
