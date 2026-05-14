@@ -3,14 +3,7 @@ import { getAllMatches } from "../../services/MatchService";
 import { getTeam } from "../../services/TeamService";
 import { db } from "../../config/Firebase";
 import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
-
-function normalizeDate(d) {
-  if (!d) return null;
-  if (d instanceof Date) return d;
-  if (d.toDate) return d.toDate();
-  const parsed = new Date(d);
-  return isNaN(parsed) ? null : parsed;
-}
+import { normalizeDate } from "../../utils/normalizeDate";
 
 export default function AdminMatches({ selectedDate, onSelectMatch }) {
   const [matches, setMatches] = useState([]);

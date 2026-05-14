@@ -10,7 +10,9 @@ import MatchReport from "../components/MatchReport";
 import Tabs from "../components/Tabs";
 
 import { getTeam } from "../services/TeamService";
-import {getSeasonMatches} from "../services/MatchService"
+import { getSeasonMatches } from "../services/MatchService";
+import { normalizeDate } from "../utils/normalizeDate";
+import { CURRENT_SEASON } from "../config/season";
 
 import "../assets/style/matchPage.css";
 import LagComponent from "../components/maincomp/LagComponent";
@@ -50,8 +52,8 @@ useEffect(() => {
   if (!isFinished) return;
 
   async function loadSeason() {
-    const home = await getSeasonMatches(selectedMatch.homeTeamId, "2026");
-    const away = await getSeasonMatches(selectedMatch.awayTeamId, "2026");
+    const home = await getSeasonMatches(selectedMatch.homeTeamId, CURRENT_SEASON);
+    const away = await getSeasonMatches(selectedMatch.awayTeamId, CURRENT_SEASON);
     setHomeSeason(home);
     setAwaySeason(away);
   }
@@ -152,12 +154,6 @@ useEffect(() => {
   // ⭐ TIDLIG RETURN ETTER ALLE HOOKS
   if (!selectedMatch) return <p>Laster kamp...</p>;
 
-  function normalizeDate(d) {
-    if (!d) return null;
-    if (d.toDate) return d.toDate();
-    return new Date(d);
-  }
-
   const matchDate = normalizeDate(selectedMatch.date);
   const isPastMatch = matchDate && matchDate < new Date();
   const effectivelyFinished = selectedMatch.status === "finished" ||
@@ -212,7 +208,7 @@ useEffect(() => {
       </div>
 
       {selectedMatch.status === "not_started" && !hasPreMatchContent && !effectivelyFinished && (
-        <Countdown match={selectedMatch} />
+        <Countdown date={matchDate} />
       )}
 
       <main className="page">

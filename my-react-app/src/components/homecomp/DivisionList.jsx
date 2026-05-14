@@ -23,7 +23,6 @@ export default function DivisionList({
   const [openDivisions, setOpenDivisions] = useState({});
   const [teamNames, setTeamNames] = useState({});
 
-  // ⭐ Hent lagnavn basert på ID
   useEffect(() => {
     async function loadNames() {
       const map = {};
@@ -47,7 +46,6 @@ export default function DivisionList({
     if (divisions.length > 0) loadNames();
   }, [divisions]);
 
-  // Åpne nye divisjoner uten å trigge infinite loop
   useEffect(() => {
     setOpenDivisions((prev) => {
       const updated = { ...prev };
@@ -105,22 +103,25 @@ export default function DivisionList({
         const isOpen = openDivisions[division];
 
         return (
-          <div key={division} className="division-block">
-            <div
-              className="division-header"
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleDivision(division);
-              }}
-            >
-              <h3>{division}</h3>
-              <span className={`dropdown-arrow ${isOpen ? "open" : ""}`}>
-                ⌄
-              </span>
-            </div>
+          <section key={division} className="division-block">
+            <h3 className="division-heading">
+              <button
+                className="division-header"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleDivision(division);
+                }}
+                aria-expanded={isOpen}
+              >
+                <span>{division}</span>
+                <span className={`dropdown-arrow ${isOpen ? "open" : ""}`}>
+                  ⌄
+                </span>
+              </button>
+            </h3>
 
             <div className={`division-matches-wrapper ${isOpen ? "open" : ""}`}>
-              <div className="division-matches">
+              <ul className="division-matches">
                 {matches.map((match) => {
                   const matchDate = match.date?.toDate
                     ? match.date.toDate()
@@ -129,7 +130,6 @@ export default function DivisionList({
                   const played =
                     match.homeScore !== null && match.awayScore !== null;
 
-                  // ⭐ ROBUST STATUS-HÅNDTERING
                   const status = (match.status || "").toLowerCase();
 
                   const isLive = status === "live" || status === "pause";
@@ -146,69 +146,70 @@ export default function DivisionList({
                     teamNames[match.awayTeamId]?.name || "Ukjent lag";
 
                   return (
-                    <div
-                      key={match.id}
-                      className={`match-card ${isLive ? "live-glow" : ""}`}
-                      onClick={() => navigate(`/match/${match.id}`)}
-                    >
-                      <div className="match-card-teams">
-                        <div className="row">
-                          <span
-                            className={`left-col ${
-                              homeWon ? "winner" : awayWon ? "loser" : ""
-                            }`}
-                          >
-                            {played ? match.homeScore : "-"}
-                          </span>
-                          <span
-                            className={`team ${
-                              homeWon ? "winner" : awayWon ? "loser" : ""
-                            }`}
-                          >
-                            {homeName}
-                          </span>
+                    <li key={match.id}>
+                      <article
+                        className={`match-card ${isLive ? "live-glow" : ""}`}
+                        onClick={() => navigate(`/match/${match.id}`)}
+                      >
+                        <div className="match-card-teams">
+                          <div className="row">
+                            <span
+                              className={`left-col ${
+                                homeWon ? "winner" : awayWon ? "loser" : ""
+                              }`}
+                            >
+                              {played ? match.homeScore : "-"}
+                            </span>
+                            <span
+                              className={`team ${
+                                homeWon ? "winner" : awayWon ? "loser" : ""
+                              }`}
+                            >
+                              {homeName}
+                            </span>
+                          </div>
+
+                          <div className="row">
+                            <span
+                              className={`left-col ${
+                                awayWon ? "winner" : homeWon ? "loser" : ""
+                              }`}
+                            >
+                              {played ? match.awayScore : "-"}
+                            </span>
+                            <span
+                              className={`team ${
+                                awayWon ? "winner" : homeWon ? "loser" : ""
+                              }`}
+                            >
+                              {awayName}
+                            </span>
+                          </div>
                         </div>
 
-                        <div className="row">
-                          <span
-                            className={`left-col ${
-                              awayWon ? "winner" : homeWon ? "loser" : ""
-                            }`}
-                          >
-                            {played ? match.awayScore : "-"}
-                          </span>
-                          <span
-                            className={`team ${
-                              awayWon ? "winner" : homeWon ? "loser" : ""
-                            }`}
-                          >
-                            {awayName}
-                          </span>
+                        <div className="match-right">
+                          {endedManually || endedAutomatically ? (
+                            <span className="match-status-ended">Slutt</span>
+                          ) : isPaused ? (
+                            <span className="match-status-pause">Pause</span>
+                          ) : isLive ? (
+                            <span className="match-status-live">LIVE</span>
+                          ) : (
+                            <span className="match-time-box">
+                              {matchDate.toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </span>
+                          )}
                         </div>
-                      </div>
-
-                      <div className="match-right">
-                        {endedManually || endedAutomatically ? (
-                          <span className="match-status-ended">Slutt</span>
-                        ) : isPaused ? (
-                          <span className="match-status-pause">Pause</span>
-                        ) : isLive ? (
-                          <span className="match-status-live">LIVE</span>
-                        ) : (
-                          <span className="match-time-box">
-                            {matchDate.toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                      </article>
+                    </li>
                   );
                 })}
-              </div>
+              </ul>
             </div>
-          </div>
+          </section>
         );
       })}
     </section>

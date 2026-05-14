@@ -1,13 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getTeam } from "../../services/TeamService";
-
-function normalizeDate(d) {
-  if (!d) return null;
-  if (d instanceof Date) return d;
-  if (d.toDate) return d.toDate();
-  return new Date(d);
-}
+import { normalizeDate } from "../utils/normalizeDate";
 
 export default function Upcoming({ matches }) {
   const [upcomingMatches, setUpcomingMatches] = useState([]);
@@ -61,27 +55,30 @@ export default function Upcoming({ matches }) {
     <section>
       <h2>Kommende kamper</h2>
 
-      {upcomingMatches.map((m) => {
-        const matchDate = m.dateObj;
+      <ol className="match-list">
+        {upcomingMatches.map((m) => {
+          const matchDate = m.dateObj;
 
-        const homeName = teamNames[m.homeTeamId]?.name || "Ukjent lag";
-        const awayName = teamNames[m.awayTeamId]?.name || "Ukjent lag";
+          const homeName = teamNames[m.homeTeamId]?.name || "Ukjent lag";
+          const awayName = teamNames[m.awayTeamId]?.name || "Ukjent lag";
 
-        return (
-          <div
-            key={m.id}
-            className="match-clickable"
-            onClick={() => navigate(`/match/${m.id}`)}
-          >
-            <p>
-              {matchDate.toLocaleDateString("no-NO")} – {m.time}
-            </p>
-            <p>
-              {homeName} vs {awayName}
-            </p>
-          </div>
-        );
-      })}
+          return (
+            <li key={m.id}>
+              <article
+                className="match-clickable"
+                onClick={() => navigate(`/match/${m.id}`)}
+              >
+                <p>
+                  {matchDate.toLocaleDateString("no-NO")} – {m.time}
+                </p>
+                <p>
+                  {homeName} vs {awayName}
+                </p>
+              </article>
+            </li>
+          );
+        })}
+      </ol>
     </section>
   );
 }

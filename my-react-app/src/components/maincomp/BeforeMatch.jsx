@@ -8,14 +8,8 @@ import { useNavigate } from "react-router-dom";
 import LagComponent from "./LagComponent";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../../config/Firebase";
-
-// 🔥 Felles dato-normalisering
-function normalizeDate(d) {
-  if (!d) return null;
-  if (d instanceof Date) return d;
-  if (d.toDate) return d.toDate(); // Firestore Timestamp
-  return new Date(d); // ISO string
-}
+import { normalizeDate } from "../../utils/normalizeDate";
+import { CURRENT_SEASON } from "../../config/season";
 
 export default function BeforeMatch({ match, allMatches}) {
   if (!match) return null;
@@ -32,11 +26,9 @@ export default function BeforeMatch({ match, allMatches}) {
   const [activeTab, setActiveTab] = useState("Før kampen")
 
   useEffect(() => {
-    console.log("match.id:", match?.id)
-    if(!match?.id) return 
+    if(!match?.id) return
     const ref = doc(db, "matches", match.id, "formations", "home")
     const unsub = onSnapshot(ref, (snap) => {
-      console.log("hasFormation:", snap.exists())
       setHasFormation(snap.exists())
     })
     return () => unsub()
@@ -66,13 +58,8 @@ export default function BeforeMatch({ match, allMatches}) {
     async function loadSeason() {
       if (!match) return;
 
-      const home = await getSeasonMatches(match.homeTeamId, "2026");
-      const away = await getSeasonMatches(match.awayTeamId, "2026");
-         console.log("homeTeamId:", match.homeTeamId);
-      console.log("awayTeamId:", match.awayTeamId);
-      console.log("homeSeason:", home);
-      console.log("awaySeason:", away);
-
+      const home = await getSeasonMatches(match.homeTeamId, CURRENT_SEASON);
+      const away = await getSeasonMatches(match.awayTeamId, CURRENT_SEASON);
       setHomeSeason(home);
       setAwaySeason(away);
     }

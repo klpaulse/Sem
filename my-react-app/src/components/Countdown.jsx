@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react";
-function normalizeDate(d) {
-  if (!d) return null;
-  if (d instanceof Date) return d;
-  if (d.toDate) return d.toDate(); // Firestore Timestamp
-  return new Date(d); // ISO string
-}
+import { normalizeDate } from "../utils/normalizeDate";
 
-export default function Countdown({date, time}){
+export default function Countdown({ date }) {
 
  
  const [timeRemaining, setTimeRemaining] = useState(0)

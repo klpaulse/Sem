@@ -20,6 +20,7 @@ import { getSeasonMatches } from "../services/MatchService";
 import AudienceQuestions from "./maincomp/AudienceQuestions";
 import PollDisplay from "./maincomp/PollDisplay";
 import BeforeMatchInfo from "./maincomp/BeforeMatchInfo";
+import { CURRENT_SEASON } from "../config/season";
 
 export default function MatchReport({ match, events, matchId, allMatches = [], isFinished = false }) {
 
@@ -55,8 +56,8 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
   useEffect(() => {
     if (!match || !isFinished) return;
     async function loadSeason() {
-      const home = await getSeasonMatches(match.homeTeamId, "2026");
-      const away = await getSeasonMatches(match.awayTeamId, "2026");
+      const home = await getSeasonMatches(match.homeTeamId, CURRENT_SEASON);
+      const away = await getSeasonMatches(match.awayTeamId, CURRENT_SEASON);
       setHomeSeason(home);
       setAwaySeason(away);
     }
@@ -130,13 +131,13 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
 
     if (e.type === "system") {
       return (
-        <div key={e.id} className="event event-system">{e.text}</div>
+        <li key={e.id} className="event event-system">{e.text}</li>
       );
     }
 
     if (e.type === "questionAnswer") {
       return (
-        <div key={e.id} className="event event-question">
+        <li key={e.id} className="event event-question">
           <span className="event-icon"><FontAwesomeIcon icon={faQuestion} /></span>
           <div className="event-text">
             <div className="question-block">
@@ -148,13 +149,13 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
               <p>{e.answer}</p>
             </div>
           </div>
-        </div>
+        </li>
       );
     }
 
     if (e.type === "goal") {
       return (
-        <div key={e.id} className="event event-goal">
+        <li key={e.id} className="event event-goal">
           <span className="event-icon"><FontAwesomeIcon icon={faFutbol} /></span>
           <div className="event-text">
             <p className="goal-title">{getTeamName(e.team)} SCORER!</p>
@@ -164,13 +165,13 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
             {e.text && <p className="goal-comment">{e.text}</p>}
           </div>
           {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}
-        </div>
+        </li>
       );
     }
 
     if (e.type === "sub") {
       return (
-        <div key={e.id} className="event event-sub">
+        <li key={e.id} className="event event-sub">
           <span className="event-icon"><FontAwesomeIcon icon={faArrowsRotate} /></span>
           <div className="event-text">
             <p className="sub-title">Spillerbytte – {getTeamName(e.team)}</p>
@@ -179,13 +180,13 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
             {e.comment && <p className="sub-comment">{e.comment}</p>}
           </div>
           {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}
-        </div>
+        </li>
       );
     }
 
     if (e.type === "yellow") {
       return (
-        <div key={e.id} className="event event-yellow">
+        <li key={e.id} className="event event-yellow">
           <span className="event-icon"><FontAwesomeIcon icon={faSquare} className="yellow-card" /></span>
           <div className="event-text">
             <p>Gult kort – {getTeamName(e.team)}</p>
@@ -193,13 +194,13 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
             {e.text && <p>{e.text}</p>}
           </div>
           {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}
-        </div>
+        </li>
       );
     }
 
     if (e.type === "red") {
       return (
-        <div key={e.id} className="event event-red">
+        <li key={e.id} className="event event-red">
           <span className="event-icon"><FontAwesomeIcon icon={faSquare} className="red-card" /></span>
           <div className="event-text">
             <p>Rødt kort – {getTeamName(e.team)}</p>
@@ -207,26 +208,26 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
             {e.text && <p>{e.text}</p>}
           </div>
           {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}
-        </div>
+        </li>
       );
     }
 
     if (e.type === "injury") {
       return (
-        <div key={e.id} className="event event-injury">
+        <li key={e.id} className="event event-injury">
           <span className="event-icon"><FontAwesomeIcon icon={faUserInjured} /></span>
           <div className="event-text">
             <p>Skade – {getTeamName(e.team)}</p>
             {e.text && <p>{e.text}</p>}
           </div>
           {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}
-        </div>
+        </li>
       );
     }
 
     if (e.type === "corner") {
       return (
-        <div key={e.id} className="event event-corner">
+        <li key={e.id} className="event event-corner">
           <span className="event-icon"><FontAwesomeIcon icon={faFlag} /></span>
           <div className="event-text">
             <p>Hjørnespark – {getTeamName(e.team)}</p>
@@ -234,13 +235,13 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
             {e.text && <p>{e.text}</p>}
           </div>
           {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}
-        </div>
+        </li>
       );
     }
 
     if (e.type === "whistle") {
       return (
-        <div key={e.id} className="event event-whistle">
+        <li key={e.id} className="event event-whistle">
           <span className="event-icon"><FontAwesomeIcon icon={faBullhorn} /></span>
           <div className="event-text">
             <p>Frispark – {getTeamName(e.team)}</p>
@@ -248,30 +249,30 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
             {e.comment && <p>{e.comment}</p>}
           </div>
           {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}
-        </div>
+        </li>
       );
     }
 
     if (e.type === "image") {
       return (
-        <div key={e.id} className="event event-image">
+        <li key={e.id} className="event event-image">
           <span className="event-icon"><FontAwesomeIcon icon={faImage} /></span>
           <div className="event-text">
             {e.text && <p>{e.text}</p>}
             {e.imageUrl && <img src={e.imageUrl} alt="Hendelsesbilde" className="event-image-img" />}
           </div>
           {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}
-        </div>
+        </li>
       );
     }
 
     if (e.type === "comment") {
       return (
-        <div key={e.id} className="event event-comment">
+        <li key={e.id} className="event event-comment">
           <span className="event-icon"><FontAwesomeIcon icon={faComment} /></span>
           <div className="event-text"><p>{e.text}</p></div>
           {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}
-        </div>
+        </li>
       );
     }
 
@@ -293,14 +294,11 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
         <PollDisplay key={p.id} matchId={id} sticky={true} singlePollId={p.id} />
       ))}
 
-      <div className="report-feed">
+      <ol className="report-feed">
         {!hasContent ? (
-          <>
-            <div className="no-live-report">
-              <p>Ingen live-rapport for denne kampen</p>
-            </div>
-          
-          </>
+          <li className="no-live-report">
+            <p>Ingen live-rapport for denne kampen</p>
+          </li>
         ) : (
           combinedFeed.map((item) =>
             item._isPoll
@@ -308,7 +306,7 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
               : renderEvent(item)
           )
         )}
-      </div>
+      </ol>
     </div>
   );
 }

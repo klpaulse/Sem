@@ -237,6 +237,7 @@ body {
 }
 
 .report-feed {
+  list-style: none;
   padding: 0;
   margin: 0;
   overflow: visible !important;
@@ -748,6 +749,8 @@ body {
 /* ================================
    H2H
 ================================ */
+.h2h-list { list-style: none; padding: 0; margin: 0; }
+.kampinfo-list { margin: 0; }
 .h2h-card { background: #111; padding: 10px 14px; border-radius: 6px; margin-bottom: 10px; color: #fff; }
 .h2h-date { font-size: 0.85rem; color: #ffffff88; margin-bottom: 6px; }
 .h2h-team { font-size: 1rem; font-weight: 600; }
@@ -814,7 +817,7 @@ body {
 ================================ */
 .kampinfo-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #ffffff22; color: #ffffffcc; font-size: 0.95rem; }
 .kampinfo-label { color: #ffffff88; font-weight: 500; }
-.kampinfo-value { font-weight: 600; color: #ffffffdd; }
+.kampinfo-value { font-weight: 600; color: #ffffffdd; margin: 0; }
 .info-block{
   margin-bottom: 20px; 
 }
@@ -959,6 +962,7 @@ body {
   padding-bottom: 4px;
 }
 
+.bench-list { list-style: none; padding: 0; margin: 0; }
 .bench-player { display: flex; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px solid #ffffff0f; }
 .bench-player-number { font-size: 12px; font-weight: 700; color: #ffffff66; min-width: 24px; }
 .bench-player-name { font-size: 13px; color: #ffffffcc; }
@@ -973,13 +977,20 @@ body {
 /* ================================
    TABELL
 ================================ */
-.league-table { 
+.league-table {
   width: 100%;
-   background: #f7f7f7;
-   border-radius: 10px; 
-   overflow: hidden;
-  border: 1px solid #e5e5e5; 
-  font-size: 12px; }
+  background: #f7f7f7;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e5e5e5;
+  font-size: 12px;
+  display: block;
+}
+
+.league-table thead,
+.league-table tbody {
+  display: block;
+}
 
 .table-header,
 .table-row {
@@ -987,13 +998,22 @@ body {
   grid-template-columns: 22px 1fr 22px 22px 22px 22px 45px 30px 25px;
   padding: 6px 8px;
   align-items: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.table-header { 
-background: #efefef; 
-font-weight: 700; 
-color: #333; 
-border-bottom: 1px solid #ddd;
+.table-header th,
+.table-row td {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.table-header {
+  background: #efefef;
+  font-weight: 700;
+  color: #333;
+  border-bottom: 1px solid #ddd;
 }
 
 .table-row {
@@ -1018,14 +1038,14 @@ border-bottom: 1px solid #ddd;
 }
 
 /* Lagnavn venstre */
-.table-row span:nth-child(2),
-.table-header span:nth-child(2) {
+.table-row td:nth-child(2),
+.table-header th:nth-child(2) {
   justify-content: flex-start;
 }
 
 /* Tall midt/høyre */
-.table-row span:not(:nth-child(2)),
-.table-header span:not(:nth-child(2)) {
+.table-row td:not(:nth-child(2)),
+.table-header th:not(:nth-child(2)) {
   justify-content: center;
 }
 

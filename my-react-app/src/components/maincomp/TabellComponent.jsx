@@ -10,32 +10,36 @@ export default function TabellComponent({ match }) {
   if (loading) return <p>Laster tabell...</p>;
 
   return (
-    <div className="league-table">
-      <div className="table-header">
-        <span>#</span>
-        <span>Lag</span>
-        <span>K</span>
-        <span>V</span>
-        <span>U</span>
-        <span>T</span>
-        <span>Mål</span>
-        <span>Diff</span>
-        <span>P</span>
-      </div>
+    <table className="league-table">
+      <thead>
+        <tr className="table-header">
+          <th scope="col">#</th>
+          <th scope="col">Lag</th>
+          <th scope="col">K</th>
+          <th scope="col">V</th>
+          <th scope="col">U</th>
+          <th scope="col">T</th>
+          <th scope="col">Mål</th>
+          <th scope="col">Diff</th>
+          <th scope="col">P</th>
+        </tr>
+      </thead>
 
-      {table.map((team, index) => (
-        <div key={team.teamId} className="table-row">
-          <span>{index + 1}</span>
-          <span>{team.teamName}</span>
-          <span>{team.played}</span>
-          <span>{team.wins}</span>
-          <span>{team.draws}</span>
-          <span>{team.losses}</span>
-          <span>{team.goalsFor} - {team.goalsAgainst}</span>
-          <span>{team.goalsFor - team.goalsAgainst}</span>
-          <span>{team.points}</span>
-        </div>
-      ))}
-    </div>
+      <tbody>
+        {table.map((team, index) => (
+          <tr key={team.teamId} className="table-row">
+            <td>{index + 1}</td>
+            <td>{team.teamName}</td>
+            <td>{team.played}</td>
+            <td>{team.wins}</td>
+            <td>{team.draws}</td>
+            <td>{team.losses}</td>
+            <td>{team.goalsFor} - {team.goalsAgainst}</td>
+            <td>{team.goalsFor - team.goalsAgainst}</td>
+            <td>{team.points}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }

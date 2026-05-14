@@ -201,26 +201,41 @@
 .division-list { margin-top: 20px; }
 .division-block { margin-bottom: 20px; }
 
+.division-heading {
+  margin: 0;
+}
+
 .division-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
   padding: 0.8rem 1rem;
   cursor: pointer;
   background: transparent;
+  border: none;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   transition: background 0.2s ease;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.5px;
+  text-align: left;
 }
 
 .division-header:hover { background: rgba(255, 255, 255, 0.05); }
-.division-header h3 { margin: 0; font-size: 0.9rem; font-weight: 600; color: #fff; letter-spacing: 0.5px; }
 
 .dropdown-arrow { font-size: 0.9rem; color: #fff; transition: transform 0.2s ease, opacity 0.2s ease; opacity: 0.7; }
 .dropdown-arrow.open { transform: rotate(180deg); opacity: 1; }
 
 .division-matches-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
 .division-matches-wrapper.open { max-height: 500px; }
-.division-matches { padding-top: 10px; }
+.division-matches { list-style: none; padding: 10px 0 0; margin: 0; }
+
+/* ================================
+   KAMPLISTER
+================================ */
+.match-list { list-style: none; padding: 0; margin: 0; }
 
 /* ================================
    KAMPKORT (hjemmeside)

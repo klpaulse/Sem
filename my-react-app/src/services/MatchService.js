@@ -6,16 +6,19 @@ import { db } from "../config/Firebase";
 ------------------------------------------------------- */
 export async function updateMatchResult(matchId, homeScore, awayScore, location) {
   const matchRef = doc(db, "matches", matchId);
-
-  await updateDoc(matchRef, {
-    homeScore: Number(homeScore),
-    awayScore: Number(awayScore),
-    location: location || "",
-    played: true,
-    updatedAt: new Date()
-  });
-
-  return true;
+  try {
+    await updateDoc(matchRef, {
+      homeScore: Number(homeScore),
+      awayScore: Number(awayScore),
+      location: location || "",
+      played: true,
+      updatedAt: new Date()
+    });
+    return true;
+  } catch (err) {
+    console.error("Kunne ikke oppdatere kampresultat:", err);
+    throw err;
+  }
 }
 
 /* -------------------------------------------------------
@@ -36,64 +39,60 @@ export function getMatchOutcome(match, teamId) {
    HENT ALLE KAMPER (for admin)
 ------------------------------------------------------- */
 export async function getAllMatches() {
-  const matchesRef = collection(db, "matches");
-  const snap = await getDocs(matchesRef);
+  try {
+    const matchesRef = collection(db, "matches");
+    const snap = await getDocs(matchesRef);
 
-  return snap.docs.map(doc => {
-    const data = doc.data();
-
-    const date = data.date?.toDate ? data.date.toDate() : new Date(data.date);
-
-    return {
-      id: doc.id,
-      ...data,
-      date
-    };
-  });
+    return snap.docs.map(doc => {
+      const data = doc.data();
+      const date = data.date?.toDate ? data.date.toDate() : new Date(data.date);
+      return { id: doc.id, ...data, date };
+    });
+  } catch (err) {
+    console.error("Kunne ikke hente kamper:", err);
+    return [];
+  }
 }
 
 /* -------------------------------------------------------
    HENT SESONGENS KAMPER FOR ETT LAG
 ------------------------------------------------------- */
 export async function getSeasonMatches(teamId, season = "2026") {
-  const matchesRef = collection(db, "matches");
+  try {
+    const matchesRef = collection(db, "matches");
 
-  const qHome = query(
-    matchesRef,
-    where("homeTeamId", "==", teamId),
-    where("season", "==", season)
-  );
+    const qHome = query(
+      matchesRef,
+      where("homeTeamId", "==", teamId),
+      where("season", "==", season)
+    );
 
-  const qAway = query(
-    matchesRef,
-    where("awayTeamId", "==", teamId),
-    where("season", "==", season)
-  );
+    const qAway = query(
+      matchesRef,
+      where("awayTeamId", "==", teamId),
+      where("season", "==", season)
+    );
 
-  const [homeSnap, awaySnap] = await Promise.all([
-    getDocs(qHome),
-    getDocs(qAway)
-  ]);
+    const [homeSnap, awaySnap] = await Promise.all([
+      getDocs(qHome),
+      getDocs(qAway)
+    ]);
 
-  const allMatches = [...homeSnap.docs, ...awaySnap.docs]
-    .map(doc => {
-      const data = doc.data();
-
-      const date = data.date?.toDate
-        ? data.date.toDate()
-        : new Date(data.date);
-
-      return {
-        id: doc.id,
-        ...data,
-        date,
-
-        // ⭐ VIKTIG: alltid legg til score-felter
-        homeScore: data.homeScore ?? null,
-        awayScore: data.awayScore ?? null,
-      };
-    })
-    .sort((a, b) => a.date - b.date);
-
-  return allMatches;
+    return [...homeSnap.docs, ...awaySnap.docs]
+      .map(doc => {
+        const data = doc.data();
+        const date = data.date?.toDate ? data.date.toDate() : new Date(data.date);
+        return {
+          id: doc.id,
+          ...data,
+          date,
+          homeScore: data.homeScore ?? null,
+          awayScore: data.awayScore ?? null,
+        };
+      })
+      .sort((a, b) => a.date - b.date);
+  } catch (err) {
+    console.error("Kunne ikke hente sesongens kamper:", err);
+    return [];
+  }
 }

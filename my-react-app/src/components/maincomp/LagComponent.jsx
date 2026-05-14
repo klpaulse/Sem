@@ -122,12 +122,14 @@ export default function LagComponent({ match }) {
           <h4 className="bench-team-title">Benk – {homeName}</h4>
           {homeBench.length === 0
             ? <p className="bench-empty">Ingen registrert</p>
-            : homeBench.map((p) => (
-                <div key={"hbench-" + p.id} className="bench-player">
-                  <span className="bench-player-number">#{p.number}</span>
-                  <span className="bench-player-name">{p.name}</span>
-                </div>
-              ))
+            : <ul className="bench-list">
+                {homeBench.map((p) => (
+                  <li key={"hbench-" + p.id} className="bench-player">
+                    <span className="bench-player-number">#{p.number}</span>
+                    <span className="bench-player-name">{p.name}</span>
+                  </li>
+                ))}
+              </ul>
           }
         </div>
 
@@ -135,12 +137,14 @@ export default function LagComponent({ match }) {
           <h4 className="bench-team-title">Benk – {awayName}</h4>
           {awayBench.length === 0
             ? <p className="bench-empty">Ingen registrert</p>
-            : awayBench.map((p) => (
-                <div key={"abench-" + p.id} className="bench-player">
-                  <span className="bench-player-number">#{p.number}</span>
-                  <span className="bench-player-name">{p.name}</span>
-                </div>
-              ))
+            : <ul className="bench-list">
+                {awayBench.map((p) => (
+                  <li key={"abench-" + p.id} className="bench-player">
+                    <span className="bench-player-number">#{p.number}</span>
+                    <span className="bench-player-name">{p.name}</span>
+                  </li>
+                ))}
+              </ul>
           }
         </div>
       </div>

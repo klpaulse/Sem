@@ -1,13 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getTeam } from "../../services/TeamService";
-
-function normalizeDate(d) {
-  if (!d) return null;
-  if (d instanceof Date) return d;
-  if (d.toDate) return d.toDate();
-  return new Date(d);
-}
+import { normalizeDate } from "../utils/normalizeDate";
 
 export default function PlayedMatches({ matches }) {
   const navigate = useNavigate();
@@ -55,36 +49,39 @@ export default function PlayedMatches({ matches }) {
 
       {past.length === 0 && <p>Ingen spilte kamper ennå</p>}
 
-      {past.map((m, index) => {
-        const kampDato = m.matchDateTime;
+      <ol className="match-list">
+        {past.map((m) => {
+          const kampDato = m.matchDateTime;
 
-        const homeName = teamNames[m.homeTeamId]?.name || "Ukjent lag";
-        const awayName = teamNames[m.awayTeamId]?.name || "Ukjent lag";
+          const homeName = teamNames[m.homeTeamId]?.name || "Ukjent lag";
+          const awayName = teamNames[m.awayTeamId]?.name || "Ukjent lag";
 
-        const harResultat =
-          m.homeScore !== null &&
-          m.homeScore !== undefined &&
-          m.awayScore !== null &&
-          m.awayScore !== undefined;
+          const harResultat =
+            m.homeScore !== null &&
+            m.homeScore !== undefined &&
+            m.awayScore !== null &&
+            m.awayScore !== undefined;
 
-        return (
-          <div
-            key={index}
-            className="match-clickable"
-            onClick={() => navigate(`/match/${m.id}`, { state: { match: m } })}
-          >
-            <p>{kampDato.toLocaleDateString("no-NO")} – Ferdig</p>
+          return (
+            <li key={m.id}>
+              <article
+                className="match-clickable"
+                onClick={() => navigate(`/match/${m.id}`, { state: { match: m } })}
+              >
+                <p>{kampDato.toLocaleDateString("no-NO")} – Ferdig</p>
 
-            {harResultat ? (
-              <p>
-                {homeName} {m.homeScore ?? 0} – {m.awayScore ?? 0} {awayName}
-              </p>
-            ) : (
-              <p>Resultat kommer</p>
-            )}
-          </div>
-        );
-      })}
+                {harResultat ? (
+                  <p>
+                    {homeName} {m.homeScore ?? 0} – {m.awayScore ?? 0} {awayName}
+                  </p>
+                ) : (
+                  <p>Resultat kommer</p>
+                )}
+              </article>
+            </li>
+          );
+        })}
+      </ol>
     </section>
   );
 }
