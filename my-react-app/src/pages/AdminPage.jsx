@@ -5,7 +5,6 @@ import { useAuthState } from "react-firebase-hooks/auth";
 
 import LagAdministrasjon from "../components/admin/LagAdministrasjon";
 import KampAdministrasjon from "../components/admin/KampAdministrasjon";
-import PlayerAdmin from "../components/admin/PlayerAdmin";
 import LiveAdmin from "../components/admin/LiveAdmin";
 import ResultatAdmin from "../components/admin/ResultatAdmin";
 import LiveControls from "../components/admin/livekontroll/LiveControls";
@@ -56,16 +55,16 @@ export default function AdminPage() {
       <aside className="admin-sidebar">
         {!inLiveMode && (
           <>
-            <button onClick={() => setActiveTab("live")}>Live</button>
-            <button onClick={() => setActiveTab("teams")}>Lag</button>
-            <button onClick={() => setActiveTab("matches")}>Kamper</button>
-            <button onClick={() => setActiveTab("players")}>Spillere</button>
-            <button onClick={() => setActiveTab("results")}>Resultater</button>
+            <button className={activeTab === "live" ? "active" : ""} onClick={() => setActiveTab("live")}>Live</button>
+            <button className={activeTab === "teams" ? "active" : ""} onClick={() => setActiveTab("teams")}>Lag</button>
+            <button className={activeTab === "matches" ? "active" : ""} onClick={() => setActiveTab("matches")}>Kamper</button>
+            <button className={activeTab === "results" ? "active" : ""} onClick={() => setActiveTab("results")}>Resultater</button>
           </>
         )}
       </aside>
 
       <main className="admin-main">
+
         {loading && <p>Laster..</p>}
 
         {!loading && (
@@ -93,7 +92,6 @@ export default function AdminPage() {
                 )}
                 {activeTab === "teams" && <LagAdministrasjon divisions={divisions} />}
                 {activeTab === "matches" && <KampAdministrasjon divisions={divisions} />}
-                {activeTab === "players" && <PlayerAdmin />}
                 {activeTab === "results" && <ResultatAdmin />}
               </>
             )}

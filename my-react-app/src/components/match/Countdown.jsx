@@ -2,55 +2,34 @@ import { useEffect, useState } from "react";
 import { normalizeDate } from "../../utils/normalizeDate";
 
 export default function Countdown({ date }) {
+  const [timeRemaining, setTimeRemaining] = useState(0);
 
- 
- const [timeRemaining, setTimeRemaining] = useState(0)
+  useEffect(() => {
+    if (!date) return;
+    const interval = setInterval(() => {
+      const kampTid = normalizeDate(date);
+      if (!kampTid) return;
+      const remaining = Math.max(0, kampTid.getTime() - Date.now());
+      setTimeRemaining(remaining);
+      if (remaining === 0) clearInterval(interval);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [date]);
 
-        useEffect(() => {
-            if(!date) return;
+  const seconds = Math.floor((timeRemaining / 1000) % 60);
+  const minutes = Math.floor((timeRemaining / (1000 * 60)) % 60);
+  const hours   = Math.floor((timeRemaining / (1000 * 60 * 60)) % 24);
+  const days    = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
 
-        const interval = setInterval(() => {
-  const kampTid = normalizeDate(date)
-  if (!kampTid) return
-
-  const now = new Date().getTime()
-  const eventTime = kampTid.getTime()
-
-  let remaining = eventTime - now
-
-  if (remaining < 0) {
-    remaining = 0
-    clearInterval(interval)
-  }
-
-  setTimeRemaining(remaining)
-}, 1000)
-            return () => clearInterval(interval)
-        },[date])
-
-        const formatTime = (time) => {
-            const seconds = Math.floor((time / 1000) % 60)
-            const minutes = Math.floor((time /(1000 * 60)) % 60)
-            const hours = Math.floor((time / (1000 * 60 * 60)) % 24)
-            const days = Math.floor(time / (1000 * 60 * 60 * 24))
-
-            return( 
-                <section className="countdown">
-                <p>Kampstart om: </p>
-                <div>{days.toString().padStart(2, "0")} <span>d</span> </div>
-                <div>{hours.toString().padStart(2, "0")} <span>t</span></div>
-                <div>{minutes.toString().padStart(2, "0")} <span>m</span></div>
-                <div>{seconds.toString().padStart(2, "0")} <span>s</span></div>
-                </section>
-
-            )
-        }
-
-        return(
-            <>
-            {formatTime(timeRemaining)}
-            </>
-        )
-
-    
-    }
+  return (
+    <div className="countdown">
+      <span className="countdown-label">Kampstart om</span>
+      <span className="countdown-inline">
+        {days > 0 && <><span className="countdown-num">{String(days).padStart(2, "0")}</span><span className="countdown-unit-label">d</span>{" "}</>}
+        <span className="countdown-num">{String(hours).padStart(2, "0")}</span><span className="countdown-unit-label">t</span>{" "}
+        <span className="countdown-num">{String(minutes).padStart(2, "0")}</span><span className="countdown-unit-label">m</span>{" "}
+        <span className="countdown-num">{String(seconds).padStart(2, "0")}</span><span className="countdown-unit-label">s</span>
+      </span>
+    </div>
+  );
+}

@@ -125,7 +125,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
 }
 
 .calandar-strip {
@@ -337,10 +337,9 @@
   border-top: 1px solid #FFFFFF0F;
   border-bottom: 1px solid #FFFFFF0F;
   border-radius: 6px;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   margin: 6px 0;
   cursor: pointer;
   transition: background 0.15s ease;
@@ -348,14 +347,92 @@
 
 .match-card:hover { background: #ffffff14; }
 
+.match-card-date {
+  font-size: 0.65rem;
+  color: #888;
+  text-transform: capitalize;
+}
+
+.match-card-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
 .match-card-teams {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
   color: var(--nextmatch-text);
+  min-width: 0;
 }
 
+.match-card-row { display: flex; align-items: center; gap: 8px; }
+
+.match-card-score {
+  width: auto;
+  min-width: 12px;
+  padding-right: 4px;
+  text-align: right;
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+.match-card-score.not-played { opacity: 0.3; }
+
+.match-card-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--nextmatch-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.winner { font-weight: 700; letter-spacing: 0.3px; }
+.loser { opacity: 0.55; }
+
+/* Badge-system for kampstatus */
+.match-badge {
+  display: inline-block;
+  flex-shrink: 0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.60rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.match-badge--time {
+  background: var(--status-gradient);
+  color: #fff;
+  border-left: 4px solid var(--countdown-text);
+  opacity: 0.9;
+}
+
+.match-badge--ended {
+  background: var(--status-gradient);
+  font-weight: 600;
+  color: #555;
+}
+
+.match-badge--pause {
+  background: var(--status-gradient);
+  color: #fff;
+  border-left: 4px solid #f39c12;
+  opacity: 0.9;
+}
+
+.match-badge--live {
+  background-color: red;
+  color: white;
+  animation: pulse 1.5s infinite;
+}
+
+/* Behold gamle klasser for evt. andre steder */
 .row { display: flex; align-items: center; gap: 8px; }
 
 .left-col {
@@ -376,9 +453,6 @@
   text-overflow: ellipsis;
   max-width: 180px;
 }
-
-.winner { font-weight: 700; letter-spacing: 0.3px; }
-.loser { opacity: 0.55; }
 
 /* ================================
    KAMPSTATUS-BADGES
@@ -413,14 +487,12 @@
 .match-status-ended {
   display: inline-block;
   background: var(--status-gradient);
-  padding: 0.25rem 1rem;
+  padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.60rem;
-  font-weight: 700;
-  color: #fff;
+  font-weight: 600;
+  color: #555;
   text-transform: uppercase;
-  border-left: 4px solid var(--countdown-text);
-  opacity: 0.9;
 }
 
 .match-status-pause {

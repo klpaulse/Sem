@@ -22,6 +22,9 @@ export default function FormationAdmin({ match, onClose }) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isEditingExisting, setIsEditingExisting] = useState(false);
 
+  // Lokalt utkast for begge lag – lagres ikke til Firestore før bruker trykker Lagre
+  const [draft, setDraft] = useState({ home: null, away: null });
+
   const fieldRef = useRef(null);
 
   /* -----------------------------
@@ -109,44 +112,47 @@ export default function FormationAdmin({ match, onClose }) {
   }
 
   /* -----------------------------
-      LAGRE
+      BYTT SIDE (lagrer utkast lokalt)
+  ------------------------------ */
+  function handleSwitchSide(newSide) {
+    if (newSide === activeSide) return;
+    setDraft(prev => ({
+      ...prev,
+      [activeSide]: { players: [...players], formation: selectedFormation, bench: [...benchPlayers] }
+    }));
+    setActiveSide(newSide);
+  }
+
+  /* -----------------------------
+      LAGRE BEGGE LAG
   ------------------------------ */
   async function saveFormation() {
     if (!match?.id) return;
 
-    const ref = doc(db, "matches", match.id, "formations", activeSide);
+    // Inkluder aktiv side i utkastet
+    const finalDraft = {
+      ...draft,
+      [activeSide]: { players: [...players], formation: selectedFormation, bench: [...benchPlayers] }
+    };
 
-    const positions = {};
-    players.forEach((p) => {
-      positions[p.id] = {
-        x: p.x,
-        y: p.y,
-        playerId: p.id,
-        name: p.name ?? "",
-        number: p.number ?? "",
-        img: p.img ?? "",
-      };
-    });
+    for (const side of ["home", "away"]) {
+      const sideData = finalDraft[side];
+      if (!sideData?.players?.length) continue;
 
-    const bench = benchPlayers.map((p) => ({
-      id: p.id ?? "",
-      name: p.name ?? "",
-      number: p.number ?? "",
-      img: p.img ?? "",
-    }));
-
-    await setDoc(
-      ref,
-      { formation: selectedFormation, positions, bench },
-      { merge: true }
-    );
-
-    if (activeSide === "away" || isEditingExisting) {
-      setShowSavedToast(true);
-      setTimeout(() => setShowSavedToast(false), 3000);
-      setMode("preview");
-      setIsEditingExisting(false);
+      const ref = doc(db, "matches", match.id, "formations", side);
+      const positions = {};
+      sideData.players.forEach(p => {
+        positions[p.id] = { x: p.x, y: p.y, playerId: p.id, name: p.name ?? "", img: p.img ?? "" };
+      });
+      const bench = sideData.bench.map(p => ({ id: p.id ?? "", name: p.name ?? "", img: p.img ?? "" }));
+      await setDoc(ref, { formation: sideData.formation, positions, bench }, { merge: true });
     }
+
+    setDraft({ home: null, away: null });
+    setShowSavedToast(true);
+    setTimeout(() => setShowSavedToast(false), 3000);
+    setMode("preview");
+    setIsEditingExisting(false);
   }
 
   /* -----------------------------
@@ -182,22 +188,28 @@ export default function FormationAdmin({ match, onClose }) {
           {/* Side-velger */}
           <div className="formation-admin__side-toggle">
             <button
-              onClick={() => setActiveSide("home")}
+              onClick={() => handleSwitchSide("home")}
               className={
                 "formation-admin__side-button" +
                 (activeSide === "home" ? " formation-admin__side-button--active" : "")
               }
             >
-              Hjemmelag – {match?.homeTeamName}
+              {match?.homeTeamName}
+              {(draft.home?.players?.length > 0 || (activeSide === "home" && players.length > 0)) && (
+                <span className="formation-admin__side-ready">✓</span>
+              )}
             </button>
             <button
-              onClick={() => setActiveSide("away")}
+              onClick={() => handleSwitchSide("away")}
               className={
                 "formation-admin__side-button" +
                 (activeSide === "away" ? " formation-admin__side-button--active" : "")
               }
             >
-              Bortelag – {match?.awayTeamName}
+              {match?.awayTeamName}
+              {(draft.away?.players?.length > 0 || (activeSide === "away" && players.length > 0)) && (
+                <span className="formation-admin__side-ready">✓</span>
+              )}
             </button>
           </div>
 
@@ -244,7 +256,7 @@ export default function FormationAdmin({ match, onClose }) {
                   className="formation-admin__player-on-field formation-admin__player-on-field--ghost"
                   style={{ left: `${p.x}%`, top: `${p.y}%` }}
                 >
-                  <PlayerChip name={p.name} number={p.number} img={p.img} />
+                  <PlayerChip name={p.name} img={p.img} />
                 </div>
               ))}
 
@@ -276,7 +288,7 @@ export default function FormationAdmin({ match, onClose }) {
                 style={{ left: `${p.x}%`, top: `${p.y}%` }}
               >
                 {p.name && (
-                  <PlayerChip name={p.name} number={p.number} img={p.img} />
+                  <PlayerChip name={p.name} img={p.img} />
                 )}
               </div>
             ))}
@@ -292,33 +304,23 @@ export default function FormationAdmin({ match, onClose }) {
             </div>
           )}
 
-          {/* Lagre-knapper */}
-          {activeSide === "home" && !isEditingExisting ? (
-            <button
-              onClick={async () => {
-                await saveFormation();
-                setActiveSide("away");
-              }}
-              className="formation-admin__save-button"
-            >
-              Neste – Sett opp {match?.awayTeamName}
-            </button>
-          ) : (
-            <button
-              onClick={() => {
-                if (isEditingExisting) {
-                  setShowConfirmModal(true);
-                } else {
-                  saveFormation();
-                }
-              }}
-              className="formation-admin__save-button"
-            >
-              {isEditingExisting
-                ? "Lagre endringer"
-                : `Lagre formasjon for ${match?.awayTeamName}`}
-            </button>
-          )}
+          {/* Lagre-knapp */}
+          {(() => {
+            const homeReady = draft.home?.players?.length > 0 || (activeSide === "home" && players.length > 0);
+            const awayReady = draft.away?.players?.length > 0 || (activeSide === "away" && players.length > 0);
+            const bothReady = homeReady && awayReady;
+
+            return (
+              <button
+                onClick={() => isEditingExisting ? setShowConfirmModal(true) : saveFormation()}
+                className="formation-admin__save-button"
+                disabled={!isEditingExisting && !bothReady}
+                title={!bothReady ? "Sett opp begge lag før du lagrer" : ""}
+              >
+                {isEditingExisting ? "Lagre endringer" : "Lagre formasjon"}
+              </button>
+            );
+          })()}
 
           {/* Bekreftelsesmodal */}
           {showConfirmModal && (

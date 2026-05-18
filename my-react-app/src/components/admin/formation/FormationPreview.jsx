@@ -26,7 +26,7 @@ export default function FormationPreview({
             className="formation-admin__player-on-field"
             style={{ left: `${p.x}%`, top: `${p.y}%` }}
           >
-            <PlayerChip name={p.name} number={p.number} img={p.img} />
+            <PlayerChip name={p.name} img={p.img} />
           </div>
         ))}
 
@@ -36,7 +36,7 @@ export default function FormationPreview({
             className="formation-admin__player-on-field"
             style={{ left: `${p.x}%`, top: `${p.y}%` }}
           >
-            <PlayerChip name={p.name} number={p.number} img={p.img} />
+            <PlayerChip name={p.name} img={p.img} />
           </div>
         ))}
       </FormationField>

@@ -6,7 +6,9 @@
       "Bash(cp c:/Users/Lovis/OneDrive/Dokumenter/GitHub/Sem/my-react-app/src/components/admin /tmp/AdminManager.jsx)",
       "Bash(cp -r c:/Users/Lovis/OneDrive/Dokumenter/GitHub/Sem/my-react-app/src/components/admincomp c:/Users/Lovis/OneDrive/Dokumenter/GitHub/Sem/my-react-app/src/components/admin)",
       "Bash(cp /tmp/AdminManager.jsx c:/Users/Lovis/OneDrive/Dokumenter/GitHub/Sem/my-react-app/src/components/admin/AdminManager.jsx)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "PowerShell(Remove-Item \"c:\\\\Users\\\\Lovis\\\\OneDrive\\\\Dokumenter\\\\GitHub\\\\Sem\\\\my-react-app\\\\src\\\\components\\\\admin\\\\MigrationAdmin.jsx\" -Confirm:$false)",
+      "PowerShell(Remove-Item \"c:\\\\Users\\\\Lovis\\\\OneDrive\\\\Dokumenter\\\\GitHub\\\\Sem\\\\my-react-app\\\\src\\\\components\\\\admin\\\\AddStatusToMatches.jsx\" -Confirm:$false)"
     ]
   }
 }

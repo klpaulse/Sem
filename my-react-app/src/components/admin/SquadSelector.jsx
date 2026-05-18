@@ -181,14 +181,11 @@ export default function SquadSelector({ match, onConfirm }) {
               </div>
 
               <div className="squad-selector__player-info">
-                <span className="squad-selector__player-number">
-                  #{p.number ?? "–"}
-                </span>
                 <span className="squad-selector__player-name">{p.name}</span>
               </div>
 
               <div className="squad-selector__checkbox">
-                {isSelected ? "✅" : "⬜"}
+                <div className="squad-selector__checkbox-tick" />
               </div>
             </div>
           );

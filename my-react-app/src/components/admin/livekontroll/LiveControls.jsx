@@ -137,7 +137,7 @@ export default function LiveControls({ match, onBack }) {
 
   return (
     <div className="live-controls">
-      <LiveHeader liveMatch={liveMatch} onBack={onBack} />
+      <LiveHeader liveMatch={liveMatch} onBack={onBack} homeTeam={homeTeam} awayTeam={awayTeam} />
 
       {/* -------------------------------------------------------
           FØR KAMP
@@ -161,10 +161,26 @@ export default function LiveControls({ match, onBack }) {
 
           {activeTab === "prematch" && (
             <>
+              <div className="reporter-name-input">
+                {!nameSaved ? (
+                  <>
+                    <input
+                      placeholder="Ditt navn (vises på live-rapport)"
+                      value={reporterName}
+                      onChange={(e) => setReporterName(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && saveName()}
+                    />
+                    <button onClick={saveName}>Lagre</button>
+                  </>
+                ) : (
+                  <p className="reporter-name-saved">✓ Vises som: {reporterName}</p>
+                )}
+              </div>
+
               <EventButtons
                 activeType={type}
                 onSelect={setType}
-                onlyTypes={["comment", "image", "poll"]} // ⭐ KUN disse før kamp
+                onlyTypes={["comment", "image", "poll"]}
               />
 
               <EventForm
@@ -187,7 +203,6 @@ export default function LiveControls({ match, onBack }) {
                 addEvent={addEvent}
               />
 
-              {/* ⭐ ADMIN SER FØR-KAMP FEED I MATCHREPORT-STIL */}
               <EventList
                 match={{
                   ...liveMatch,
@@ -198,22 +213,6 @@ export default function LiveControls({ match, onBack }) {
               />
             </>
           )}
-
-          <div className="reporter-name-input">
-          {!nameSaved ? (
-            <>
-            <input
-            placeholder="Ditt navn (vises på live-rapport)"
-            value={reporterName}
-            onChange={(e) => setReporterName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && saveName()}
-            />
-            <button onClick={saveName}>Lagre</button>
-            </>
-          ) : (
-            <p className="reporter-name-saved">✓ Vises som: {reporterName}</p>
-          )}
-          </div>
 
           {activeTab === "formation" && (
             <div>

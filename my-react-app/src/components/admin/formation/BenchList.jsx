@@ -10,7 +10,6 @@ export default function BenchList({ players, onDragStart }) {
             onDragStart(p.id, true);
           }}
         >
-          <div className="bench-number">{p.number}</div>
           <div className="bench-name">{p.name}</div>
         </div>
       ))}

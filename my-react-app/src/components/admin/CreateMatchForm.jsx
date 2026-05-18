@@ -3,80 +3,52 @@ import { db, auth } from "../../config/Firebase";
 import { addDoc, Timestamp, collection, getDocs } from "firebase/firestore";
 import { generateSlug } from "../../utils/generateSlug";
 
-export default function CreateMatchForm() {
-  const [divisions, setDivisions] = useState([]);
-  const [selectedDivision, setSelectedDivision] = useState("");
-
+export default function CreateMatchForm({ divisions, onAdded }) {
   const [teams, setTeams] = useState([]);
   const [filteredTeams, setFilteredTeams] = useState([]);
-
+  const [selectedDivision, setSelectedDivision] = useState("");
   const [selectedHomeTeam, setSelectedHomeTeam] = useState("");
   const [selectedAwayTeam, setSelectedAwayTeam] = useState("");
-
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [venue, setVenue] = useState("");
+  const [reporterEmail, setReporterEmail] = useState("");
+  const [reporters, setReporters] = useState([]);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
-  const [reporterEmail, setReporterEmail] =useState("")
-  const [reporters, setReporters] = useState([])
-
-  const matchesRef = collection(db, "matches");
-
-  // Hent alle lag og bygg liste over divisjoner
   useEffect(() => {
-    const fetchTeams = async () => {
-      const teamsRef = collection(db, "teams");
-      const snapshot = await getDocs(teamsRef);
-
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      setTeams(data);
-
-      // Finn unike divisjoner
-      const uniqueDivs = [...new Set(data.map((t) => t.division))];
-      setDivisions(uniqueDivs);
-    };
-
-    fetchTeams();
+    getDocs(collection(db, "teams")).then(snap => {
+      setTeams(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
   }, []);
 
-  // Filtrer lag når divisjon velges
   useEffect(() => {
-    if (!selectedDivision) {
-      setFilteredTeams([]);
-      return;
-    }
-
-    const filtered = teams.filter((t) => t.division === selectedDivision);
-    setFilteredTeams(filtered);
+    setFilteredTeams(selectedDivision ? teams.filter(t => t.division === selectedDivision) : []);
+    setSelectedHomeTeam("");
+    setSelectedAwayTeam("");
   }, [selectedDivision, teams]);
 
   const addMatch = async () => {
-    if (!selectedDivision) return alert("Velg divisjon");
-    if (!selectedHomeTeam || !selectedAwayTeam)
-      return alert("Velg begge lag");
-    if (selectedHomeTeam === selectedAwayTeam)
-      return alert("Et lag kan ikke spille mot seg selv");
-    if (!date || !time) return alert("Velg dato og tid");
+    setError("");
+    if (!selectedDivision) return setError("Velg divisjon");
+    if (!selectedHomeTeam || !selectedAwayTeam) return setError("Velg begge lag");
+    if (selectedHomeTeam === selectedAwayTeam) return setError("Hjemme- og bortelag kan ikke være like");
+    if (!date || !time) return setError("Velg dato og tid");
 
     const fullDate = new Date(`${date}T${time}`);
-
-    const homeTeamObj = filteredTeams.find((t) => t.id === selectedHomeTeam);
-    const awayTeamObj = filteredTeams.find((t) => t.id === selectedAwayTeam);
-
+    const homeTeamObj = filteredTeams.find(t => t.id === selectedHomeTeam);
+    const awayTeamObj = filteredTeams.find(t => t.id === selectedAwayTeam);
     const slug = generateSlug(homeTeamObj.name, awayTeamObj.name, fullDate, time);
 
     try {
-      await addDoc(matchesRef, {
+      await addDoc(collection(db, "matches"), {
         division: selectedDivision,
         homeTeamId: homeTeamObj.id,
         awayTeamId: awayTeamObj.id,
         slug,
         date: Timestamp.fromDate(fullDate),
-        time: time,
+        time,
         arena: venue,
         status: "not_started",
         events: [],
@@ -84,110 +56,101 @@ export default function CreateMatchForm() {
         awayScore: null,
         played: false,
         goalScorers: [],
+        reporters,
         userId: auth?.currentUser?.uid,
-        reporters: reporters,
       });
 
-      // Reset
       setSelectedHomeTeam("");
       setSelectedAwayTeam("");
       setDate("");
       setTime("");
       setVenue("");
-      setReporters([])
-      setReporterEmail("")
-
-      alert("Kamp lagt til!");
-    } catch (err) {
-      console.error(err);
-      alert("Feil ved lagring av kamp");
+      setReporters([]);
+      setReporterEmail("");
+      setSuccess(true);
+      setTimeout(() => { setSuccess(false); onAdded?.(); }, 1200);
+    } catch {
+      setError("Noe gikk galt, prøv igjen");
     }
   };
 
-  function addReporter (){
-    if (!reporterEmail.trim()) return
-    if(reporters.includes(reporterEmail)) return 
-    setReporters([...reporters, reporterEmail])
-    setReporterEmail("")
-  }
-
-  function removeReporter(email){
-    setReporters(reporters.filter(r => r !== email))
-  }
+  const addReporter = () => {
+    if (!reporterEmail.trim() || reporters.includes(reporterEmail)) return;
+    setReporters([...reporters, reporterEmail]);
+    setReporterEmail("");
+  };
 
   return (
-    <section>
-      <h2>Legg til kamp</h2>
-
-      {/* Velg divisjon */}
-      <select
-        value={selectedDivision}
-        onChange={(e) => setSelectedDivision(e.target.value)}
-      >
-        <option value="">Velg divisjon</option>
-        {divisions.map((div) => (
-          <option key={div} value={div}>
-            {div}
-          </option>
-        ))}
-      </select>
-
-      {/* Hjemmelag */}
-      <select
-        value={selectedHomeTeam}
-        onChange={(e) => setSelectedHomeTeam(e.target.value)}
-        disabled={!selectedDivision}
-      >
-        <option value="">Velg hjemmelag</option>
-        {filteredTeams.map((team) => (
-          <option key={team.id} value={team.id}>
-            {team.name}
-          </option>
-        ))}
-      </select>
-
-      {/* Bortelag */}
-      <select
-        value={selectedAwayTeam}
-        onChange={(e) => setSelectedAwayTeam(e.target.value)}
-        disabled={!selectedDivision}
-      >
-        <option value="">Velg bortelag</option>
-        {filteredTeams.map((team) => (
-          <option key={team.id} value={team.id}>
-            {team.name}
-          </option>
-        ))}
-      </select>
-
-      <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-      <input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
-      <input
-        placeholder="Bane / sted"
-        value={venue}
-        onChange={(e) => setVenue(e.target.value)}
-      />
-
-      <button onClick={addMatch}>Legg til kamp</button>
-
-      <div>
-        <label>Reportere (kan holde live) :</label>
-        <div style={{display: "flex", gap: "8px"}}>
-        <input
-        placeholder="E-post til reporter"
-        value={reporterEmail}
-        onChange={(e) => setReporterEmail(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && addReporter()}
-        />
-        <button type="button" onClick={addReporter}>Legg til</button>
+    <div className="kampadmin-add-form">
+      <div className="kampadmin-form-row">
+        <div className="kampadmin-field">
+          <label>Divisjon</label>
+          <select value={selectedDivision} onChange={e => setSelectedDivision(e.target.value)}>
+            <option value="">Velg divisjon</option>
+            {(divisions || []).map(div => <option key={div} value={div}>{div}</option>)}
+          </select>
         </div>
-        {reporters.map(email => (
-          <div key={email} style={{display: "flex", gap: "8px", marginTop:"4px"}}>
-            <span>{email}</span>
-            <button type="button" onClick={() => removeReporter(email)}>X</button>
-            </div>
-        ))}
       </div>
-    </section>
+
+      <div className="kampadmin-form-row">
+        <div className="kampadmin-field">
+          <label>Hjemmelag</label>
+          <select value={selectedHomeTeam} onChange={e => setSelectedHomeTeam(e.target.value)} disabled={!selectedDivision}>
+            <option value="">Velg hjemmelag</option>
+            {filteredTeams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+          </select>
+        </div>
+        <div className="kampadmin-field">
+          <label>Bortelag</label>
+          <select value={selectedAwayTeam} onChange={e => setSelectedAwayTeam(e.target.value)} disabled={!selectedDivision}>
+            <option value="">Velg bortelag</option>
+            {filteredTeams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+          </select>
+        </div>
+      </div>
+
+      <div className="kampadmin-form-row">
+        <div className="kampadmin-field">
+          <label>Dato</label>
+          <input type="date" value={date} onChange={e => setDate(e.target.value)} />
+        </div>
+        <div className="kampadmin-field">
+          <label>Tid</label>
+          <input type="time" value={time} onChange={e => setTime(e.target.value)} />
+        </div>
+        <div className="kampadmin-field">
+          <label>Bane / sted</label>
+          <input placeholder="Valgfritt" value={venue} onChange={e => setVenue(e.target.value)} />
+        </div>
+      </div>
+
+      <div className="kampadmin-field">
+        <label>Reportere</label>
+        <div className="kampadmin-reporter-row">
+          <input
+            placeholder="E-post til reporter"
+            value={reporterEmail}
+            onChange={e => setReporterEmail(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && addReporter()}
+          />
+          <button type="button" className="btn-secondary btn-sm" onClick={addReporter}>Legg til</button>
+        </div>
+        {reporters.length > 0 && (
+          <div className="kampadmin-reporter-list">
+            {reporters.map(email => (
+              <span key={email} className="kampadmin-reporter-chip">
+                {email}
+                <button onClick={() => setReporters(reporters.filter(r => r !== email))}>×</button>
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {error && <p className="kampadmin-error">{error}</p>}
+      {success && <p className="kampadmin-success">Kamp lagt til!</p>}
+
+      <button className="btn-primary" onClick={addMatch}>Legg til kamp</button>
+    </div>
   );
 }

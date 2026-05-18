@@ -8,19 +8,17 @@ export default function BeforeMatchInfo({
   allMatches,
   homeSeason,
   awaySeason,
-  hideTitle = false 
+  hideTitle = false,
 }) {
   if (!match) return null;
 
   const matchDate = normalizeDate(match.date);
-
   const homeId = match.homeTeamId;
   const awayId = match.awayTeamId;
 
   const [homeName, setHomeName] = useState("Hjemmelag");
   const [awayName, setAwayName] = useState("Bortelag");
 
-  // ⭐ Hent lagnavn basert på ID
   useEffect(() => {
     async function loadNames() {
       if (homeId) {
@@ -32,11 +30,9 @@ export default function BeforeMatchInfo({
         setAwayName(away?.name || "Ukjent lag");
       }
     }
-
     loadNames();
   }, [homeId, awayId]);
 
-  // ⭐ Head-to-head (siste 3 oppgjør)
   const headToHead = allMatches
     .filter(
       (m) =>
@@ -50,97 +46,71 @@ export default function BeforeMatchInfo({
   return (
     <section className="before-match-info">
 
-      {/* ⭐ TIMELINE FOR BEGGE LAG – ALLTID VIST */}
-      <div className="info-block">
-        <h3 className="timeline-header">Sesongforløp</h3>
-
-        
-        <div className="timeline-row">
-          <span className="timeline-team">{homeName}</span>
-        <SeasonTimeline
-          matches={homeSeason}
-          teamId={homeId}
-          currentMatchId={match.id}
-        />
+      <div className="bmi-columns">
+        <div className="info-block">
+          <h3 className="timeline-header">Sesongforløp</h3>
+          <div className="timeline-row">
+            <span className="timeline-team">{homeName}</span>
+            <SeasonTimeline matches={homeSeason} teamId={homeId} currentMatchId={match.id} />
+          </div>
+          <div className="timeline-row">
+            <span className="timeline-team">{awayName}</span>
+            <SeasonTimeline matches={awaySeason} teamId={awayId} currentMatchId={match.id} />
+          </div>
         </div>
 
-        <div className="timeline-row">
-          <span className="timeline-team">{awayName}</span>
-        <SeasonTimeline
-          matches={awaySeason}
-          teamId={awayId}
-          currentMatchId={match.id}
-        />
-      </div>
-      </div>
-      
-    
-
-      {/* HEAD TO HEAD */}
-      <div className="info-block">
-        <h3 className="timeline-header">Siste møter</h3>
-
-        <ol className="h2h-list">
-          {headToHead.map((m) => {
-            const date = normalizeDate(m.date).toLocaleDateString("no-NO");
-
-            const hName = m.homeTeamId === homeId ? homeName : awayName;
-            const aName = m.awayTeamId === awayId ? awayName : homeName;
-
-            return (
-              <li key={m.id} className="h2h-card">
-                <div className="h2h-left">
-                  <span className="h2h-date">{date}</span>
-                  <span className="h2h-matchup">
-                    {hName} - {aName}
-                  </span>
-                </div>
-
-                <span className={`h2h-result ${
-                  m.homeScore === m.awayScore
-                  ? "draw"
+        <div className="info-block">
+          <h3 className="timeline-header">Siste møter</h3>
+          {headToHead.length === 0 ? (
+            <p className="h2h-empty">Ingen tidligere møter.</p>
+          ) : (
+            <ol className="h2h-list">
+              {headToHead.map((m) => {
+                const date = normalizeDate(m.date).toLocaleDateString("no-NO");
+                const hName = m.homeTeamId === homeId ? homeName : awayName;
+                const aName = m.awayTeamId === awayId ? awayName : homeName;
+                const resultClass =
+                  m.homeScore === m.awayScore ? "draw"
                   : m.homeScore > m.awayScore
                   ? (m.homeTeamId === homeId ? "win" : "loss")
-                  : (m.homeTeamId === homeId ? "loss" : "win")
-                }`}
-                >
-                  {m.homeScore}-{m.awayScore}</span>
-              </li>
-            );
-          })}
-        </ol>
+                  : (m.homeTeamId === homeId ? "loss" : "win");
+                return (
+                  <li key={m.id} className="h2h-card">
+                    <div className="h2h-left">
+                      <span className="h2h-date">{date}</span>
+                      <span className="h2h-matchup">{hName} – {aName}</span>
+                    </div>
+                    <span className={`h2h-result ${resultClass}`}>
+                      {m.homeScore}–{m.awayScore}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
+          )}
+        </div>
       </div>
 
-      {/* KAMPINFO */}
       {!hideTitle && (
-      <div className="info-block">
-        <h3 className="timeline-header">Kampinfo</h3>
-
-        <dl className="kampinfo-list">
-          <div className="kampinfo-row">
-            <dt className="kampinfo-label">Arena:</dt>
-            <dd className="kampinfo-value">{match.arena || "ukjent"}</dd>
-          </div>
-
-          <div className="kampinfo-row">
-            <dt className="kampinfo-label">Dato:</dt>
-            <dd className="kampinfo-value">
-              {matchDate.toLocaleDateString("no-NO")}
-            </dd>
-          </div>
-
-          <div className="kampinfo-row">
-            <dt className="kampinfo-label">Tid:</dt>
-            <dd className="kampinfo-value">
-              {match.time ||
-                matchDate.toLocaleTimeString("no-NO", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-            </dd>
-          </div>
-        </dl>
-      </div>
+        <div className="info-block">
+          <h3 className="timeline-header">Kampinfo</h3>
+          <dl className="kampinfo-list">
+            <div className="kampinfo-row">
+              <dt className="kampinfo-label">Arena:</dt>
+              <dd className="kampinfo-value">{match.arena || "ukjent"}</dd>
+            </div>
+            <div className="kampinfo-row">
+              <dt className="kampinfo-label">Dato:</dt>
+              <dd className="kampinfo-value">{matchDate.toLocaleDateString("no-NO")}</dd>
+            </div>
+            <div className="kampinfo-row">
+              <dt className="kampinfo-label">Tid:</dt>
+              <dd className="kampinfo-value">
+                {match.time || matchDate.toLocaleTimeString("no-NO", { hour: "2-digit", minute: "2-digit" })}
+              </dd>
+            </div>
+          </dl>
+        </div>
       )}
     </section>
   );

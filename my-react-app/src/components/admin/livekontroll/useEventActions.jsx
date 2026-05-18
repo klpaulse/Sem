@@ -114,8 +114,9 @@ export function useEventActions(match, liveMatch) {
       LEGG TIL HENDELSE
   ------------------------------ */
   async function addEvent(type, data, setText, resetData) {
-    const minute = getMinute();
+    const isPause = liveMatch?.status === "pause";
     const isPreMatch = liveMatch?.status === "not_started";
+    const minute = (isPause || isPreMatch) ? null : getMinute();
     let imageUrl = null;
 
     if (type === "image" && data.image) {

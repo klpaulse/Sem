@@ -57,17 +57,23 @@ export default function TeamPage() {
   const seasonMatches = useMemo(() =>
     matches.filter(m => m.season === season), [matches, season]);
 
+  const today = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
+
   const upcomingMatches = useMemo(() =>
     seasonMatches
-      .filter(m => m.status !== "finished")
+      .filter(m => m.status !== "finished" && m.date >= today)
       .sort((a, b) => a.date - b.date),
-    [seasonMatches]);
+    [seasonMatches, today]);
 
   const playedMatches = useMemo(() =>
     seasonMatches
-      .filter(m => m.status === "finished")
+      .filter(m => m.status === "finished" || m.date < today)
       .sort((a, b) => b.date - a.date),
-    [seasonMatches]);
+    [seasonMatches, today]);
 
   const stats = useMemo(() => {
     let wins = 0, draws = 0, losses = 0, gf = 0, ga = 0;
@@ -147,6 +153,7 @@ export default function TeamPage() {
                       match={m}
                       homeName={teamNames[m.homeTeamId] || "…"}
                       awayName={teamNames[m.awayTeamId] || "…"}
+                      showDate
                       onClick={() => navigate(`/match/${m.slug || m.id}`)}
                     />
                   </li>
@@ -165,6 +172,7 @@ export default function TeamPage() {
                       match={m}
                       homeName={teamNames[m.homeTeamId] || "…"}
                       awayName={teamNames[m.awayTeamId] || "…"}
+                      showDate
                       onClick={() => navigate(`/match/${m.slug || m.id}`)}
                     />
                   </li>
@@ -192,10 +200,9 @@ export default function TeamPage() {
           {players.length === 0
             ? <li className="squad-empty">Ingen spillere registrert</li>
             : players
-                .sort((a, b) => (a.number || 99) - (b.number || 99))
+                .sort((a, b) => a.name.localeCompare(b.name))
                 .map(p => (
                   <li key={p.id} className="squad-player">
-                    <span className="squad-number">{p.number || "—"}</span>
                     <span className="squad-name">{p.name}</span>
                   </li>
                 ))

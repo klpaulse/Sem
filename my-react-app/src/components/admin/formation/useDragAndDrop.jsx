@@ -105,7 +105,6 @@ export function useDragAndDrop({ players, setPlayers, allPlayers, activeSide, se
         {
           id: p.id,
           name: p.name,
-          number: p.number,
           img: p.img || "",
           x: bestPos.x,
           y: bestPos.y,

@@ -1,9 +1,190 @@
+/* ============================================
+   LIVE ADMIN – KAMPKORT
+   ============================================ */
+
+.admin-matches-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.admin-no-matches {
+  color: #666;
+  font-size: 0.9rem;
+  padding: 1rem 0;
+}
+
+.admin-match-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 12px 14px;
+  flex-wrap: wrap;
+}
+
+.admin-match-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.admin-match-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  word-break: break-word;
+}
+
+.admin-match-time {
+  font-size: 12px;
+  color: #888;
+}
+
+.admin-match-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.admin-btn-live {
+  background: #2ecc71;
+  border: none;
+  color: #000;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.admin-btn-live:hover { background: #27ae60; }
+
+.admin-btn-featured {
+  background: transparent;
+  border: 1px solid #555;
+  color: #aaa;
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.admin-btn-featured:hover { border-color: #f1c40f; color: #f1c40f; }
+
+.admin-btn-featured.is-featured {
+  border-color: #f1c40f;
+  color: #f1c40f;
+  background: rgba(241,196,15,0.08);
+}
+
+.admin-btn-reporters {
+  background: transparent;
+  border: 1px solid #444;
+  color: #ccc;
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.admin-btn-reporters:hover { background: rgba(255,255,255,0.06); }
+
+/* REPORTER-MODAL */
+
+.reporter-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.reporter-modal {
+  background: #1a1a1a;
+  padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  border: 1px solid #333;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.reporter-modal-title {
+  color: #fff;
+  font-size: 16px;
+  margin: 0;
+}
+
+.reporter-modal-sub {
+  color: #ffffff66;
+  font-size: 13px;
+  margin: 0;
+}
+
+.reporter-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.reporter-empty {
+  color: #ffffff44;
+  font-style: italic;
+  font-size: 13px;
+}
+
+.reporter-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid #2a2a2a;
+  color: #ffffffcc;
+  font-size: 14px;
+}
+
+.reporter-add-row {
+  display: flex;
+  gap: 8px;
+}
+
+.reporter-input {
+  flex: 1;
+  background: #111;
+  border: 1px solid #333;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.reporter-close {
+  width: 100%;
+}
+
 /* === ADMIN LAYOUT === */
 
 .admin-layout {
   display: grid;
-  grid-template-columns: 220px 1fr;
-  height: 100vh;
+  grid-template-columns: 180px 1fr;
+  min-height: 100vh;
   background: #0d0d0d;
   color: white;
 }
@@ -11,26 +192,149 @@
 .admin-sidebar {
   background: #111;
   border-right: 1px solid #222;
-  padding: 20px;
+  padding: 16px 12px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .admin-sidebar button {
-  background: #151414;
-  border: 1px solid #333;
-  padding: 10px 14px;
-  border-radius: 6px;
-  color: white;
+  background: transparent;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #888;
   text-align: left;
-  font-size: 15px;
+  font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .admin-sidebar button:hover {
-  background: #222;
+  background: rgba(255,255,255,0.06);
+  color: #ccc;
 }
+
+.admin-sidebar button.active {
+  background: rgba(255, 90, 90, 0.12);
+  color: #fff;
+  font-weight: 600;
+}
+
+.admin-main {
+  overflow-y: auto;
+  padding: 20px 16px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 700px) {
+  .admin-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .admin-sidebar {
+    flex-direction: row;
+    height: auto;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    border-right: none;
+    border-bottom: 1px solid #1e1e1e;
+    padding: 10px 12px;
+    gap: 4px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+
+  .admin-sidebar::-webkit-scrollbar { display: none; }
+
+  .admin-sidebar button {
+    white-space: nowrap;
+    padding: 7px 16px;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    border-radius: 20px;
+    text-align: center;
+  }
+
+  .admin-sidebar button.active {
+    background: rgba(255, 90, 90, 0.15);
+    color: #fff;
+  }
+
+  .admin-main {
+    padding: 14px 12px;
+  }
+
+  /* LiveAdmin match cards */
+  .admin-match-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .admin-match-actions {
+    width: 100%;
+  }
+
+  .admin-btn-live,
+  .admin-btn-featured,
+  .admin-btn-reporters {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    padding: 8px 6px;
+  }
+}
+
+/* ============================================
+   KNAPPER – hierarki
+   ============================================ */
+
+.btn-primary {
+  background: #2ecc71;
+  border: none;
+  color: #000;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-primary:hover { background: #27ae60; }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid #444;
+  color: #ccc;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-secondary:hover { background: rgba(255,255,255,0.06); }
+
+.btn-danger {
+  background: transparent;
+  border: 1px solid #c0392b;
+  color: #e74c3c;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-danger:hover { background: rgba(231,76,60,0.1); }
 
 .admin-main {
   padding: 24px;
@@ -42,52 +346,192 @@
 .live-controls {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  margin-top: 10px;
+  gap: 16px;
 }
 
-.match-status-bar {
+/* --- HEADER --- */
+
+.live-header-bar {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
 }
 
-.match-status-bar button {
-  background: #1a1a1a;
-  border: 1px solid #333;
-  padding: 6px 12px;
-  border-radius: 6px;
-  color: white;
+.live-back-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.06);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  transition: background 0.2s;
+}
+
+.live-back-btn:hover { background: rgba(255,255,255,0.12); }
+
+.live-back-btn::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: rotate(45deg) translateX(2px);
+  display: block;
+}
+
+.live-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.live-header-teams {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.live-status-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+/* --- TABS --- */
+
+.live-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 4px;
+}
+
+.live-tabs button {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #888;
+  padding: 8px 16px;
   font-size: 14px;
   cursor: pointer;
+  margin-bottom: -1px;
+  transition: color 0.15s;
 }
 
-.match-status-bar button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+.live-tabs button:hover { color: #ccc; }
+
+.live-tabs button.active {
+  color: #fff;
+  border-bottom-color: #fff;
+  font-weight: 600;
 }
 
-.event-selector {
+/* --- HENDELSESKNAPPER --- */
+
+.event-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
-.event-selector button {
-  background: #1a1a1a;
-  border: 1px solid #333;
-  padding: 8px 14px;
-  border-radius: 6px;
-  font-size: 15px;
-  color: white;
+.event-buttons button {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #ccc;
   display: flex;
   align-items: center;
   gap: 6px;
   cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
-.event-selector button:hover {
-  background: #222;
+.event-buttons button:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
 }
+
+.event-buttons button.active {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.4);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* --- KAMPKONTROLLER --- */
+
+.match-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 0;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+
+.match-controls-main {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mc-btn {
+  padding: 9px 16px;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.mc-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.mc-btn-start {
+  background: #2ecc71;
+  color: #000;
+}
+.mc-btn-start:not(:disabled):hover { background: #27ae60; }
+
+.mc-btn-secondary {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+}
+.mc-btn-secondary:not(:disabled):hover { background: rgba(255,255,255,0.14); }
+
+.mc-btn-end {
+  background: rgba(231,76,60,0.12);
+  border: 1px solid rgba(231,76,60,0.4);
+  color: #e74c3c;
+}
+.mc-btn-end:not(:disabled):hover { background: rgba(231,76,60,0.2); }
+
+.mc-btn-undo {
+  background: transparent;
+  border: 1px solid #333;
+  color: #888;
+  font-size: 13px;
+  align-self: flex-start;
+}
+.mc-btn-undo:hover { color: #ccc; border-color: #555; }
+
+/* --- LEGACY (ubrukt men beholdt for ikke å brekke noe) --- */
+.match-status-bar { display: flex; gap: 8px; }
+.event-selector { display: flex; flex-wrap: wrap; gap: 8px; }
 
 .event-input-area {
   background: var(--card-bg);
@@ -428,6 +872,53 @@
   color: #fff;
 }
 
+/* ============================================
+   FORMATION PREVIEW
+   ============================================ */
+
+.formation-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.formation-preview__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.formation-preview__toast {
+  background: rgba(46, 204, 113, 0.15);
+  border: 1px solid rgba(46, 204, 113, 0.4);
+  color: #2ecc71;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.formation-preview__actions {
+  margin-top: 8px;
+}
+
+.formation-preview__edit-button {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #ccc;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.formation-preview__edit-button:hover {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+}
+
 
 
 .formation-admin__title {
@@ -568,190 +1059,1157 @@
    ============================================ */
 
 .squad-selector {
-  padding: 20px;
-  max-width: 700px;
-  margin: 0 auto;
+  max-width: 600px;
 }
 
 .squad-selector__title {
-  font-size: 1.6rem;
-  margin-bottom: 15px;
-  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 16px;
 }
 
-/* --------------------------------------------
-   SIDE-TOGGLE (Hjemme / Borte)
-   -------------------------------------------- */
+/* SIDE-TOGGLE */
 .squad-selector__side-toggle {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
 .squad-selector__side-button {
   flex: 1;
-  padding: 12px;
-  border: 1px solid #ccc;
-  background: #f7f7f7;
+  padding: 10px 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
   border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
+  color: #aaa;
+  font-size: 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: 0.15s ease;
 }
 
 .squad-selector__side-button--active {
-  background: #007bff;
-  color: white;
-  border-color: #007bff;
+  background: rgba(43,124,255,0.15);
+  border-color: rgba(43,124,255,0.5);
+  color: #fff;
 }
 
 .squad-selector__count {
-  font-weight: bold;
+  font-weight: 700;
+  font-size: 13px;
+  color: inherit;
 }
 
-/* --------------------------------------------
-   INFO TEXT
-   -------------------------------------------- */
+/* INFO */
 .squad-selector__info {
-  margin-bottom: 15px;
-  font-size: 0.95rem;
-  text-align: center;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  color: #888;
 }
 
-/* --------------------------------------------
-   PLAYER LIST
-   -------------------------------------------- */
+/* SPILLERLISTE */
 .squad-selector__list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 4px;
+  max-height: 420px;
+  overflow-y: auto;
 }
 
 .squad-selector__empty {
-  text-align: center;
-  color: #777;
+  color: #666;
+  font-size: 0.9rem;
+  padding: 1rem 0;
 }
 
-/* --------------------------------------------
-   PLAYER ITEM
-   -------------------------------------------- */
+/* SPILLERKORT */
 .squad-selector__player {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 12px;
-  border: 1px solid #ddd;
+  padding: 9px 12px;
+  border: 1px solid rgba(255,255,255,0.07);
   border-radius: 8px;
-  background: white;
+  background: rgba(255,255,255,0.03);
   cursor: pointer;
-  transition: 0.15s ease;
+  transition: background 0.12s, border-color 0.12s;
 }
 
 .squad-selector__player:hover {
-  background: #f2f2f2;
+  background: rgba(255,255,255,0.07);
 }
 
 .squad-selector__player--selected {
-  border-color: #007bff;
-  background: #e8f1ff;
+  border-color: rgba(43,124,255,0.45);
+  background: rgba(43,124,255,0.1);
 }
 
 .squad-selector__player--disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
-/* --------------------------------------------
-   PLAYER IMAGE
-   -------------------------------------------- */
+/* SPILLERBILDE */
 .squad-selector__player-img img {
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   object-fit: cover;
 }
 
 .squad-selector__player-img-placeholder {
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: #ddd;
+  background: rgba(255,255,255,0.1);
   display: flex;
   justify-content: center;
   align-items: center;
-  font-weight: bold;
+  font-weight: 700;
+  font-size: 14px;
+  color: #aaa;
 }
 
-/* --------------------------------------------
-   PLAYER INFO
-   -------------------------------------------- */
+/* SPILLERINFO */
 .squad-selector__player-info {
   flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 1px;
 }
 
 .squad-selector__player-number {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: #666;
 }
 
 .squad-selector__player-name {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 500;
-  color: #000000; 
+  color: #fff;
 }
 
-/* --------------------------------------------
-   CHECKBOX
-   -------------------------------------------- */
+/* AVKRYSSING */
 .squad-selector__checkbox {
-  font-size: 1.3rem;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: 0.12s ease;
 }
 
-/* --------------------------------------------
-   CONFIRM BUTTON
-   -------------------------------------------- */
+.squad-selector__player--selected .squad-selector__checkbox {
+  background: #2b7cff;
+  border-color: #2b7cff;
+}
+
+.squad-selector__checkbox-tick {
+  display: none;
+  width: 5px;
+  height: 9px;
+  border-right: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+
+.squad-selector__player--selected .squad-selector__checkbox-tick {
+  display: block;
+}
+
+/* BEKREFT */
 .squad-selector__confirm-button {
-  margin-top: 20px;
+  margin-top: 16px;
   width: 100%;
-  padding: 14px;
-  background: #28a745;
-  color: white;
+  padding: 12px;
+  background: #2ecc71;
+  color: #000;
   border: none;
   border-radius: 8px;
-  font-size: 1.1rem;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
-  transition: 0.15s ease;
+  transition: background 0.15s;
 }
 
-.squad-selector__confirm-button:hover {
-  background: #218838;
+.squad-selector__confirm-button:hover { background: #27ae60; }
+
+/* ============================================
+   KNAPP-STØRRELSE MODIFIKATOR
+   ============================================ */
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 12px;
+  border-radius: 5px;
+}
+
+/* ============================================
+   LAG-ADMINISTRASJON
+   ============================================ */
+.lagadmin {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Division tabs */
+.lagadmin-division-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.lagadmin-division-tab {
+  padding: 5px 14px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  background: transparent;
+  color: #aaa;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.lagadmin-division-tab:hover { background: rgba(255,255,255,0.07); color: #fff; }
+.lagadmin-division-tab.active {
+  background: rgba(255,90,90,0.18);
+  color: #fff;
+  border-color: rgba(255,90,90,0.4);
+}
+
+/* Team list */
+.lagadmin-team-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.lagadmin-empty {
+  color: #666;
+  font-size: 0.9rem;
+  padding: 10px 0;
+}
+
+/* Individual team card */
+.lagadmin-team {
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+  position: relative;
+}
+
+.lagadmin-team.expanded { border-color: rgba(255,255,255,0.15); }
+
+.lagadmin-team-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  cursor: pointer;
+  background: rgba(255,255,255,0.03);
+  transition: background 0.15s;
+  gap: 10px;
+  min-height: 48px;
+}
+
+.lagadmin-team-header:hover { background: rgba(255,255,255,0.06); }
+
+.lagadmin-team-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  flex: 1;
+}
+
+.lagadmin-team-name-input {
+  flex: 1;
+  background: #1a1a1a;
+  border: 1px solid #555;
+  color: #fff;
+  padding: 5px 8px;
+  border-radius: 5px;
+  font-size: 0.9rem;
+}
+
+.lagadmin-team-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.lagadmin-player-count {
+  font-size: 0.75rem;
+  color: #777;
+  white-space: nowrap;
+}
+
+.lagadmin-chevron {
+  font-size: 0.7rem;
+  color: #666;
+  margin-left: 2px;
+}
+
+/* Player list inside expanded team */
+.lagadmin-players {
+  padding: 10px 14px 14px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lagadmin-empty-players {
+  font-size: 0.82rem;
+  color: #666;
+  margin: 4px 0 8px;
+}
+
+/* Individual player row */
+.lagadmin-player {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.lagadmin-player:last-of-type { border-bottom: none; }
+
+.lagadmin-player-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.lagadmin-player-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.lagadmin-player-placeholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #aaa;
+  flex-shrink: 0;
+}
+
+.lagadmin-player-number {
+  font-size: 0.8rem;
+  color: #888;
+  font-weight: 600;
+  min-width: 28px;
+}
+
+.lagadmin-player-name {
+  font-size: 0.9rem;
+  color: #ddd;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lagadmin-player-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Player edit / add form */
+.lagadmin-player-edit-form,
+.lagadmin-add-player-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px;
+  width: 100%;
+}
+
+.lagadmin-player-age {
+  font-size: 0.78rem;
+  color: #777;
+}
+
+.lagadmin-file-label {
+  font-size: 0.8rem;
+  color: #888;
+  cursor: pointer;
+}
+
+.lagadmin-file-label input[type="file"] {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: #aaa;
+}
+
+.lagadmin-player-form-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.lagadmin-add-player-btn {
+  margin-top: 6px;
+  padding: 7px 12px;
+  background: transparent;
+  border: 1px dashed rgba(255,255,255,0.15);
+  color: #888;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  width: 100%;
+  text-align: left;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.lagadmin-add-player-btn:hover { border-color: rgba(255,255,255,0.3); color: #ccc; }
+
+/* Bottom section: add team + bulk */
+.lagadmin-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lagadmin-feedback {
+  font-size: 0.85rem;
+  color: #2ecc71;
+  margin: 0;
+}
+
+.lagadmin-add-btn {
+  padding: 9px 16px;
+  background: rgba(46,204,113,0.1);
+  border: 1px solid rgba(46,204,113,0.3);
+  color: #2ecc71;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: left;
+  transition: background 0.15s;
+  align-self: flex-start;
+}
+
+.lagadmin-add-btn:hover { background: rgba(46,204,113,0.18); }
+
+.lagadmin-add-team-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+}
+
+.lagadmin-add-team-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Bulk import */
+.lagadmin-bulk-section {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 12px;
+}
+
+.lagadmin-bulk-toggle {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.lagadmin-bulk-toggle:hover { color: #aaa; }
+
+.lagadmin-move-select {
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: #eee;
+  padding: 3px 6px;
+  font-size: 0.8rem;
+}
+
+.lagadmin-bulk-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.lagadmin-bulk-form textarea {
+  background: #1a1a1a;
+  border: 1px solid #444;
+  color: #eee;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  resize: vertical;
+}
+
+/* Confirm delete overlay */
+.lagadmin-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.lagadmin-confirm {
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 24px;
+  max-width: 320px;
+  width: 90%;
+  text-align: center;
+}
+
+.lagadmin-confirm p {
+  color: #eee;
+  margin: 0 0 6px;
+  font-size: 1rem;
+}
+
+.lagadmin-confirm-warning {
+  color: #888 !important;
+  font-size: 0.82rem !important;
+  margin-bottom: 18px !important;
+}
+
+.lagadmin-confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+/* ================================
+   KAMPADMINISTRASJON
+================================ */
+.kampadmin {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kampadmin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.kampadmin-empty {
+  color: #555;
+  font-size: 0.85rem;
+  padding: 12px 0;
+  font-style: italic;
+}
+
+.kampadmin-item {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.kampadmin-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.kampadmin-item > div:first-child {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.kampadmin-item-date {
+  font-size: 0.72rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.kampadmin-item-matchup {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #ddd;
+}
+
+.kampadmin-item-arena {
+  font-size: 0.72rem;
+  color: #555;
+}
+
+.kampadmin-item-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Edit form inline */
+.kampadmin-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.kampadmin-edit-row,
+.kampadmin-form-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.kampadmin-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 120px;
+}
+
+.kampadmin-field label {
+  font-size: 0.72rem;
+  color: #777;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.kampadmin-field input,
+.kampadmin-field select {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #eee;
+  padding: 6px 8px;
+  font-size: 0.85rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.kampadmin-field input:focus,
+.kampadmin-field select:focus {
+  outline: none;
+  border-color: rgba(255,90,90,0.4);
+}
+
+.kampadmin-edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Add form */
+.kampadmin-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.07);
+  margin-top: 6px;
+}
+
+.kampadmin-reporter-row {
+  display: flex;
+  gap: 8px;
+}
+
+.kampadmin-reporter-row input {
+  flex: 1;
+}
+
+.kampadmin-reporter-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.kampadmin-reporter-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-size: 0.78rem;
+  color: #ccc;
+}
+
+.kampadmin-reporter-chip button {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0;
+  line-height: 1;
+}
+
+.kampadmin-reporter-chip button:hover { color: #fff; }
+
+.kampadmin-error {
+  color: #e74c3c;
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+.kampadmin-success {
+  color: #2ecc71;
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+/* Toggle buttons */
+.kampadmin-section {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 10px;
+  margin-top: 4px;
+}
+
+.kampadmin-toggle {
+  background: none;
+  border: none;
+  color: #777;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.kampadmin-toggle:hover { color: #ccc; }
+
+/* ================================
+   RESULTATADMIN
+================================ */
+.resultatadmin {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.resultat-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 90, 90, 0.3);
+  color: #ff8080;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 1px 6px;
+  margin-left: 6px;
+}
+
+.resultat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.resultat-empty {
+  color: #555;
+  font-size: 0.85rem;
+  padding: 12px 0;
+  font-style: italic;
+}
+
+.resultat-item {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.resultat-item.editing {
+  border-color: rgba(255,90,90,0.2);
+}
+
+.resultat-item-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  gap: 10px;
+}
+
+.resultat-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.resultat-date {
+  font-size: 0.72rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.resultat-matchup {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #ddd;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.resultat-arena {
+  font-size: 0.7rem;
+  color: #444;
+}
+
+.resultat-item-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.resultat-score {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ccc;
+  min-width: 40px;
+  text-align: center;
+}
+
+.resultat-form-wrapper {
+  border-top: 1px solid rgba(255,255,255,0.07);
+  padding: 14px 12px;
+}
+
+/* ================================
+   RESULTS FORM
+================================ */
+.results-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.results-scoreboard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.results-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.results-team-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #aaa;
+  text-align: center;
+}
+
+.results-score-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.score-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.score-btn:hover { background: rgba(255,255,255,0.12); }
+
+.results-score {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #fff;
+  min-width: 32px;
+  text-align: center;
+}
+
+.results-vs {
+  font-size: 1.2rem;
+  color: #444;
+  font-weight: 300;
+}
+
+.results-scorers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.results-scorers-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.results-scorers-col h3 {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin: 0 0 2px;
+}
+
+.scorer-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.scorer-row select {
+  flex: 1;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #eee;
+  padding: 5px 8px;
+  font-size: 0.82rem;
+}
+
+.remove-scorer {
+  background: none;
+  border: none;
+  color: #555;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 4px;
+  transition: color 0.15s ease;
+}
+
+.remove-scorer:hover { color: #e74c3c; }
+
+.add-scorer-btn {
+  background: none;
+  border: 1px dashed rgba(255,255,255,0.12);
+  border-radius: 6px;
+  color: #555;
+  font-size: 0.78rem;
+  padding: 5px 8px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+  text-align: left;
+}
+
+.add-scorer-btn:hover { border-color: rgba(255,255,255,0.25); color: #aaa; }
+
+/* ================================
+   MOBIL – ADMIN
+================================ */
+@media (max-width: 700px) {
+
+  /* Kampadmin */
+  .kampadmin-edit-row,
+  .kampadmin-form-row {
+    flex-direction: column;
+  }
+
+  .kampadmin-field {
+    min-width: 0;
+  }
+
+  .kampadmin-item {
+    padding: 0;
+  }
+
+  .kampadmin-item > div:first-child {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding: 0;
+  }
+
+  .kampadmin-item-info {
+    width: 100%;
+    padding: 10px 12px 8px;
+  }
+
+  .kampadmin-item-actions {
+    width: 100%;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 0;
+    gap: 0;
+  }
+
+  .kampadmin-item-actions .btn-sm {
+    flex: 1;
+    border-radius: 0;
+    padding: 10px 8px;
+    font-size: 0.82rem;
+    border-right: 1px solid rgba(255,255,255,0.06);
+    text-align: center;
+  }
+
+  .kampadmin-item-actions .btn-sm:last-child {
+    border-right: none;
+  }
+
+  .kampadmin-edit-row,
+  .kampadmin-form-row {
+    flex-direction: column;
+  }
+
+  .kampadmin-field {
+    min-width: 0;
+  }
+
+  /* Lagadmin */
+  .lagadmin-team-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+    padding-right: 36px;
+  }
+
+  .lagadmin-team-name {
+    font-size: 0.92rem;
+    flex: unset;
+  }
+
+  .lagadmin-chevron {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+  }
+
+  .lagadmin-team-meta {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 6px;
+  }
+
+  .lagadmin-bottom {
+    flex-direction: column;
+  }
+
+  /* Resultatadmin */
+  .resultat-item-main {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .resultat-item-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .results-scoreboard {
+    gap: 8px;
+  }
+
+  .results-score {
+    font-size: 1.4rem;
+  }
+
+  .results-scorers {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  /* Division tabs */
+  .division-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+  }
+
+  .division-tabs::-webkit-scrollbar { display: none; }
+
+  .lagadmin-division-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+  }
+
+  .lagadmin-division-tabs::-webkit-scrollbar { display: none; }
+}
+
+.results-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .squad-selector__confirm-button:disabled {
-  background: #aaa;
+  background: rgba(255,255,255,0.1);
+  color: #666;
   cursor: not-allowed;
 }
 
-/* --------------------------------------------
-   WARNING
-   -------------------------------------------- */
+/* ADVARSEL */
 .squad-selector__warning {
-  margin-top: 10px;
-  text-align: center;
-  color: #d9534f;
-  font-weight: 500;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #e74c3c;
 }
 
-/* --------------------------------------------
-   LOADING
-   -------------------------------------------- */
+/* LASTER */
 .squad-selector__loading {
-  text-align: center;
   padding: 40px;
-  font-size: 1.2rem;
+  font-size: 1rem;
+  color: #888;
 }
 

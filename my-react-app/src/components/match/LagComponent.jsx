@@ -42,7 +42,6 @@ export default function LagComponent({ match }) {
           .map((key) => ({
             id: key,
             name: pos[key].name,
-            number: pos[key].number,
             x: pos[key].x,
             y: pos[key].y,
             img: pos[key].img || "",
@@ -65,7 +64,6 @@ export default function LagComponent({ match }) {
           .map((key) => ({
             id: key,
             name: pos[key].name,
-            number: pos[key].number,
             x: pos[key].x,
             y: pos[key].y,
             img: pos[key].img || "",
@@ -87,65 +85,66 @@ export default function LagComponent({ match }) {
 
   return (
     <div className="lagoppstilling-container">
-      <FormationField interactive={false}>
-        {homePlayers.map((p) => (
-          <div
-            key={"home-" + p.id}
-            style={{
-              position: "absolute",
-              left: `${p.x}%`,
-              top: `${p.y}%`,
-              transform: "translate(-50%, -50%)",
-            }}
-          >
-            <PlayerChip name={p.name} number={p.number} img={p.img} team="home" />
-          </div>
-        ))}
-
-        {awayPlayers.map((p) => (
-          <div
-            key={"away-" + p.id}
-            style={{
-              position: "absolute",
-              left: `${p.x}%`,
-              top: `${p.y}%`,
-              transform: "translate(-50%, -50%)",
-            }}
-          >
-            <PlayerChip name={p.name} number={p.number} img={p.img} team="away" />
-          </div>
-        ))}
-      </FormationField>
-
-      <div className="bench-section">
-        <div className="bench-team">
-          <h4 className="bench-team-title">Benk – {homeName}</h4>
-          {homeBench.length === 0
-            ? <p className="bench-empty">Ingen registrert</p>
-            : <ul className="bench-list">
-                {homeBench.map((p) => (
-                  <li key={"hbench-" + p.id} className="bench-player">
-                    <span className="bench-player-number">#{p.number}</span>
-                    <span className="bench-player-name">{p.name}</span>
-                  </li>
-                ))}
-              </ul>
-          }
+      <div className="lag-layout">
+        <div className="lag-field">
+          <FormationField interactive={false}>
+            {homePlayers.map((p) => (
+              <div
+                key={"home-" + p.id}
+                style={{
+                  position: "absolute",
+                  left: `${p.x}%`,
+                  top: `${p.y}%`,
+                  transform: "translate(-50%, -50%)",
+                }}
+              >
+                <PlayerChip name={p.name} img={p.img} team="home" />
+              </div>
+            ))}
+            {awayPlayers.map((p) => (
+              <div
+                key={"away-" + p.id}
+                style={{
+                  position: "absolute",
+                  left: `${p.x}%`,
+                  top: `${p.y}%`,
+                  transform: "translate(-50%, -50%)",
+                }}
+              >
+                <PlayerChip name={p.name} img={p.img} team="away" />
+              </div>
+            ))}
+          </FormationField>
         </div>
 
-        <div className="bench-team">
-          <h4 className="bench-team-title">Benk – {awayName}</h4>
-          {awayBench.length === 0
-            ? <p className="bench-empty">Ingen registrert</p>
-            : <ul className="bench-list">
-                {awayBench.map((p) => (
-                  <li key={"abench-" + p.id} className="bench-player">
-                    <span className="bench-player-number">#{p.number}</span>
-                    <span className="bench-player-name">{p.name}</span>
-                  </li>
-                ))}
-              </ul>
-          }
+        <div className="lag-bench">
+          <div className="bench-team">
+            <h4 className="bench-team-title">Benk – {homeName}</h4>
+            {homeBench.length === 0
+              ? <p className="bench-empty">Ingen registrert</p>
+              : <ul className="bench-list">
+                  {homeBench.map((p) => (
+                    <li key={"hbench-" + p.id} className="bench-player">
+                      <span className="bench-player-name">{p.name}</span>
+                    </li>
+                  ))}
+                </ul>
+            }
+          </div>
+
+          <div className="bench-team">
+            <h4 className="bench-team-title">Benk – {awayName}</h4>
+            {awayBench.length === 0
+              ? <p className="bench-empty">Ingen registrert</p>
+              : <ul className="bench-list">
+                  {awayBench.map((p) => (
+                    <li key={"abench-" + p.id} className="bench-player">
+                      <span className="bench-player-name">{p.name}</span>
+                    </li>
+                  ))}
+                </ul>
+            }
+          </div>
         </div>
       </div>
     </div>

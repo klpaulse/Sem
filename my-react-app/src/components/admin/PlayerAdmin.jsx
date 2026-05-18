@@ -187,16 +187,8 @@ export default function PlayerAdmin() {
                 {p.name}{" "}
                 {p.birthdate && `(${calculateAge(p.birthdate)} år)`}
 
-                <button onClick={() => startEdit(p)} style={{ marginLeft: "10px" }}>
-                  Endre
-                </button>
-
-                <button
-                  onClick={() => deletePlayer(p.id)}
-                  style={{ marginLeft: "6px", color: "red" }}
-                >
-                  Slett
-                </button>
+                <button className="btn-secondary" style={{ marginLeft: "10px" }} onClick={() => startEdit(p)}>Endre</button>
+                <button className="btn-danger" style={{ marginLeft: "6px" }} onClick={() => deletePlayer(p.id)}>Slett</button>
               </li>
             ))}
           </ul>
@@ -225,8 +217,8 @@ export default function PlayerAdmin() {
                 onChange={(e) => setEditFile(e.target.files[0])}
               />
 
-              <button onClick={saveEdit}>Lagre</button>
-              <button onClick={() => setEditingPlayer(null)}>Avbryt</button>
+              <button className="btn-primary" onClick={saveEdit}>Lagre</button>
+              <button className="btn-secondary" onClick={() => setEditingPlayer(null)}>Avbryt</button>
             </div>
           )}
 
@@ -252,7 +244,7 @@ export default function PlayerAdmin() {
             onChange={(e) => setPlayerFile(e.target.files[0])}
           />
 
-          <button onClick={addPlayer}>Legg til spiller</button>
+          <button className="btn-primary" onClick={addPlayer}>Legg til spiller</button>
         </>
       )}
     </section>

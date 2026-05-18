@@ -20,7 +20,6 @@ export function useFormationSync(match, activeSide) {
         Object.keys(pos).map((key) => ({
           id: key,
           name: pos[key].name,
-          number: pos[key].number,
           x: pos[key].x,
           y: pos[key].y,
           img: pos[key].img || "",
@@ -43,7 +42,6 @@ export function useFormationSync(match, activeSide) {
         Object.keys(pos).map((key) => ({
           id: key,
           name: pos[key].name,
-          number: pos[key].number,
           x: pos[key].x,
           y: pos[key].y,
           img: pos[key].img || "",
@@ -73,7 +71,6 @@ export function useFormationSync(match, activeSide) {
         Object.keys(pos).map((key) => ({
           id: pos[key].playerId,
           name: pos[key].name,
-          number: pos[key].number,
           x: pos[key].x,
           y: pos[key].y,
           img: pos[key].img || "",

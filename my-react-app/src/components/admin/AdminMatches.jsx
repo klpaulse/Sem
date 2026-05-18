@@ -125,112 +125,85 @@ export default function AdminMatches({ selectedDate, onSelectMatch }) {
   });
 
   return (
-    <section className="admin-page">
-      <h1>Kamper denne dagen</h1>
+    <section className="admin-matches-section">
+      {matchesForDay.length === 0 && (
+        <p className="admin-no-matches">Ingen kamper denne dagen.</p>
+      )}
 
-      {matchesForDay.length === 0 && <p>Ingen kamper denne dagen.</p>}
+      {matchesForDay.map((m) => {
+        const homeName = teams[m.homeTeamId]?.name || "?";
+        const awayName = teams[m.awayTeamId]?.name || "?";
+        const reporterCount = (m.reporters || []).length;
 
-      {matchesForDay.map((m) => (
-        <div
-          key={m.id}
-          className="admin-match-row"
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center"
-          }}
-        >
-          <span>
-            {teams[m.homeTeamId]?.name || "?"} – {teams[m.awayTeamId]?.name || "?"}
-          </span>
+        return (
+          <div key={m.id} className="admin-match-card">
+            <div className="admin-match-info">
+              <span className="admin-match-title">{homeName} – {awayName}</span>
+              {m.time && <span className="admin-match-time">{m.time}</span>}
+            </div>
 
-          <div style={{ display: "flex", gap: "8px" }}>
-            <button onClick={() => onSelectMatch(m)}>🎙 Start live</button>
-            <button onClick={() => setReporterMatch(m)}>👤 Reportere</button>
-            <button onClick={() => setFeatured(m.id)}>⭐ Dagens livekamp</button>
-            <button onClick={() => removeFeatured(m.id)}>❌ Fjern dagens kamp</button>
+            <div className="admin-match-actions">
+              <button
+                className="admin-btn-live"
+                onClick={() => onSelectMatch(m)}
+              >
+                Start live
+              </button>
 
+              <button
+                className={`admin-btn-featured ${m.featuredLive ? "is-featured" : ""}`}
+                onClick={() => m.featuredLive ? removeFeatured(m.id) : setFeatured(m.id)}
+                title={m.featuredLive ? "Fjern som dagens livekamp" : "Sett som dagens livekamp"}
+              >
+                {m.featuredLive ? "★ Fremhevet" : "☆ Fremhev"}
+              </button>
+
+              <button
+                className="admin-btn-reporters"
+                onClick={() => setReporterMatch(m)}
+              >
+                Reportere{reporterCount > 0 ? ` (${reporterCount})` : ""}
+              </button>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {/* REPORTER-MODAL */}
       {reporterMatch && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.7)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 100
-          }}
-        >
-          <div
-            style={{
-              background: "#1a1a1a",
-              padding: "24px",
-              borderRadius: "12px",
-              width: "90%",
-              maxWidth: "400px",
-              border: "1px solid #333"
-            }}
-          >
-            <h3 style={{ color: "#fff", marginBottom: "4px" }}>
-              {teams[reporterMatch.homeTeamId]?.name} –{" "}
-              {teams[reporterMatch.awayTeamId]?.name}
+        <div className="reporter-modal-overlay">
+          <div className="reporter-modal">
+            <h3 className="reporter-modal-title">
+              {teams[reporterMatch.homeTeamId]?.name} – {teams[reporterMatch.awayTeamId]?.name}
             </h3>
+            <p className="reporter-modal-sub">Administrer reportere</p>
 
-            <p
-              style={{
-                color: "#ffffff66",
-                fontSize: "13px",
-                marginBottom: "16px"
-              }}
-            >
-              Administrer reportere
-            </p>
+            <ul className="reporter-list">
+              {(reporterMatch.reporters || []).length === 0 && (
+                <li className="reporter-empty">Ingen reportere lagt til</li>
+              )}
+              {(reporterMatch.reporters || []).map((email) => (
+                <li key={email} className="reporter-row">
+                  <span>{email}</span>
+                  <button className="btn-danger" onClick={() => removeReporter(email)}>Fjern</button>
+                </li>
+              ))}
+            </ul>
 
-            {(reporterMatch.reporters || []).length === 0 && (
-              <p style={{ color: "#ffffff44", fontStyle: "italic" }}>
-                Ingen reportere lagt til
-              </p>
-            )}
-
-            {(reporterMatch.reporters || []).map((email) => (
-              <div
-                key={email}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "6px 0",
-                  borderBottom: "1px solid #333"
-                }}
-              >
-                <span style={{ color: "#ffffffcc" }}>{email}</span>
-                <button onClick={() => removeReporter(email)}>Fjern</button>
-              </div>
-            ))}
-
-            <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
+            <div className="reporter-add-row">
               <input
+                className="reporter-input"
                 placeholder="E-post til reporter"
                 value={reporterEmail}
                 onChange={(e) => setReporterEmail(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addReporter()}
-                style={{ flex: 1 }}
               />
-              <button onClick={addReporter}>Legg til</button>
+              <button className="btn-primary" onClick={addReporter}>Legg til</button>
             </div>
 
             <button
-              onClick={() => {
-                setReporterMatch(null);
-                setReporterEmail("");
-              }}
-              style={{ width: "100%", marginTop: "12px" }}
+              className="btn-secondary reporter-close"
+              onClick={() => { setReporterMatch(null); setReporterEmail(""); }}
             >
               Lukk
             </button>

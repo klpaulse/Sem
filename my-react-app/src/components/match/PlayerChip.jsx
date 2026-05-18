@@ -1,5 +1,6 @@
-export default function PlayerChip({ name, number, img, team }) {
+export default function PlayerChip({ name, img, team }) {
   const lastName = name ? name.split(" ").slice(-1)[0] : "";
+  const initial = name ? name.charAt(0) : "?";
 
   return (
     <div className="player-chip">
@@ -7,7 +8,7 @@ export default function PlayerChip({ name, number, img, team }) {
         {img ? (
           <img src={img} alt={name} className="player-chip__img" />
         ) : (
-          <span className="player-chip__number">{number}</span>
+          <span className="player-chip__number">{initial}</span>
         )}
       </div>
 
