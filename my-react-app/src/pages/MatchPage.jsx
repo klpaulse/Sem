@@ -194,12 +194,16 @@ useEffect(() => {
         awayTeamId={selectedMatch.awayTeamId}
         result={
           effectivelyFinished
-            ? (selectedMatch.homeScore != null ? `${selectedMatch.homeScore} - ${selectedMatch.awayScore}` : "-:-")
-            : selectedMatch.status === "live"
+            ? (selectedMatch.homeScore != null ? `${selectedMatch.homeScore} - ${selectedMatch.awayScore}` : "–")
+            : (selectedMatch.status === "live" || selectedMatch.status === "pause")
             ? `${selectedMatch.homeScore ?? 0} - ${selectedMatch.awayScore ?? 0}`
             : `Kl ${selectedMatch.time}`
         }
-        resultClassName={effectivelyFinished && selectedMatch.homeScore == null ? "lp-result--text" : ""}
+        resultClassName={
+          effectivelyFinished && selectedMatch.homeScore == null ? "lp-result--text"
+          : !effectivelyFinished && selectedMatch.status !== "live" && selectedMatch.status !== "pause" ? "lp-result--time"
+          : ""
+        }
       >
         <p className="lp-date">
           {selectedMatch.date?.toDate?.().toLocaleDateString("no-NO")}

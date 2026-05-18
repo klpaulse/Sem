@@ -81,7 +81,6 @@ export default function BeforeMatch({ match, allMatches }) {
           <Countdown date={matchDate} />
         </MatchScoreCard>
 
-        <MatchMeta match={match} matchDate={matchDate} />
 
         <main className="match-content">
           {hasFormation && (

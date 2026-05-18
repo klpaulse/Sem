@@ -168,13 +168,10 @@ body {
   font-size: 0.9rem;
   font-weight: 700;
   color: #ffffffcc;
-  line-height: 1.2;
+  line-height: 1.3;
   text-align: center;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  word-break: break-word;
+  white-space: normal;
 }
 
 .lp-result {
@@ -191,6 +188,12 @@ body {
   opacity: 0.6;
 }
 
+.lp-result--time {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
 .lp-status {
   display: inline-flex;
   align-items: center;
@@ -202,8 +205,29 @@ body {
   font-weight: 700;
   color: #fff;
   text-transform: uppercase;
-  border-left: 4px solid var(--countdown-text);
   margin-bottom: 1rem;
+}
+
+.lp-status--slutt {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  color: #888;
+  font-weight: 600;
+}
+
+.lp-status--live {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid #E63946;
+  color: #888;
+  font-weight: 600;
+}
+
+.lp-status--pause {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #888;
+  font-weight: 600;
 }
 
 .lp-date {
@@ -243,6 +267,28 @@ body {
   margin-left: 1px;
 }
 
+.countdown-strip {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #ffffffaa;
+  text-align: center;
+  margin-top: 8px;
+  font-style: normal;
+}
+
+.countdown-strip strong {
+  font-weight: 700;
+  color: #fff;
+  font-style: normal;
+}
+
+.countdown-strip em {
+  font-style: normal;
+  font-size: 0.65rem;
+  color: #ffffffaa;
+  margin-right: 2px;
+}
+
 /* ================================
    RAPPORT FEED
 ================================ */
@@ -279,9 +325,9 @@ body {
 
 .no-live-report {
   text-align: center;
-  padding: 2rem 1rem;
+  padding: 0.75rem 1rem;
   color: #ffffff55;
-  font-size: 14px;
+  font-size: 13px;
   font-style: italic;
 }
 
@@ -707,10 +753,11 @@ body {
 }
 
 .timeline-box {
-  width: 34px;
-  height: 28px;
+  width: 42px;
+  height: 42px;
   border-radius: 6px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   font-weight: 700;
@@ -718,8 +765,22 @@ body {
   color: white;
   flex-shrink: 0;
   scroll-snap-align: center;
-  box-shadow:none; 
+  cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.timeline-letter {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.timeline-score {
+  font-size: 9px;
+  font-weight: 600;
+  opacity: 0.85;
+  line-height: 1;
+  margin-top: 2px;
 }
 
 .timeline-wrapper {
@@ -730,15 +791,12 @@ body {
   margin-bottom: 10px;
 }
 
-.timeline-box:hover { transform: translateY(-4px); box-shadow: 0 6px 14px rgba(0,0,0,0.35); }
+.timeline-box:hover { transform: translateY(-2px); }
 .timeline-empty { padding: 12px 0; color: #aaa; font-size: 14px; text-align: center; font-style: italic; }
-.timeline-box.not-played { background: #3a3a3a; color: #ccc; }
-.timeline-current { border: 3px solid #3498db; box-shadow: 0 0 12px rgba(52,152,219,0.7); }
+.timeline-box.not-played { background: transparent; border: 2px dashed #444; color: #555; }
+.timeline-current { border: 2px solid #3498db !important; box-shadow: 0 0 10px rgba(52,152,219,0.6); }
 .form-W { background: linear-gradient(135deg, #1f8f55, #166b3f); }
-.form-D {
-  background: #f2f2f2;
-   color: #111; 
-  }
+.form-D { background: #555; color: #eee; }
 .form-L { background: linear-gradient(135deg, #b8323a, #8e272e); }
 
 .timeline-row {
@@ -835,7 +893,15 @@ body {
 .kampinfo-label { color: #ffffff88; font-weight: 500; }
 .kampinfo-value { font-weight: 600; color: #ffffffdd; margin: 0; }
 .info-block{
-  margin-bottom: 20px; 
+  margin-bottom: 20px;
+}
+
+.match-content {
+  padding: 0 1rem;
+}
+
+.before-match-info {
+  padding: 0;
 }
 
 /* ================================

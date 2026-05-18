@@ -108,11 +108,11 @@ export default function LiveControls({ match, onBack }) {
     };
 
     const resetMap = {
-      goal:      () => setGoalData({ team: "", player: "", assist: "" }),
-      yellow:    () => setCardData({ team: "", player: "" }),
-      red:       () => setCardData({ team: "", player: "" }),
-      sub:       () => setSubData({ team: "", in: "", out: "", comment: "" }),
-      whistle:   () => setFkData({ team: "", player: "", comment: "" }),
+      goal:      () => { setGoalData({ team: "", player: "", assist: "" }); setText(""); },
+      yellow:    () => { setCardData({ team: "", player: "" }); setText(""); },
+      red:       () => { setCardData({ team: "", player: "" }); setText(""); },
+      sub:       () => { setSubData({ team: "", in: "", out: "", comment: "" }); setText(""); },
+      whistle:   () => { setFkData({ team: "", player: "", comment: "" }); setText(""); },
       corner:    () => { setSimpleData({ team: "", minutes: "", image: null, comment: "", options: ["", ""] }); setText(""); },
       injury:    () => { setSimpleData({ team: "", minutes: "", image: null, comment: "", options: ["", ""] }); setText(""); },
       addedTime: () => { setSimpleData({ team: "", minutes: "", image: null, comment: "", options: ["", ""] }); setText(""); },

@@ -11,6 +11,8 @@ export default function MatchCard({ match, homeName, awayName, onClick, showDate
   const isPaused = status === "pause";
   const isEnded = status === "finished" || (isPast && !isLive && !isPaused);
 
+  const showScore = played || isLive || isPaused;
+
   const homeWon = played && match.homeScore > match.awayScore;
   const awayWon = played && match.awayScore > match.homeScore;
 
@@ -40,8 +42,8 @@ export default function MatchCard({ match, homeName, awayName, onClick, showDate
       <div className="match-card-body">
         <div className="match-card-teams">
           <div className="match-card-row">
-            <span className={`match-card-score${homeWon ? " winner" : awayWon ? " loser" : ""}${!played ? " not-played" : ""}`}>
-              {played ? match.homeScore : "-"}
+            <span className={`match-card-score${homeWon ? " winner" : awayWon ? " loser" : ""}${!showScore ? " not-played" : ""}`}>
+              {showScore ? (match.homeScore ?? 0) : "-"}
             </span>
             <span className={`match-card-name${homeWon ? " winner" : awayWon ? " loser" : ""}`}>
               {homeName}
@@ -49,8 +51,8 @@ export default function MatchCard({ match, homeName, awayName, onClick, showDate
           </div>
 
           <div className="match-card-row">
-            <span className={`match-card-score${awayWon ? " winner" : homeWon ? " loser" : ""}${!played ? " not-played" : ""}`}>
-              {played ? match.awayScore : "-"}
+            <span className={`match-card-score${awayWon ? " winner" : homeWon ? " loser" : ""}${!showScore ? " not-played" : ""}`}>
+              {showScore ? (match.awayScore ?? 0) : "-"}
             </span>
             <span className={`match-card-name${awayWon ? " winner" : homeWon ? " loser" : ""}`}>
               {awayName}

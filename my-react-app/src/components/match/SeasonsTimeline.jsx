@@ -5,11 +5,18 @@ import { getMatchOutcome } from "../../services/MatchService";
 export default function SeasonTimeline({ matches, teamId, currentMatchId }) {
   const navigate = useNavigate();
   const currentRef = useRef(null);
+  const containerRef = useRef(null);
 
   useEffect(() => {
-    if (currentRef.current) {
-      currentRef.current.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
-    }
+    if (!currentRef.current || !containerRef.current) return;
+    requestAnimationFrame(() => {
+      const container = containerRef.current;
+      const item = currentRef.current;
+      if (!container || !item) return;
+      const containerRect = container.getBoundingClientRect();
+      const itemRect = item.getBoundingClientRect();
+      container.scrollLeft += itemRect.left - containerRect.left - containerRect.width / 2 + itemRect.width / 2;
+    });
   }, [currentMatchId]);
 
   if (!matches || matches.length === 0) {
@@ -21,7 +28,7 @@ export default function SeasonTimeline({ matches, teamId, currentMatchId }) {
   }
 
   return (
-    <div className="timeline-container">
+    <div className="timeline-container" ref={containerRef}>
       {matches.map((m) => {
         const outcome = getMatchOutcome(m, teamId);
         const goalFor = m.homeTeamId === teamId ? m.homeScore : m.awayScore;

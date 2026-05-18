@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import SeasonTimeline from "./SeasonsTimeline";
 import { getTeam } from "../../services/TeamService";
 import { normalizeDate } from "../../utils/normalizeDate";
@@ -18,6 +19,7 @@ export default function BeforeMatchInfo({
 
   const [homeName, setHomeName] = useState("Hjemmelag");
   const [awayName, setAwayName] = useState("Bortelag");
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function loadNames() {
@@ -75,7 +77,7 @@ export default function BeforeMatchInfo({
                   ? (m.homeTeamId === homeId ? "win" : "loss")
                   : (m.homeTeamId === homeId ? "loss" : "win");
                 return (
-                  <li key={m.id} className="h2h-card">
+                  <li key={m.id} className="h2h-card" onClick={() => navigate(`/match/${m.slug || m.id}`)} style={{ cursor: "pointer" }}>
                     <div className="h2h-left">
                       <span className="h2h-date">{date}</span>
                       <span className="h2h-matchup">{hName} – {aName}</span>
@@ -91,27 +93,24 @@ export default function BeforeMatchInfo({
         </div>
       </div>
 
-      {!hideTitle && (
-        <div className="info-block">
-          <h3 className="timeline-header">Kampinfo</h3>
-          <dl className="kampinfo-list">
-            <div className="kampinfo-row">
-              <dt className="kampinfo-label">Arena:</dt>
-              <dd className="kampinfo-value">{match.arena || "ukjent"}</dd>
-            </div>
-            <div className="kampinfo-row">
-              <dt className="kampinfo-label">Dato:</dt>
-              <dd className="kampinfo-value">{matchDate.toLocaleDateString("no-NO")}</dd>
-            </div>
-            <div className="kampinfo-row">
-              <dt className="kampinfo-label">Tid:</dt>
-              <dd className="kampinfo-value">
-                {match.time || matchDate.toLocaleTimeString("no-NO", { hour: "2-digit", minute: "2-digit" })}
-              </dd>
-            </div>
-          </dl>
-        </div>
-      )}
+      <div className="info-block">
+        <dl className="kampinfo-list">
+          <div className="kampinfo-row">
+            <dt className="kampinfo-label">Arena:</dt>
+            <dd className="kampinfo-value">{match.arena || "ukjent"}</dd>
+          </div>
+          <div className="kampinfo-row">
+            <dt className="kampinfo-label">Dato:</dt>
+            <dd className="kampinfo-value">{matchDate.toLocaleDateString("no-NO")}</dd>
+          </div>
+          <div className="kampinfo-row">
+            <dt className="kampinfo-label">Tid:</dt>
+            <dd className="kampinfo-value">
+              {match.time || matchDate.toLocaleTimeString("no-NO", { hour: "2-digit", minute: "2-digit" })}
+            </dd>
+          </div>
+        </dl>
+      </div>
     </section>
   );
 }

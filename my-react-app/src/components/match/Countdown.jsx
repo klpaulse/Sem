@@ -22,14 +22,12 @@ export default function Countdown({ date }) {
   const days    = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
 
   return (
-    <div className="countdown">
-      <span className="countdown-label">Kampstart om</span>
-      <span className="countdown-inline">
-        {days > 0 && <><span className="countdown-num">{String(days).padStart(2, "0")}</span><span className="countdown-unit-label">d</span>{" "}</>}
-        <span className="countdown-num">{String(hours).padStart(2, "0")}</span><span className="countdown-unit-label">t</span>{" "}
-        <span className="countdown-num">{String(minutes).padStart(2, "0")}</span><span className="countdown-unit-label">m</span>{" "}
-        <span className="countdown-num">{String(seconds).padStart(2, "0")}</span><span className="countdown-unit-label">s</span>
-      </span>
-    </div>
+    <p className="countdown-strip">
+      Kampstart om{" "}
+      {days > 0 && <><strong>{String(days).padStart(2, "0")}</strong><em>d</em>{" "}</>}
+      <strong>{String(hours).padStart(2, "0")}</strong><em>t</em>{" "}
+      <strong>{String(minutes).padStart(2, "0")}</strong><em>m</em>{" "}
+      <strong>{String(seconds).padStart(2, "0")}</strong><em>s</em>
+    </p>
   );
 }
