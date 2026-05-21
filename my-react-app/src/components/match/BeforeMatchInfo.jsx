@@ -94,6 +94,7 @@ export default function BeforeMatchInfo({
       </div>
 
       <div className="info-block">
+        <h3 className="timeline-header">Kampinfo</h3>
         <dl className="kampinfo-list">
           <div className="kampinfo-row">
             <dt className="kampinfo-label">Arena:</dt>

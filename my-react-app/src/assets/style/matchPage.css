@@ -970,6 +970,7 @@ body {
    KAMPINFO
 ================================ */
 .kampinfo-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #ffffff22; color: #ffffffcc; font-size: 0.95rem; }
+.kampinfo-row:last-child { border-bottom: none; padding-bottom: 0; }
 .kampinfo-label { color: #ffffff88; font-weight: 500; }
 .kampinfo-value { font-weight: 600; color: #ffffffdd; margin: 0; }
 .info-block{
