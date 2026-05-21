@@ -319,8 +319,8 @@
 .dropdown-arrow { font-size: 0.9rem; color: #fff; transition: transform 0.2s ease, opacity 0.2s ease; opacity: 0.7; }
 .dropdown-arrow.open { transform: rotate(180deg); opacity: 1; }
 
-.division-matches-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
-.division-matches-wrapper.open { max-height: 500px; }
+.division-matches-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.45s ease; }
+.division-matches-wrapper.open { max-height: 2000px; }
 .division-matches { list-style: none; padding: 10px 0 0; margin: 0; }
 
 /* ================================
@@ -366,21 +366,26 @@
   align-items: flex-start;
   gap: 4px;
   color: var(--nextmatch-text);
+  flex: 1;
   min-width: 0;
 }
 
-.match-card-row { display: flex; align-items: center; gap: 8px; }
+.match-card-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
 
 .match-card-score {
   width: auto;
-  min-width: 12px;
+  min-width: 14px;
   padding-right: 4px;
   text-align: right;
   font-weight: 700;
-  opacity: 0.8;
+  flex-shrink: 0;
+  opacity: 0.85;
 }
-
-.match-card-score.not-played { opacity: 0.3; }
 
 .match-card-name {
   font-size: 0.95rem;
@@ -389,7 +394,8 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 180px;
+  flex: 1;
+  min-width: 0;
 }
 
 .winner { font-weight: 700; letter-spacing: 0.3px; }
@@ -593,3 +599,17 @@
 
 
 
+
+@media (min-width: 900px) {
+  .page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  .division-matches {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 12px;
+  }
+}

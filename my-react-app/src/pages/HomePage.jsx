@@ -117,36 +117,39 @@ export default function HomePage() {
         </nav>
 
         {activeTab === "kamper" && (
-          <>
-            {todaysFeaturedMatches.length > 0 && (
-              <div className="live-banner">
-                <div className="live-row-title">Dagens livekamp:</div>
-                <ul className="live-list">
-                  {todaysFeaturedMatches.map((m) => (
-                    <li key={m.id} className="live-row">
-                      <span className="live-dot"></span>
-                      {teamNames[m.homeTeamId]} – {teamNames[m.awayTeamId]}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+          <div className="home-layout">
+            <div className="home-main">
+              {todaysFeaturedMatches.length > 0 && (
+                <div className="live-banner">
+                  <div className="live-row-title">Dagens livekamp:</div>
+                  <ul className="live-list">
+                    {todaysFeaturedMatches.map((m) => (
+                      <li key={m.id} className="live-row">
+                        <span className="live-dot"></span>
+                        {teamNames[m.homeTeamId]} – {teamNames[m.awayTeamId]}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-            <section className="calandar-section">
-              <Calandar
-                selectedDate={selectedDate}
-                setSelectedDate={setSelectedDate}
-              />
-            </section>
+              <section className="calandar-section">
+                <Calandar
+                  selectedDate={selectedDate}
+                  setSelectedDate={setSelectedDate}
+                />
+              </section>
 
-            <section className="division-section">
-              <DivisionList
-                matchesByDivision={matchesByDivision}
-                navigate={navigate}
-                selectedDate={selectedDate}
-              />
-            </section>
-          </>
+              <section className="division-section">
+                <DivisionList
+                  matchesByDivision={matchesByDivision}
+                  navigate={navigate}
+                  selectedDate={selectedDate}
+                />
+              </section>
+            </div>
+
+          </div>
         )}
 
         {activeTab === "tabell" && (

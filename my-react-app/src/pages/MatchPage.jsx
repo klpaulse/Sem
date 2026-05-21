@@ -40,17 +40,7 @@ export default function MatchPage() {
 
   // ⭐ ALLE HOOKS FØRST – før enhver return
 useEffect(() => {
-  if (!selectedMatch) return;
-  
-  const matchDate = selectedMatch.date?.toDate 
-    ? selectedMatch.date.toDate() 
-    : new Date(selectedMatch.date);
-  const isPast = matchDate && matchDate < new Date();
-  const isFinished = selectedMatch.status === "finished" || 
-    (selectedMatch.status === "not_started" && isPast);
-
-  if (!isFinished) return;
-
+  if (!selectedMatch?.id) return;
   async function loadSeason() {
     const home = await getSeasonMatches(selectedMatch.homeTeamId, selectedMatch.season);
     const away = await getSeasonMatches(selectedMatch.awayTeamId, selectedMatch.season);
@@ -58,7 +48,7 @@ useEffect(() => {
     setAwaySeason(away);
   }
   loadSeason();
-}, [selectedMatch]);
+}, [selectedMatch?.id]);
 
   // Løs slug til kamp (med fallback til Firebase-ID for gamle lenker)
   useEffect(() => {
@@ -162,6 +152,7 @@ useEffect(() => {
   const effectivelyFinished = selectedMatch.status === "finished" ||
     (selectedMatch.status === "not_started" && isPastMatch);
   const hasPreMatchContent = events.length > 0 || polls.length > 0;
+  const noLiveReport = effectivelyFinished && events.length === 0;
 
   if (selectedMatch.status === "not_started" && !hasPreMatchContent && !isPastMatch) {
     return (
@@ -215,33 +206,52 @@ useEffect(() => {
       )}
 
       <main className="page">
-        <Tabs activeTab={activeTab} setActiveTab={setActiveTab} hasFormation={hasFormation} />
+        <div className={`match-desktop-layout${noLiveReport ? " match-desktop-layout--full" : ""}`}>
+          <div className="match-desktop-main">
+            <Tabs activeTab={activeTab} setActiveTab={setActiveTab} hasFormation={hasFormation} />
 
-        <section className={`content-box ${activeTab === "lag" ? "content-box--lag" : ""}`}>
-          {activeTab === "rapport" && (
-            <MatchReport
-              match={{...selectedMatch, status: effectivelyFinished ? "finished" : selectedMatch.status}}
-              events={events}
-              matchId={selectedMatch.id}
-              allMatches={allMatches}
-              isFinished={effectivelyFinished}
-            />
+            {noLiveReport && activeTab === "rapport" ? (
+              <div className="no-live-layout">
+                <div className="no-live-col">
+                  <BeforeMatchInfo
+                    match={selectedMatch}
+                    allMatches={allMatches}
+                    homeSeason={homeSeason}
+                    awaySeason={awaySeason}
+                    hideTitle={true}
+                  />
+                </div>
+              </div>
+            ) : (
+              <section className={`content-box ${activeTab === "lag" ? "content-box--lag" : ""}`}>
+                {activeTab === "rapport" && (
+                  <MatchReport
+                    match={{...selectedMatch, status: effectivelyFinished ? "finished" : selectedMatch.status}}
+                    events={events}
+                    matchId={selectedMatch.id}
+                    allMatches={allMatches}
+                    isFinished={effectivelyFinished}
+                  />
+                )}
+                {activeTab === "tabell" && <TabellComponent match={selectedMatch} />}
+                {activeTab === "lag" && <LagComponent match={selectedMatch} />}
+              </section>
+            )}
+          </div>
+
+          {!noLiveReport && (
+            <aside className="match-desktop-sidebar">
+              <BeforeMatchInfo
+                match={selectedMatch}
+                allMatches={allMatches}
+                homeSeason={homeSeason}
+                awaySeason={awaySeason}
+                hideTitle={true}
+              />
+            </aside>
           )}
-          {activeTab === "tabell" && <TabellComponent match={selectedMatch} />}
-          {activeTab === "lag" && <LagComponent match={selectedMatch} />}
-        </section>
-        
-
-        {activeTab === "rapport" && effectivelyFinished && events.length === 0  &&(
-          <BeforeMatchInfo
-          match={selectedMatch}
-          allMatches={allMatches}
-          homeSeason={homeSeason}
-          awaySeason={awaySeason}
-          hideTitle={true}
-          />
-        )}
-        </main>
+        </div>
+      </main>
       
     </>
   );

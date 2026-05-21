@@ -9,14 +9,15 @@ export default function SeasonTimeline({ matches, teamId, currentMatchId }) {
 
   useEffect(() => {
     if (!currentRef.current || !containerRef.current) return;
-    requestAnimationFrame(() => {
+    const id = setTimeout(() => {
       const container = containerRef.current;
       const item = currentRef.current;
       if (!container || !item) return;
       const containerRect = container.getBoundingClientRect();
       const itemRect = item.getBoundingClientRect();
       container.scrollLeft += itemRect.left - containerRect.left - containerRect.width / 2 + itemRect.width / 2;
-    });
+    }, 50);
+    return () => clearTimeout(id);
   }, [currentMatchId]);
 
   if (!matches || matches.length === 0) {

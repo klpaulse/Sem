@@ -82,27 +82,43 @@ export default function BeforeMatch({ match, allMatches }) {
         </MatchScoreCard>
 
 
-        <main className="match-content">
-          {hasFormation && (
-            <nav className="nav">
-              <button className="nav-btn" onClick={() => setActiveTab("Før kampen")}>Før kampen</button>
-              <button className="nav-btn" onClick={() => setActiveTab("lag")}>Lag</button>
-            </nav>
-          )}
+        <main className="page">
+          <div className="match-desktop-layout">
+            <div className="match-desktop-main">
+              {hasFormation && (
+                <nav className="nav">
+                  <button className="nav-btn" onClick={() => setActiveTab("Før kampen")}>Før kampen</button>
+                  <button className="nav-btn" onClick={() => setActiveTab("lag")}>Lag</button>
+                </nav>
+              )}
 
-          {activeTab === "Før kampen" && (
-            <BeforeMatchInfo
-              match={match}
-              allMatches={allMatches}
-              homeSeason={homeSeason}
-              awaySeason={awaySeason}
-              hideTitle={true}
-            />
-          )}
+              {activeTab === "Før kampen" && (
+                <div className="match-info-mobile-only">
+                  <BeforeMatchInfo
+                    match={match}
+                    allMatches={allMatches}
+                    homeSeason={homeSeason}
+                    awaySeason={awaySeason}
+                    hideTitle={true}
+                  />
+                </div>
+              )}
 
-          {hasFormation && activeTab === "lag" && (
-            <LagComponent match={match} />
-          )}
+              {hasFormation && activeTab === "lag" && (
+                <LagComponent match={match} />
+              )}
+            </div>
+
+            <aside className="match-desktop-sidebar">
+              <BeforeMatchInfo
+                match={match}
+                allMatches={allMatches}
+                homeSeason={homeSeason}
+                awaySeason={awaySeason}
+                hideTitle={true}
+              />
+            </aside>
+          </div>
         </main>
       </div>
     </>
