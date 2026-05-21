@@ -10,6 +10,7 @@ import LagComponent from "./LagComponent";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../../config/Firebase";
 import { normalizeDate } from "../../utils/normalizeDate";
+import ShareButton from "../shared/ShareButton";
 
 export default function BeforeMatch({ match, allMatches }) {
   if (!match) return null;
@@ -59,14 +60,16 @@ export default function BeforeMatch({ match, allMatches }) {
 
   return (
     <>
-      <header className="site-header">
+      <header className="site-header site-header--split">
+        <button className="back-btn" onClick={() => navigate(-1)} aria-label="Tilbake" />
         <h1
-          className="live-header"
+          className="live-header live-header--compact"
           onClick={() => navigate("/")}
           style={{ cursor: "pointer" }}
         >
           Breddefotball Live
         </h1>
+        <ShareButton title={`${homeName} – ${awayName}`} />
       </header>
 
       <div className="match-wrap">

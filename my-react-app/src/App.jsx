@@ -19,6 +19,7 @@ import AdminLogin from './pages/AdminLogin.jsx'
 import TeamPage from './pages/TeamPage.jsx'
 import ProtectedRoute from './ProtectedRoute.jsx'
 import ReactGA from "react-ga4"
+import Footer from './components/shared/Footer.jsx'
 
 function AnalyticsTracker() {
   const location = useLocation()
@@ -124,6 +125,7 @@ function App() {
           <Route path="/lag/:teamId" element={<TeamPage />} />
 
         </Routes>
+        <Footer />
       </ErrorBoundary>
     </>
   )

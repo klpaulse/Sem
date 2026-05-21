@@ -47,7 +47,8 @@ export function useLeagueTable(division, season) {
           losses: 0,
           goalsFor: 0,
           goalsAgainst: 0,
-          points: 0
+          points: 0,
+          formResults: [],
         };
       });
 
@@ -58,7 +59,7 @@ export function useLeagueTable(division, season) {
         const home = tableMap[match.homeTeamId];
         const away = tableMap[match.awayTeamId];
 
-        if (!home || !away) continue; // sikkerhet
+        if (!home || !away) continue;
 
         home.played++;
         away.played++;
@@ -69,20 +70,36 @@ export function useLeagueTable(division, season) {
         away.goalsFor += match.awayScore;
         away.goalsAgainst += match.homeScore;
 
+        const matchDate = match.date?.toDate ? match.date.toDate() : new Date(match.date);
+
         if (match.homeScore > match.awayScore) {
           home.wins++;
           home.points += 3;
           away.losses++;
+          home.formResults.push({ date: matchDate, result: "V" });
+          away.formResults.push({ date: matchDate, result: "T" });
         } else if (match.homeScore < match.awayScore) {
           away.wins++;
           away.points += 3;
           home.losses++;
+          home.formResults.push({ date: matchDate, result: "T" });
+          away.formResults.push({ date: matchDate, result: "V" });
         } else {
           home.draws++;
           away.draws++;
           home.points++;
           away.points++;
+          home.formResults.push({ date: matchDate, result: "U" });
+          away.formResults.push({ date: matchDate, result: "U" });
         }
+      }
+
+      for (const team of Object.values(tableMap)) {
+        team.form = team.formResults
+          .sort((a, b) => a.date - b.date)
+          .slice(-5)
+          .map(r => r.result);
+        delete team.formResults;
       }
 
       // 5. Sorter tabellen

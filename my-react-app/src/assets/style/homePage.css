@@ -613,3 +613,51 @@
     gap: 0 12px;
   }
 }
+
+.no-matches-msg {
+  text-align: center;
+  color: #888;
+  padding: 2rem 0;
+  font-size: 0.95rem;
+}
+
+/* ================================
+   FOOTER
+================================ */
+.site-footer {
+  margin-top: 3rem;
+  padding: 1.5rem 1rem;
+  border-top: 1px solid #ffffff11;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.site-footer__tagline {
+  color: #888;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.site-footer__contact {
+  font-size: 0.8rem;
+  color: #666;
+  margin: 0;
+}
+
+.site-footer__contact a {
+  color: #888;
+  text-decoration: none;
+}
+
+.site-footer__contact a:hover {
+  color: #fff;
+}
+
+.site-footer__copy {
+  font-size: 0.75rem;
+  color: #444;
+  margin: 0;
+}
+

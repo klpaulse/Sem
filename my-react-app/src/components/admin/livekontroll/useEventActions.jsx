@@ -12,6 +12,7 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getTeam } from "../../../services/TeamService";
 
 export function useEventActions(match, liveMatch) {
   const matchRef = doc(db, "matches", match.id);
@@ -136,12 +137,23 @@ export function useEventActions(match, liveMatch) {
 
       await updateDoc(matchRef, { homeScore: newHome, awayScore: newAway });
 
+      const scoringTeam = await getTeam(data.team);
+      const players = Array.isArray(scoringTeam?.players)
+        ? scoringTeam.players
+        : Object.values(scoringTeam?.players || {});
+      const scorer = players.find((p) => p.id === data.player);
+      const assister = data.assist ? players.find((p) => p.id === data.assist) : null;
+
       await addDoc(eventsRef, {
         id: crypto.randomUUID(),
         type: "goal",
         team: data.team,
         player: data.player,
+        playerName: scorer?.name || null,
         assist: data.assist || null,
+        assistName: assister?.name || null,
+        division: match.division ? String(match.division) : null,
+        season: match.season ? String(match.season) : null,
         homeScore: newHome,
         awayScore: newAway,
         text: data.text || "",
@@ -155,11 +167,20 @@ export function useEventActions(match, liveMatch) {
     }
 
     if (type === "yellow" || type === "red") {
+      const cardTeam = await getTeam(data.team);
+      const cardPlayers = Array.isArray(cardTeam?.players)
+        ? cardTeam.players
+        : Object.values(cardTeam?.players || {});
+      const cardPlayer = cardPlayers.find((p) => p.id === data.player);
+
       await addDoc(eventsRef, {
         id: crypto.randomUUID(),
         type,
         team: data.team,
         player: data.player,
+        playerName: cardPlayer?.name || null,
+        division: match.division ? String(match.division) : null,
+        season: match.season ? String(match.season) : null,
         text: data.text || "",
         imageUrl,
         minute,
@@ -170,12 +191,23 @@ export function useEventActions(match, liveMatch) {
     }
 
     if (type === "sub") {
+      const subTeam = await getTeam(data.team);
+      const subPlayers = Array.isArray(subTeam?.players)
+        ? subTeam.players
+        : Object.values(subTeam?.players || {});
+      const playerIn = subPlayers.find((p) => p.id === data.in);
+      const playerOut = subPlayers.find((p) => p.id === data.out);
+
       await addDoc(eventsRef, {
         id: crypto.randomUUID(),
         type: "sub",
         team: data.team,
         in: data.in,
         out: data.out,
+        playerInName: playerIn?.name || null,
+        playerOutName: playerOut?.name || null,
+        division: match.division ? String(match.division) : null,
+        season: match.season ? String(match.season) : null,
         comment: data.comment,
         imageUrl,
         minute,

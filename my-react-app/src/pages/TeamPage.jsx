@@ -4,6 +4,9 @@ import { getTeam } from "../services/TeamService";
 import { getTeamMatches } from "../services/MatchService";
 import MatchCard from "../components/match/MatchCard";
 import TabellComponent from "../components/match/TabellComponent";
+import TopscorersComponent from "../components/match/TopscorersComponent";
+import CardStatsComponent from "../components/match/CardStatsComponent";
+import TeamStatsComponent from "../components/match/TeamStatsComponent";
 import "../assets/style/matchPage.css";
 import "../assets/style/teamPage.css";
 
@@ -50,8 +53,12 @@ export default function TeamPage() {
   const season = useMemo(() => {
     if (matches.length === 0) return null;
     const counts = {};
-    matches.forEach(m => { counts[m.season] = (counts[m.season] || 0) + 1; });
-    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0];
+    matches.forEach(m => {
+      const s = m.season != null ? String(m.season) : null;
+      if (s) counts[s] = (counts[s] || 0) + 1;
+    });
+    const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+    return top ? top[0] : null;
   }, [matches]);
 
   const seasonMatches = useMemo(() =>
@@ -138,6 +145,7 @@ export default function TeamPage() {
       <nav className="home-tabs">
         <button className={`home-tab ${activeTab === "kamper" ? "active" : ""}`} onClick={() => setActiveTab("kamper")}>Kamper</button>
         <button className={`home-tab ${activeTab === "tabell" ? "active" : ""}`} onClick={() => setActiveTab("tabell")}>Tabell</button>
+        <button className={`home-tab ${activeTab === "statistikk" ? "active" : ""}`} onClick={() => setActiveTab("statistikk")}>Statistikk</button>
         <button className={`home-tab ${activeTab === "tropp" ? "active" : ""}`} onClick={() => setActiveTab("tropp")}>Tropp</button>
       </nav>
 
@@ -193,6 +201,14 @@ export default function TeamPage() {
           season={season}
           highlightTeamId={teamId}
         />
+      )}
+
+      {activeTab === "statistikk" && season && (
+        <>
+          <TopscorersComponent teamId={teamId} season={season} showAssists={true} />
+          <CardStatsComponent teamId={teamId} season={season} />
+          <TeamStatsComponent teamId={teamId} season={season} />
+        </>
       )}
 
       {activeTab === "tropp" && (

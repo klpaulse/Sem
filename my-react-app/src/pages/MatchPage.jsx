@@ -22,6 +22,7 @@ import PollDisplay from "../components/match/PollDisplay";
 import BeforeMatchInfo from "../components/match/BeforeMatchInfo";
 import MatchScoreCard from "../components/match/MatchScoreCard";
 import ReactGA from "react-ga4"
+import ShareButton from "../components/shared/ShareButton"
 
 export default function MatchPage() {
   const { slug } = useParams();
@@ -166,10 +167,12 @@ useEffect(() => {
 
   return (
     <>
-      <header className="site-header">
-        <h1 className="live-header" onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
+      <header className="site-header site-header--split">
+        <button className="back-btn" onClick={() => navigate(-1)} aria-label="Tilbake" />
+        <h1 className="live-header live-header--compact" onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
           Breddefotball live
         </h1>
+        <ShareButton title={`${homeName} – ${awayName}`} />
       </header>
 
       <MatchScoreCard
@@ -211,17 +214,24 @@ useEffect(() => {
             <Tabs activeTab={activeTab} setActiveTab={setActiveTab} hasFormation={hasFormation} />
 
             {noLiveReport && activeTab === "rapport" ? (
-              <div className="no-live-layout">
-                <div className="no-live-col">
-                  <BeforeMatchInfo
-                    match={selectedMatch}
+              <>
+                <section className="content-box">
+                  <MatchReport
+                    match={{...selectedMatch, status: "finished"}}
+                    events={[]}
+                    matchId={selectedMatch.id}
                     allMatches={allMatches}
-                    homeSeason={homeSeason}
-                    awaySeason={awaySeason}
-                    hideTitle={true}
+                    isFinished={true}
                   />
-                </div>
-              </div>
+                </section>
+                <BeforeMatchInfo
+                  match={selectedMatch}
+                  allMatches={allMatches}
+                  homeSeason={homeSeason}
+                  awaySeason={awaySeason}
+                  hideTitle={true}
+                />
+              </>
             ) : (
               <section className={`content-box ${activeTab === "lag" ? "content-box--lag" : ""}`}>
                 {activeTab === "rapport" && (

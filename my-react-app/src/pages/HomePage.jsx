@@ -8,6 +8,7 @@ import { getTeam } from "../services/TeamService";
 import Calandar from "../components/home/Calandar";
 import DivisionList from "../components/home/DivisionList";
 import TabellComponent from "../components/match/TabellComponent";
+import TopscorersComponent from "../components/match/TopscorersComponent";
 import "../assets/style/homePage.css";
 
 export default function HomePage() {
@@ -169,7 +170,10 @@ export default function HomePage() {
             {divisions
               .filter(({ division }) => division === (activeDivision ?? divisions[0]?.division))
               .map(({ division, season }) => (
-                <TabellComponent key={division} division={division} season={season} title={division} />
+                <div key={division}>
+                  <TabellComponent division={division} season={season} title={division} />
+                  <TopscorersComponent division={division} season={season} />
+                </div>
               ))
             }
           </section>

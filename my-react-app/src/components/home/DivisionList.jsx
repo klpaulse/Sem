@@ -79,6 +79,10 @@ export default function DivisionList({
     d1.getMonth() === d2.getMonth() &&
     d1.getDate() === d2.getDate();
 
+  if (divisions.length === 0) {
+    return <p className="no-matches-msg">Ingen kamper denne dagen</p>;
+  }
+
   return (
     <section className="division-list">
 
