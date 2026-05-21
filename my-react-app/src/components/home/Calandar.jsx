@@ -111,40 +111,38 @@ export default function Calandar({ selectedDate, setSelectedDate }) {
   return (
     <div className="calandar-container">
 
-      {!showFullCalandar && (
-        <div className="calandar-strip" ref={stripRef}>
-          <div
-            className="calendar-open-btn"
-            onClick={openFullCalendar}
-          >
-            <FontAwesomeIcon icon={faCalendar} />
-          </div>
-
-          {days.map((day, index) => {
-            const isSelected = day.toDateString() === safeSelectedDate.toDateString();
-
-            return (
-              <div
-                key={index}
-                className={`calendar-day ${isSelected ? "selected" : ""}`}
-                onClick={() => handleSelectDate(day)}
-              >
-                {day.toLocaleDateString("no-NO", {
-                  weekday: "short",
-                  day: "numeric",
-                })}
-              </div>
-            );
-          })}
-
-          <div
-            className="calendar-open-btn"
-            onClick={openFullCalendar}
-          >
-            <FontAwesomeIcon icon={faCalendar} />
-          </div>
+      <div className={`calandar-strip${showFullCalandar ? " calandar-strip--hidden" : ""}`} ref={stripRef}>
+        <div
+          className="calendar-open-btn"
+          onClick={openFullCalendar}
+        >
+          <FontAwesomeIcon icon={faCalendar} />
         </div>
-      )}
+
+        {days.map((day, index) => {
+          const isSelected = day.toDateString() === safeSelectedDate.toDateString();
+
+          return (
+            <div
+              key={index}
+              className={`calendar-day ${isSelected ? "selected" : ""}`}
+              onClick={() => handleSelectDate(day)}
+            >
+              {day.toLocaleDateString("no-NO", {
+                weekday: "short",
+                day: "numeric",
+              })}
+            </div>
+          );
+        })}
+
+        <div
+          className="calendar-open-btn"
+          onClick={openFullCalendar}
+        >
+          <FontAwesomeIcon icon={faCalendar} />
+        </div>
+      </div>
 
       {showFullCalandar && (
         <div className="month-view">

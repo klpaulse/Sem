@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SeasonTimeline from "./SeasonsTimeline";
+import WeatherWidget from "./WeatherWidget";
 import { getTeam } from "../../services/TeamService";
 import { normalizeDate } from "../../utils/normalizeDate";
 
@@ -10,6 +11,7 @@ export default function BeforeMatchInfo({
   homeSeason,
   awaySeason,
   hideTitle = false,
+  hideKampinfo = false,
 }) {
   if (!match) return null;
 
@@ -93,25 +95,28 @@ export default function BeforeMatchInfo({
         </div>
       </div>
 
-      <div className="info-block">
-        <h3 className="timeline-header">Kampinfo</h3>
-        <dl className="kampinfo-list">
-          <div className="kampinfo-row">
-            <dt className="kampinfo-label">Arena:</dt>
-            <dd className="kampinfo-value">{match.arena || "ukjent"}</dd>
-          </div>
-          <div className="kampinfo-row">
-            <dt className="kampinfo-label">Dato:</dt>
-            <dd className="kampinfo-value">{matchDate.toLocaleDateString("no-NO")}</dd>
-          </div>
-          <div className="kampinfo-row">
-            <dt className="kampinfo-label">Tid:</dt>
-            <dd className="kampinfo-value">
-              {match.time || matchDate.toLocaleTimeString("no-NO", { hour: "2-digit", minute: "2-digit" })}
-            </dd>
-          </div>
-        </dl>
-      </div>
+      {!hideKampinfo && (
+        <div className="info-block">
+          <h3 className="timeline-header">Kampinfo</h3>
+          <dl className="kampinfo-list">
+            <div className="kampinfo-row">
+              <dt className="kampinfo-label">Arena:</dt>
+              <dd className="kampinfo-value">{match.arena || "ukjent"}</dd>
+            </div>
+            <div className="kampinfo-row">
+              <dt className="kampinfo-label">Dato:</dt>
+              <dd className="kampinfo-value">{matchDate.toLocaleDateString("no-NO")}</dd>
+            </div>
+            <div className="kampinfo-row">
+              <dt className="kampinfo-label">Tid:</dt>
+              <dd className="kampinfo-value">
+                {match.time || matchDate.toLocaleTimeString("no-NO", { hour: "2-digit", minute: "2-digit" })}
+              </dd>
+            </div>
+            <WeatherWidget arena={match.arena} matchDate={matchDate} matchTime={match.time} />
+          </dl>
+        </div>
+      )}
     </section>
   );
 }

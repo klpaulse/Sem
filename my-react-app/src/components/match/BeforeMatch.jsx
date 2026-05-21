@@ -23,12 +23,15 @@ export default function BeforeMatch({ match, allMatches }) {
   const [homeName, setHomeName] = useState("Hjemmelag");
   const [awayName, setAwayName] = useState("Bortelag");
   const [hasFormation, setHasFormation] = useState(false);
-  const [activeTab, setActiveTab] = useState("Før kampen");
+  const [activeTab, setActiveTab] = useState("info");
 
   useEffect(() => {
     if (!match?.id) return;
     const ref = doc(db, "matches", match.id, "formations", "home");
-    const unsub = onSnapshot(ref, (snap) => setHasFormation(snap.exists()));
+    const unsub = onSnapshot(ref, (snap) => {
+      const data = snap.data();
+      setHasFormation(snap.exists() && Object.keys(data?.positions || {}).length > 0);
+    });
     return () => unsub();
   }, [match]);
 
@@ -72,7 +75,7 @@ export default function BeforeMatch({ match, allMatches }) {
         <ShareButton title={`${homeName} – ${awayName}`} />
       </header>
 
-      <div className="match-wrap">
+      <main className="page">
         <MatchScoreCard
           status="Før kamp"
           homeName={homeName}
@@ -80,38 +83,63 @@ export default function BeforeMatch({ match, allMatches }) {
           homeTeamId={match.homeTeamId}
           awayTeamId={match.awayTeamId}
           result={match.time || matchDate.toLocaleTimeString("no-NO", { hour: "2-digit", minute: "2-digit" })}
+          resultClassName="lp-result--time"
         >
           <Countdown date={matchDate} />
         </MatchScoreCard>
 
+        <div className="match-desktop-layout">
+          <div className={`match-desktop-main${!hasFormation ? " match-desktop-main--full" : ""}`}>
 
-        <main className="page">
-          <div className="match-desktop-layout">
-            <div className="match-desktop-main">
-              {hasFormation && (
-                <nav className="nav">
-                  <button className="nav-btn" onClick={() => setActiveTab("Før kampen")}>Før kampen</button>
-                  <button className="nav-btn" onClick={() => setActiveTab("lag")}>Lag</button>
-                </nav>
-              )}
+            {hasFormation && (
+              <nav className="nav">
+                <button className="nav-btn" onClick={() => setActiveTab("info")}>Før kampen</button>
+                <button className="nav-btn" onClick={() => setActiveTab("lag")}>Lag</button>
+              </nav>
+            )}
 
-              {activeTab === "Før kampen" && (
-                <div className="match-info-mobile-only">
-                  <BeforeMatchInfo
-                    match={match}
-                    allMatches={allMatches}
-                    homeSeason={homeSeason}
-                    awaySeason={awaySeason}
-                    hideTitle={true}
-                  />
-                </div>
-              )}
+            {/* Mobile only: BeforeMatchInfo */}
+            {(!hasFormation || activeTab === "info") && (
+              <div className="match-info-mobile-only">
+                <BeforeMatchInfo
+                  match={match}
+                  allMatches={allMatches}
+                  homeSeason={homeSeason}
+                  awaySeason={awaySeason}
+                  hideTitle={true}
+                />
+              </div>
+            )}
 
-              {hasFormation && activeTab === "lag" && (
+            {/* Mobile: Lag tab */}
+            {hasFormation && activeTab === "lag" && (
+              <div className="upcoming-mobile-only">
                 <LagComponent match={match} />
-              )}
-            </div>
+              </div>
+            )}
 
+            {/* Desktop: Lag on left when formation exists */}
+            {hasFormation && (
+              <div className="upcoming-desktop-only">
+                <LagComponent match={match} />
+              </div>
+            )}
+
+            {/* Desktop: full-width BeforeMatchInfo when no formation */}
+            {!hasFormation && (
+              <div className="upcoming-full-info">
+                <BeforeMatchInfo
+                  match={match}
+                  allMatches={allMatches}
+                  homeSeason={homeSeason}
+                  awaySeason={awaySeason}
+                  hideTitle={true}
+                />
+              </div>
+            )}
+          </div>
+
+          {hasFormation && (
             <aside className="match-desktop-sidebar">
               <BeforeMatchInfo
                 match={match}
@@ -121,29 +149,9 @@ export default function BeforeMatch({ match, allMatches }) {
                 hideTitle={true}
               />
             </aside>
-          </div>
-        </main>
-      </div>
+          )}
+        </div>
+      </main>
     </>
-  );
-}
-
-function MatchMeta({ match, matchDate }) {
-  const parts = [];
-
-  if (matchDate) {
-    const dateStr = matchDate.toLocaleDateString("nb-NO", {
-      weekday: "short", day: "numeric", month: "long",
-    });
-    parts.push(match?.time ? `${dateStr}, kl. ${match.time}` : dateStr);
-  }
-
-  if (match?.arena) parts.push(match.arena);
-  if (match?.division) parts.push(match.division);
-
-  if (parts.length === 0) return null;
-
-  return (
-    <p className="match-meta-strip">{parts.join(" · ")}</p>
   );
 }

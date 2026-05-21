@@ -154,6 +154,7 @@ useEffect(() => {
     (selectedMatch.status === "not_started" && isPastMatch);
   const hasPreMatchContent = events.length > 0 || polls.length > 0;
   const noLiveReport = effectivelyFinished && events.length === 0;
+  const isUpcomingInLayout = selectedMatch.status === "not_started" && !effectivelyFinished;
 
   if (selectedMatch.status === "not_started" && !hasPreMatchContent && !isPastMatch) {
     return (
@@ -175,43 +176,45 @@ useEffect(() => {
         <ShareButton title={`${homeName} – ${awayName}`} />
       </header>
 
-      <MatchScoreCard
-        status={
-          effectivelyFinished ? "Slutt"
-          : selectedMatch.status === "pause" ? "Pause"
-          : selectedMatch.status === "live" ? "Live"
-          : "Før kamp"
-        }
-        homeName={homeName}
-        awayName={awayName}
-        homeTeamId={selectedMatch.homeTeamId}
-        awayTeamId={selectedMatch.awayTeamId}
-        result={
-          effectivelyFinished
-            ? (selectedMatch.homeScore != null ? `${selectedMatch.homeScore} - ${selectedMatch.awayScore}` : "–")
-            : (selectedMatch.status === "live" || selectedMatch.status === "pause")
-            ? `${selectedMatch.homeScore ?? 0} - ${selectedMatch.awayScore ?? 0}`
-            : `Kl ${selectedMatch.time}`
-        }
-        resultClassName={
-          effectivelyFinished && selectedMatch.homeScore == null ? "lp-result--text"
-          : !effectivelyFinished && selectedMatch.status !== "live" && selectedMatch.status !== "pause" ? "lp-result--time"
-          : ""
-        }
-      >
-        <p className="lp-date">
-          {selectedMatch.date?.toDate?.().toLocaleDateString("no-NO")}
-        </p>
-      </MatchScoreCard>
-
-      {selectedMatch.status === "not_started" && !hasPreMatchContent && !effectivelyFinished && (
-        <Countdown date={matchDate} />
-      )}
-
       <main className="page">
-        <div className={`match-desktop-layout${noLiveReport ? " match-desktop-layout--full" : ""}`}>
-          <div className="match-desktop-main">
-            <Tabs activeTab={activeTab} setActiveTab={setActiveTab} hasFormation={hasFormation} />
+        <MatchScoreCard
+          status={
+            effectivelyFinished ? "Slutt"
+            : selectedMatch.status === "pause" ? "Pause"
+            : selectedMatch.status === "live" ? "Live"
+            : "Før kamp"
+          }
+          homeName={homeName}
+          awayName={awayName}
+          homeTeamId={selectedMatch.homeTeamId}
+          awayTeamId={selectedMatch.awayTeamId}
+          result={
+            effectivelyFinished
+              ? (selectedMatch.homeScore != null ? `${selectedMatch.homeScore} - ${selectedMatch.awayScore}` : "–")
+              : (selectedMatch.status === "live" || selectedMatch.status === "pause")
+              ? `${selectedMatch.homeScore ?? 0} - ${selectedMatch.awayScore ?? 0}`
+              : `Kl ${selectedMatch.time}`
+          }
+          resultClassName={
+            effectivelyFinished && selectedMatch.homeScore == null ? "lp-result--text"
+            : !effectivelyFinished && selectedMatch.status !== "live" && selectedMatch.status !== "pause" ? "lp-result--time"
+            : ""
+          }
+        >
+          <p className="lp-date">
+            {selectedMatch.date?.toDate?.().toLocaleDateString("no-NO")}
+          </p>
+        </MatchScoreCard>
+
+        {selectedMatch.status === "not_started" && !hasPreMatchContent && !effectivelyFinished && (
+          <Countdown date={matchDate} />
+        )}
+
+        <div className="match-desktop-layout">
+          <div className={`match-desktop-main${isUpcomingInLayout && !hasFormation ? " match-desktop-main--full" : ""}`}>
+            <div className={noLiveReport || (isUpcomingInLayout && hasFormation) ? "tabs-hidden-desktop" : ""}>
+              <Tabs activeTab={activeTab} setActiveTab={setActiveTab} hasFormation={hasFormation} />
+            </div>
 
             {noLiveReport && activeTab === "rapport" ? (
               <>
@@ -224,32 +227,59 @@ useEffect(() => {
                     isFinished={true}
                   />
                 </section>
-                <BeforeMatchInfo
-                  match={selectedMatch}
-                  allMatches={allMatches}
-                  homeSeason={homeSeason}
-                  awaySeason={awaySeason}
-                  hideTitle={true}
-                />
+                <div className="no-report-mobile-info">
+                  <BeforeMatchInfo
+                    match={selectedMatch}
+                    allMatches={allMatches}
+                    homeSeason={homeSeason}
+                    awaySeason={awaySeason}
+                    hideTitle={true}
+                    hideKampinfo={true}
+                  />
+                </div>
+                <section className="content-box no-report-desktop-table">
+                  <TabellComponent match={selectedMatch} />
+                </section>
               </>
             ) : (
-              <section className={`content-box ${activeTab === "lag" ? "content-box--lag" : ""}`}>
-                {activeTab === "rapport" && (
-                  <MatchReport
-                    match={{...selectedMatch, status: effectivelyFinished ? "finished" : selectedMatch.status}}
-                    events={events}
-                    matchId={selectedMatch.id}
-                    allMatches={allMatches}
-                    isFinished={effectivelyFinished}
-                  />
+              <>
+                {isUpcomingInLayout && hasFormation && (
+                  <section className="content-box content-box--lag upcoming-desktop-only">
+                    <LagComponent match={selectedMatch} />
+                  </section>
                 )}
-                {activeTab === "tabell" && <TabellComponent match={selectedMatch} />}
-                {activeTab === "lag" && <LagComponent match={selectedMatch} />}
-              </section>
+
+                {isUpcomingInLayout && !hasFormation && (
+                  <div className="upcoming-full-info">
+                    <BeforeMatchInfo
+                      match={selectedMatch}
+                      allMatches={allMatches}
+                      homeSeason={homeSeason}
+                      awaySeason={awaySeason}
+                      hideTitle={true}
+                      hideKampinfo={false}
+                    />
+                  </div>
+                )}
+
+                <section className={`content-box${activeTab === "lag" ? " content-box--lag" : ""}${isUpcomingInLayout && hasFormation ? " upcoming-mobile-only" : ""}${isUpcomingInLayout && !hasFormation ? " upcoming-tabs-desktop-hide" : ""}`}>
+                  {activeTab === "rapport" && (
+                    <MatchReport
+                      match={{...selectedMatch, status: effectivelyFinished ? "finished" : selectedMatch.status}}
+                      events={events}
+                      matchId={selectedMatch.id}
+                      allMatches={allMatches}
+                      isFinished={effectivelyFinished}
+                    />
+                  )}
+                  {activeTab === "tabell" && <TabellComponent match={selectedMatch} />}
+                  {activeTab === "lag" && <LagComponent match={selectedMatch} />}
+                </section>
+              </>
             )}
           </div>
 
-          {!noLiveReport && (
+          {(!isUpcomingInLayout || hasFormation) && (
             <aside className="match-desktop-sidebar">
               <BeforeMatchInfo
                 match={selectedMatch}
@@ -257,12 +287,12 @@ useEffect(() => {
                 homeSeason={homeSeason}
                 awaySeason={awaySeason}
                 hideTitle={true}
+                hideKampinfo={effectivelyFinished}
               />
             </aside>
           )}
         </div>
       </main>
-      
     </>
   );
 }
