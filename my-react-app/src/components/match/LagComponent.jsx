@@ -5,7 +5,7 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../../config/Firebase";
 import { getTeam } from "../../services/TeamService";
 
-export default function LagComponent({ match }) {
+export default function LagComponent({ match, sideLayout = false }) {
   const [homePlayers, setHomePlayers] = useState([]);
   const [awayPlayers, setAwayPlayers] = useState([]);
   const [homeBench, setHomeBench] = useState([]);
@@ -84,7 +84,7 @@ export default function LagComponent({ match }) {
   }, [match]);
 
   return (
-    <div className="lagoppstilling-container">
+    <div className={`lagoppstilling-container${sideLayout ? " lagoppstilling--side" : ""}`}>
       <div className="lag-layout">
         <div className="lag-field">
           <FormationField interactive={false}>

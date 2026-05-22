@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { collection, onSnapshot, query, orderBy, getDocs, doc } from "firebase/firestore";
 import { db } from "../config/Firebase";
 
@@ -23,6 +23,7 @@ import BeforeMatchInfo from "../components/match/BeforeMatchInfo";
 import MatchScoreCard from "../components/match/MatchScoreCard";
 import ReactGA from "react-ga4"
 import ShareButton from "../components/shared/ShareButton"
+import GoalWidget from "../components/match/GoalWidget"
 
 export default function MatchPage() {
   const { slug } = useParams();
@@ -38,6 +39,9 @@ export default function MatchPage() {
   const [hasFormation, setHasFormation] = useState(false);
   const [homeSeason, setHomeSeason] = useState([])
   const [awaySeason, setAwaySeason] = useState([])
+  const [showGoalWidget, setShowGoalWidget] = useState(false)
+  const [eventsLoaded, setEventsLoaded] = useState(false)
+  const seenEventIdsRef = useRef(new Set())
 
   // ⭐ ALLE HOOKS FØRST – før enhver return
 useEffect(() => {
@@ -79,11 +83,24 @@ useEffect(() => {
 
 
   useEffect(() => {
-    if (!selectedMatch?.id) return 
-    
+    if (!selectedMatch?.id) return
+
     ReactGA.event("kamp_visning",{
     })
   }, [selectedMatch])
+
+  useEffect(() => {
+    if (!events.length || !selectedMatch) return;
+    const isFirstLoad = seenEventIdsRef.current.size === 0;
+    let hasNewGoal = false;
+    events.forEach(e => {
+      if (!seenEventIdsRef.current.has(e.id)) {
+        if (!isFirstLoad && e.type === "goal") hasNewGoal = true;
+        seenEventIdsRef.current.add(e.id);
+      }
+    });
+    if (isFirstLoad || hasNewGoal) setShowGoalWidget(true);
+  }, [events, selectedMatch]);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -106,7 +123,8 @@ useEffect(() => {
   }, [selectedMatch]);
 
   useEffect(() => {
-    if (!selectedMatch) return;
+    if (!selectedMatch?.id) return;
+    setEventsLoaded(false);
     const q = query(
       collection(db, "matches", selectedMatch.id, "events"),
       orderBy("createdAt", "asc")
@@ -114,9 +132,10 @@ useEffect(() => {
     const unsub = onSnapshot(q, (snapshot) => {
       const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setEvents(list);
+      setEventsLoaded(true);
     });
     return () => unsub();
-  }, [selectedMatch]);
+  }, [selectedMatch?.id]);
 
   useEffect(() => {
     async function loadNames() {
@@ -153,8 +172,10 @@ useEffect(() => {
   const effectivelyFinished = selectedMatch.status === "finished" ||
     (selectedMatch.status === "not_started" && isPastMatch);
   const hasPreMatchContent = events.length > 0 || polls.length > 0;
-  const noLiveReport = effectivelyFinished && events.length === 0;
+  const noLiveReport = eventsLoaded && effectivelyFinished && events.length === 0;
   const isUpcomingInLayout = selectedMatch.status === "not_started" && !effectivelyFinished;
+  const isLive = selectedMatch.status === "live" || selectedMatch.status === "pause";
+  const useLiveLayout = isLive || events.length > 0 || (!eventsLoaded && effectivelyFinished);
 
   if (selectedMatch.status === "not_started" && !hasPreMatchContent && !isPastMatch) {
     return (
@@ -176,7 +197,18 @@ useEffect(() => {
         <ShareButton title={`${homeName} – ${awayName}`} />
       </header>
 
-      <main className="page">
+      {showGoalWidget && (
+        <GoalWidget
+          events={events}
+          homeScore={selectedMatch.homeScore}
+          awayScore={selectedMatch.awayScore}
+          homeName={homeName}
+          awayName={awayName}
+          onClose={() => setShowGoalWidget(false)}
+        />
+      )}
+
+      <main className={`page match-page${useLiveLayout && activeTab === "lag" ? " page--lag-wide" : ""}`}>
         <MatchScoreCard
           status={
             effectivelyFinished ? "Slutt"
@@ -210,8 +242,12 @@ useEffect(() => {
           <Countdown date={matchDate} />
         )}
 
-        <div className="match-desktop-layout">
-          <div className={`match-desktop-main${isUpcomingInLayout && !hasFormation ? " match-desktop-main--full" : ""}`}>
+        <div className={`match-desktop-layout${!useLiveLayout && (!isUpcomingInLayout || hasFormation) ? " match-desktop-layout--has-sidebar" : useLiveLayout && activeTab === "lag" ? " match-desktop-layout--lag" : useLiveLayout && activeTab === "tabell" ? " match-desktop-layout--tabell" : useLiveLayout ? " match-desktop-layout--rapport-full" : ""}`}>
+          <div className={`match-desktop-main${
+            (isUpcomingInLayout && !hasFormation) || (useLiveLayout && activeTab === "rapport")
+              ? " match-desktop-main--full"
+              : ""
+          }`}>
             <div className={noLiveReport || (isUpcomingInLayout && hasFormation) ? "tabs-hidden-desktop" : ""}>
               <Tabs activeTab={activeTab} setActiveTab={setActiveTab} hasFormation={hasFormation} />
             </div>
@@ -239,6 +275,33 @@ useEffect(() => {
                 </div>
                 <section className="content-box no-report-desktop-table">
                   <TabellComponent match={selectedMatch} />
+                </section>
+              </>
+            ) : useLiveLayout ? (
+              <>
+                {/* Desktop: rapport alltid synlig til venstre */}
+                <section className="content-box live-rapport-desktop-only">
+                  <MatchReport
+                    match={{...selectedMatch, status: effectivelyFinished ? "finished" : selectedMatch.status}}
+                    events={events}
+                    matchId={selectedMatch.id}
+                    allMatches={allMatches}
+                    isFinished={effectivelyFinished}
+                  />
+                </section>
+                {/* Mobil: tab-styrt innhold */}
+                <section className={`content-box live-mobile-tabs${activeTab === "lag" ? " content-box--lag" : ""}`}>
+                  {activeTab === "rapport" && (
+                    <MatchReport
+                      match={{...selectedMatch, status: effectivelyFinished ? "finished" : selectedMatch.status}}
+                      events={events}
+                      matchId={selectedMatch.id}
+                      allMatches={allMatches}
+                      isFinished={effectivelyFinished}
+                    />
+                  )}
+                  {activeTab === "tabell" && <TabellComponent match={selectedMatch} />}
+                  {activeTab === "lag" && <LagComponent match={selectedMatch} />}
                 </section>
               </>
             ) : (
@@ -279,7 +342,18 @@ useEffect(() => {
             )}
           </div>
 
-          {(!isUpcomingInLayout || hasFormation) && (
+          {useLiveLayout ? (
+            (activeTab === "tabell" || activeTab === "lag") && (
+              <aside className={`match-desktop-sidebar${activeTab === "lag" ? " match-desktop-sidebar--lag" : activeTab === "tabell" ? " match-desktop-sidebar--tabell" : ""}`}>
+                {activeTab === "tabell" && (
+                  <section className="content-box">
+                    <TabellComponent match={selectedMatch} />
+                  </section>
+                )}
+                {activeTab === "lag" && <LagComponent match={selectedMatch} sideLayout />}
+              </aside>
+            )
+          ) : (!isUpcomingInLayout || hasFormation) ? (
             <aside className="match-desktop-sidebar">
               <BeforeMatchInfo
                 match={selectedMatch}
@@ -290,7 +364,7 @@ useEffect(() => {
                 hideKampinfo={effectivelyFinished}
               />
             </aside>
-          )}
+          ) : null}
         </div>
       </main>
     </>

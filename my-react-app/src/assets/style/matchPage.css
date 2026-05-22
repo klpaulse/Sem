@@ -259,6 +259,10 @@ body {
   display: none;
 }
 
+.live-rapport-desktop-only {
+  display: none;
+}
+
 .lp-row {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -585,8 +589,8 @@ body {
 
 .event-image .event-icon { font-size: 16px; color: #ffffff66; padding-top: 2px; }
 .event-image .event-text p { margin: 0 0 2px 0; font-size: 14px; color: #ffffffcc; font-style: italic; }
-.event-image .event-image-img { width: 100%; max-width: 100%; border-radius: 8px; margin-top: 6px; display: block; }
-.event-image-img { width: 100%; max-width: 300px; border-radius: 6px; margin-top: 6px; }
+.event-image .event-image-img { width: 100%; max-width: 480px; border-radius: 8px; margin-top: 6px; display: block; }
+.event-image-img { width: 100%; max-width: 480px; border-radius: 6px; margin-top: 6px; }
 
 /* ================================
    SPØRSMÅL/SVAR
@@ -1178,6 +1182,19 @@ body {
 .lagoppstilling-container { background: transparent !important; padding: 0; }
 .formation-admin__player-on-field { position: absolute; transform: translate(-50%, -50%); cursor: grab; z-index: 2; }
 
+.lag-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.lagoppstilling--side .lag-layout {
+  display: grid;
+  grid-template-columns: 1fr 110px;
+  gap: 1rem;
+  align-items: start;
+}
+
 /* ================================
    SKELETON LOADER
 ================================ */
@@ -1424,6 +1441,143 @@ body {
 }
 
 /* ================================
+   GOAL WIDGET
+================================ */
+.goal-widget {
+  position: fixed;
+  top: 72px;
+  right: 16px;
+  width: 270px;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 14px;
+  padding: 14px 16px;
+  z-index: 300;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+  animation: widgetSlideIn 0.3s ease;
+}
+
+@keyframes widgetSlideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.goal-widget__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.goal-widget__live {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(230, 57, 70, 0.12);
+  border: 1px solid #E63946;
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #E63946;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.goal-widget__close {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.goal-widget__close:hover { color: #fff; }
+
+.goal-widget__score {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #2a2a2a;
+  margin-bottom: 8px;
+}
+
+.goal-widget__team {
+  font-size: 0.75rem;
+  color: #ffffffaa;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.goal-widget__team:last-child { text-align: right; }
+
+.goal-widget__result {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 2px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.goal-widget__events {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 260px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+.goal-widget__event {
+  display: grid;
+  grid-template-columns: 18px 1fr auto;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 0;
+  border-bottom: 1px solid #ffffff08;
+  font-size: 0.78rem;
+  color: #ffffffaa;
+}
+
+.goal-widget__event:last-child { border-bottom: none; }
+
+.goal-widget__event--goal {
+  color: #fff;
+  font-weight: 600;
+}
+
+.goal-widget__event--system {
+  color: #ffffff55;
+  font-style: italic;
+}
+
+.goal-widget__event-icon {
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.goal-widget__event-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.goal-widget__event-minute {
+  color: #ffffff44;
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+/* ================================
    MOBIL
 ================================ */
 @media (max-width: 600px) {
@@ -1462,6 +1616,12 @@ body {
     padding: 0 32px;
   }
 
+  .page.match-page {
+    max-width: none;
+    padding: 0 250px;
+    box-sizing: border-box;
+  }
+
   .last-played-card {
     margin: 0;
     border-radius: 10px;
@@ -1485,14 +1645,65 @@ body {
   }
 
   .match-desktop-layout {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .match-desktop-layout--rapport-full {
+    display: block;
+    width: 100%;
+  }
+
+  .match-desktop-layout--rapport-full .match-desktop-main {
+    width: 100%;
+    max-width: none;
+  }
+
+  .match-desktop-layout--rapport-full .content-box {
+    margin-left: 0;
+    margin-right: 0;
+    max-width: none;
+  }
+
+  .match-desktop-layout--has-sidebar {
     display: grid;
     grid-template-columns: 1fr 360px;
     gap: 24px;
     align-items: start;
   }
 
+  .match-desktop-layout--lag {
+    display: grid;
+    grid-template-columns: 1fr 680px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .match-desktop-layout--tabell {
+    display: grid;
+    grid-template-columns: 1fr 460px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .page--lag-wide {
+    max-width: 1350px;
+  }
+
+  .match-desktop-sidebar--tabell {
+    margin-top: calc(1.2rem + 1.5em + 1.5rem);
+  }
+
+  .match-desktop-sidebar--tabell .content-box {
+    margin-top: 0;
+  }
+
   .match-desktop-main {
+    display: block;
+    width: 100%;
     min-width: 0;
+    box-sizing: border-box;
   }
 
   .match-desktop-sidebar {
@@ -1502,6 +1713,7 @@ body {
 
   .match-desktop-main--full {
     grid-column: 1 / -1;
+    width: 100%;
   }
 
   .upcoming-desktop-only {
@@ -1518,6 +1730,19 @@ body {
 
   .upcoming-tabs-desktop-hide {
     display: none;
+  }
+
+  .live-rapport-desktop-only {
+    display: block;
+  }
+
+  .live-mobile-tabs {
+    display: none;
+  }
+
+  .match-desktop-sidebar--lag {
+    margin-top: calc(1.2rem + 1.5em + 1.5rem);
+    padding-bottom: 2rem;
   }
 
   .match-info-mobile-only {
