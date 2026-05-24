@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../config/Firebase";
+import { toSlug } from "../../utils/slugify";
 
 export function useLeagueTable(division, season) {
   const [table, setTable] = useState([]);
@@ -40,6 +41,7 @@ export function useLeagueTable(division, season) {
       teams.forEach(team => {
         tableMap[team.id] = {
           teamId: team.id,
+          teamSlug: toSlug(team.name),
           teamName: team.name,
           played: 0,
           wins: 0,

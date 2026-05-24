@@ -122,7 +122,7 @@ function App() {
           } />
 
           <Route path="/admin-login" element={<AdminLogin />} />
-          <Route path="/lag/:teamId" element={<TeamPage />} />
+          <Route path="/lag/:slug" element={<TeamPage />} />
 
         </Routes>
         <Footer />

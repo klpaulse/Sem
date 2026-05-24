@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { db } from "../config/Firebase";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, getDocs } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
 import { getTeam } from "../services/TeamService";
+import { toSlug } from "../utils/slugify";
 
 import Calandar from "../components/home/Calandar";
 import DivisionList from "../components/home/DivisionList";
@@ -17,7 +18,43 @@ export default function HomePage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [activeTab, setActiveTab] = useState("kamper");
   const [activeDivision, setActiveDivision] = useState(null);
+  const [allTeams, setAllTeams] = useState([]);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showResults, setShowResults] = useState(false);
+  const searchRef = useRef(null);
+  const searchInputRef = useRef(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    getDocs(collection(db, "teams")).then(snap => {
+      setAllTeams(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setShowResults(false);
+        setSearchOpen(false);
+        setSearchQuery("");
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [searchOpen]);
+
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase();
+    return allTeams.filter(t => t.name?.toLowerCase().includes(q)).slice(0, 8);
+  }, [searchQuery, allTeams]);
 
   useEffect(() => {
     const matchesRef = collection(db, "matches");
@@ -102,20 +139,66 @@ export default function HomePage() {
 
       <main className="page">
 
-        <nav className="home-tabs">
+        <div ref={searchRef}>
+        <div className="home-tabs-row">
+          <nav className="home-tabs">
+            <button
+              className={`home-tab ${activeTab === "kamper" ? "active" : ""}`}
+              onClick={() => setActiveTab("kamper")}
+            >
+              Kamper
+            </button>
+            <button
+              className={`home-tab ${activeTab === "tabell" ? "active" : ""}`}
+              onClick={() => setActiveTab("tabell")}
+            >
+              Tabell
+            </button>
+          </nav>
           <button
-            className={`home-tab ${activeTab === "kamper" ? "active" : ""}`}
-            onClick={() => setActiveTab("kamper")}
+            className={`search-icon-btn${searchOpen ? " search-icon-btn--active" : ""}`}
+            onClick={() => { setSearchOpen(o => !o); setSearchQuery(""); setShowResults(false); }}
+            aria-label="Søk på lag"
           >
-            Kamper
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
           </button>
-          <button
-            className={`home-tab ${activeTab === "tabell" ? "active" : ""}`}
-            onClick={() => setActiveTab("tabell")}
-          >
-            Tabell
-          </button>
-        </nav>
+        </div>
+
+        {searchOpen && (
+          <div className="team-search">
+            <input
+              ref={searchInputRef}
+              className="team-search__input"
+              type="search"
+              placeholder="Søk på lag..."
+              value={searchQuery}
+              onChange={e => { setSearchQuery(e.target.value); setShowResults(true); }}
+            />
+            {showResults && searchResults.length > 0 && (
+              <ul className="team-search__results">
+                {searchResults.map(t => (
+                  <li key={t.id}>
+                    <button
+                      className="team-search__result"
+                      onClick={() => {
+                        navigate(`/lag/${toSlug(t.name)}`);
+                        setSearchQuery("");
+                        setSearchOpen(false);
+                        setShowResults(false);
+                      }}
+                    >
+                      <span className="team-search__name">{t.name}</span>
+                      {t.division && <span className="team-search__div">{t.division}</span>}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+        </div>
 
         {activeTab === "kamper" && (
           <div className="home-layout">

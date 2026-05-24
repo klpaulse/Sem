@@ -208,7 +208,12 @@ useEffect(() => {
         />
       )}
 
-      <main className={`page match-page${useLiveLayout && activeTab === "lag" ? " page--lag-wide" : ""}`}>
+      <main className={`page match-page${
+        useLiveLayout && activeTab === "lag" ? " page--lag-wide" :
+        useLiveLayout && activeTab === "tabell" ? " match-page--tabell" :
+        useLiveLayout ? " match-page--rapport" :
+        ""
+      }`}>
         <MatchScoreCard
           status={
             effectivelyFinished ? "Slutt"
@@ -242,13 +247,19 @@ useEffect(() => {
           <Countdown date={matchDate} />
         )}
 
+        {useLiveLayout && !noLiveReport && (
+          <div className="live-nav-desktop">
+            <Tabs activeTab={activeTab} setActiveTab={setActiveTab} hasFormation={hasFormation} />
+          </div>
+        )}
+
         <div className={`match-desktop-layout${!useLiveLayout && (!isUpcomingInLayout || hasFormation) ? " match-desktop-layout--has-sidebar" : useLiveLayout && activeTab === "lag" ? " match-desktop-layout--lag" : useLiveLayout && activeTab === "tabell" ? " match-desktop-layout--tabell" : useLiveLayout ? " match-desktop-layout--rapport-full" : ""}`}>
           <div className={`match-desktop-main${
             (isUpcomingInLayout && !hasFormation) || (useLiveLayout && activeTab === "rapport")
               ? " match-desktop-main--full"
               : ""
           }`}>
-            <div className={noLiveReport || (isUpcomingInLayout && hasFormation) ? "tabs-hidden-desktop" : ""}>
+            <div className={`${noLiveReport || (isUpcomingInLayout && hasFormation) ? "tabs-hidden-desktop" : ""}${useLiveLayout && !noLiveReport ? " live-nav-mobile-only" : ""}`}>
               <Tabs activeTab={activeTab} setActiveTab={setActiveTab} hasFormation={hasFormation} />
             </div>
 

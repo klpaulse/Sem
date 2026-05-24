@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { toSlug } from "../../utils/slugify";
 
 export default function MatchScoreCard({ status, homeName, awayName, homeTeamId, awayTeamId, result, resultClassName, children }) {
   const navigate = useNavigate();
@@ -14,11 +15,11 @@ export default function MatchScoreCard({ status, homeName, awayName, homeTeamId,
       <p className={`lp-status${statusMod}`}>{status}</p>
 
       <div className="lp-row">
-        <button className="lp-title team-link" onClick={() => homeTeamId && navigate(`/lag/${homeTeamId}`)}>
+        <button className="lp-title team-link" onClick={() => homeTeamId && navigate(`/lag/${toSlug(homeName)}`)}>
           {homeName}
         </button>
         <p className={`lp-result ${resultClassName || ""}`}>{result}</p>
-        <button className="lp-title team-link" onClick={() => awayTeamId && navigate(`/lag/${awayTeamId}`)}>
+        <button className="lp-title team-link" onClick={() => awayTeamId && navigate(`/lag/${toSlug(awayName)}`)}>
           {awayName}
         </button>
       </div>

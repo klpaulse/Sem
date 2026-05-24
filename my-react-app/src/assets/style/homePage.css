@@ -36,6 +36,109 @@
 ================================ */
 
 /* ================================
+   LAGSØK
+================================ */
+.home-tabs-row {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 1rem;
+}
+
+.home-tabs-row .home-tabs {
+  border-bottom: none;
+  margin-bottom: 0;
+  flex: 1;
+}
+
+.search-icon-btn {
+  background: none;
+  border: none;
+  color: #777;
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s ease;
+}
+
+.search-icon-btn:hover,
+.search-icon-btn--active {
+  color: #fff;
+}
+
+.team-search {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.team-search__input {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 0.85rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+.team-search__input::placeholder {
+  color: #555;
+}
+
+.team-search__input:focus {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.team-search__results {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  list-style: none;
+  padding: 4px 0;
+  margin: 0;
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.team-search__result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.55rem 1rem;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+  gap: 8px;
+  transition: background 0.15s ease;
+}
+
+.team-search__result:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.team-search__name {
+  font-size: 0.9rem;
+}
+
+.team-search__div {
+  font-size: 0.75rem;
+  color: #666;
+  flex-shrink: 0;
+}
+
+/* ================================
    HJEM-FANER
 ================================ */
 .home-tabs {
@@ -147,6 +250,21 @@
   border-radius: var(--cal-radius-medium);
   backdrop-filter: var(--cal-blur);
   scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+
+.calandar-strip::-webkit-scrollbar {
+  height: 3px;
+}
+
+.calandar-strip::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.calandar-strip::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
 }
 
 .calendar-slide {
@@ -612,7 +730,7 @@
   }
 
   .tabell-section {
-    max-width: 700px;
+    max-width: 1000px;
   }
 
   .calandar-strip--hidden {

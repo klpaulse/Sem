@@ -24,7 +24,7 @@ body {
 }
 
 .page {
-  padding: 0 1rem 1.5rem;
+  padding: 0 1rem 3rem;
   text-align: left;
 }
 
@@ -260,6 +260,10 @@ body {
 }
 
 .live-rapport-desktop-only {
+  display: none;
+}
+
+.live-nav-desktop {
   display: none;
 }
 
@@ -589,8 +593,8 @@ body {
 
 .event-image .event-icon { font-size: 16px; color: #ffffff66; padding-top: 2px; }
 .event-image .event-text p { margin: 0 0 2px 0; font-size: 14px; color: #ffffffcc; font-style: italic; }
-.event-image .event-image-img { width: 100%; max-width: 480px; border-radius: 8px; margin-top: 6px; display: block; }
-.event-image-img { width: 100%; max-width: 480px; border-radius: 6px; margin-top: 6px; }
+.event-image .event-image-img { width: 100%; max-width: 480px; border-radius: 8px; margin-top: 6px; display: block; margin-left: auto; margin-right: auto; }
+.event-image-img { width: 100%; max-width: 480px; border-radius: 6px; margin-top: 6px; margin-left: auto; margin-right: auto; display: block; }
 
 /* ================================
    SPØRSMÅL/SVAR
@@ -1264,6 +1268,7 @@ body {
 ================================ */
 .topscorer-block {
   margin-top: 1.5rem;
+  margin-bottom: 2.5rem;
 }
 
 .topscorer-list {
@@ -1611,20 +1616,40 @@ body {
 ================================ */
 @media (min-width: 900px) {
   .page {
+    width: 100%;
     max-width: 1100px;
     margin: 0 auto;
     padding: 0 32px;
+    box-sizing: border-box;
   }
 
   .page.match-page {
     max-width: none;
-    padding: 0 250px;
+    width: 100%;
+    margin: 0;
+    padding: 0 48px;
     box-sizing: border-box;
   }
 
-  .last-played-card {
-    margin: 0;
+  .last-played-card,
+  .page > .last-played-card {
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto;
     border-radius: 10px;
+    box-sizing: border-box;
+  }
+
+  .page.match-page--rapport > .last-played-card {
+    max-width: 900px;
+  }
+
+  .page.match-page--tabell > .last-played-card {
+    max-width: 1384px;
+  }
+
+  .page.page--lag-wide > .last-played-card {
+    max-width: 1604px;
   }
 
   .tabs-hidden-desktop {
@@ -1651,8 +1676,9 @@ body {
   }
 
   .match-desktop-layout--rapport-full {
-    display: block;
+    max-width: 900px;
     width: 100%;
+    margin: 0 auto;
   }
 
   .match-desktop-layout--rapport-full .match-desktop-main {
@@ -1668,9 +1694,11 @@ body {
 
   .match-desktop-layout--has-sidebar {
     display: grid;
-    grid-template-columns: 1fr 360px;
+    grid-template-columns: 1fr 400px;
     gap: 24px;
     align-items: start;
+    max-width: 1100px;
+    margin: 0 auto;
   }
 
   .match-desktop-layout--lag {
@@ -1678,6 +1706,8 @@ body {
     grid-template-columns: 1fr 680px;
     gap: 24px;
     align-items: start;
+    max-width: 1604px;
+    margin: 0 auto;
   }
 
   .match-desktop-layout--tabell {
@@ -1685,18 +1715,16 @@ body {
     grid-template-columns: 1fr 460px;
     gap: 24px;
     align-items: start;
+    max-width: 1384px;
+    margin: 0 auto;
   }
 
   .page--lag-wide {
     max-width: 1350px;
   }
 
-  .match-desktop-sidebar--tabell {
-    margin-top: calc(1.2rem + 1.5em + 1.5rem);
-  }
-
   .match-desktop-sidebar--tabell .content-box {
-    margin-top: 0;
+    margin-top: 1.5rem;
   }
 
   .match-desktop-main {
@@ -1736,6 +1764,29 @@ body {
     display: block;
   }
 
+  .event-image .event-image-img,
+  .event-image-img {
+    max-width: 640px;
+  }
+
+  .live-nav-mobile-only {
+    display: none;
+  }
+
+  .live-nav-desktop {
+    display: block;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .match-page--tabell .live-nav-desktop {
+    max-width: 1384px;
+  }
+
+  .page--lag-wide .live-nav-desktop {
+    max-width: 1604px;
+  }
+
   .live-mobile-tabs {
     display: none;
   }
@@ -1768,6 +1819,50 @@ body {
     gap: 1rem;
     margin: 1rem;
     margin-top: 1.5rem;
+  }
+
+  .event {
+    padding: 14px 16px;
+    grid-template-columns: 36px 1fr 52px;
+    gap: 10px;
+  }
+
+  .event-text p {
+    font-size: 16px;
+  }
+
+  .event-text p:first-child {
+    font-size: 18px;
+    margin-bottom: 5px;
+  }
+
+  .event-text p:not(:first-child) {
+    font-size: 15px;
+  }
+
+  .event-icon {
+    font-size: 18px;
+  }
+
+  .event-minute {
+    font-size: 13px;
+  }
+
+  .event-system {
+    font-size: 14px;
+    padding: 16px 0;
+  }
+
+  .event-comment .event-text p {
+    font-size: 15px !important;
+  }
+
+  .poll-event-option-text {
+    font-size: 15px;
+  }
+
+  .poll-event-option-pct {
+    font-size: 14px;
   }
 
 }

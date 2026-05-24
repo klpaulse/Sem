@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getTeam } from "../services/TeamService";
+import { getTeam, getTeamBySlug } from "../services/TeamService";
 import { getTeamMatches } from "../services/MatchService";
 import MatchCard from "../components/match/MatchCard";
 import TabellComponent from "../components/match/TabellComponent";
@@ -11,9 +11,10 @@ import "../assets/style/matchPage.css";
 import "../assets/style/teamPage.css";
 
 export default function TeamPage() {
-  const { teamId } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
   const [team, setTeam] = useState(null);
+  const [teamId, setTeamId] = useState(null);
   const [matches, setMatches] = useState([]);
   const [teamNames, setTeamNames] = useState({});
   const [activeTab, setActiveTab] = useState("kamper");
@@ -21,16 +22,17 @@ export default function TeamPage() {
 
   useEffect(() => {
     async function load() {
-      const [teamData, matchData] = await Promise.all([
-        getTeam(teamId),
-        getTeamMatches(teamId),
-      ]);
+      const teamData = (await getTeamBySlug(slug)) || (await getTeam(slug));
+      if (!teamData) { setLoading(false); return; }
+      const id = teamData.id;
+      const matchData = await getTeamMatches(id);
       setTeam(teamData);
+      setTeamId(id);
       setMatches(matchData);
       setLoading(false);
     }
     load();
-  }, [teamId]);
+  }, [slug]);
 
   useEffect(() => {
     async function loadNames() {
@@ -104,16 +106,22 @@ export default function TeamPage() {
     ? team.players
     : Object.values(team.players || {});
 
+  function calcAge(birthdate) {
+    if (!birthdate) return null;
+    const diff = Date.now() - new Date(birthdate).getTime();
+    return Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+  }
+
   return (
-    <main className="page">
-      <header className="team-header">
-        <button className="team-back-btn" onClick={() => navigate(-1)} aria-label="Tilbake" />
+    <>
+      <header className="site-header site-header--split">
+        <button className="back-btn" onClick={() => navigate(-1)} aria-label="Tilbake" />
         <div className="team-header-title">
           <h1 className="team-name">{team.name}</h1>
-          <p className="team-meta">{team.division}{season ? ` · ${season}` : ""}</p>
+          <p className="team-meta">{team.division}</p>
         </div>
-        <div className="team-header-spacer" />
       </header>
+    <main className="page team-page">
 
       <div className="team-stats-row">
         <div className="stat-box">
@@ -152,7 +160,7 @@ export default function TeamPage() {
       {activeTab === "kamper" && (
         <section className="team-matches">
           {upcomingMatches.length > 0 && (
-            <>
+            <div className="team-match-col">
               <h2 className="team-section-title">Kommende</h2>
               <ol className="match-list">
                 {upcomingMatches.map(m => (
@@ -167,11 +175,11 @@ export default function TeamPage() {
                   </li>
                 ))}
               </ol>
-            </>
+            </div>
           )}
 
           {playedMatches.length > 0 && (
-            <>
+            <div className="team-match-col">
               <h2 className="team-section-title">Spilte kamper</h2>
               <ol className="match-list">
                 {playedMatches.map(m => (
@@ -186,7 +194,7 @@ export default function TeamPage() {
                   </li>
                 ))}
               </ol>
-            </>
+            </div>
           )}
 
           {upcomingMatches.length === 0 && playedMatches.length === 0 && (
@@ -217,14 +225,32 @@ export default function TeamPage() {
             ? <li className="squad-empty">Ingen spillere registrert</li>
             : players
                 .sort((a, b) => a.name.localeCompare(b.name))
-                .map(p => (
-                  <li key={p.id} className="squad-player">
-                    <span className="squad-name">{p.name}</span>
-                  </li>
-                ))
+                .map(p => {
+                  const age = calcAge(p.birthdate);
+                  const birthYear = p.birthdate ? new Date(p.birthdate).getFullYear() : null;
+                  return (
+                    <li key={p.id} className="squad-player">
+                      <div className="squad-avatar">
+                        {p.img
+                          ? <img src={p.img} alt={p.name} className="squad-photo" />
+                          : <span className="squad-initials">{p.name.charAt(0)}</span>
+                        }
+                      </div>
+                      <div className="squad-info">
+                        <span className="squad-name">{p.name}</span>
+                        {birthYear && (
+                          <span className="squad-birthdate">
+                            f. {birthYear}{age !== null ? ` · ${age} år` : ""}
+                          </span>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })
           }
         </ul>
       )}
     </main>
+    </>
   );
 }

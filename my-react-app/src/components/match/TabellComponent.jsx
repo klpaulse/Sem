@@ -51,7 +51,7 @@ export default function TabellComponent({ match, division: divProp, season: seas
             <tr key={team.teamId} className={`table-row ${team.teamId === highlightTeamId ? "highlight" : ""}`}>
               <td>{index + 1}</td>
               <td>
-                <button className="team-link" onClick={() => navigate(`/lag/${team.teamId}`)}>
+                <button className="team-link" onClick={() => navigate(`/lag/${team.teamSlug || team.teamId}`)}>
                   {team.teamName}
                 </button>
               </td>
