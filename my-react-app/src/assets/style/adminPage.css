@@ -1,4 +1,56 @@
 /* ============================================
+   MÅL-REDIGERING
+   ============================================ */
+.goal-edit-btn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #aaa;
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.goal-edit-btn:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+
+.goal-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.goal-edit-form select {
+  background: #1a1a1a;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.85rem;
+}
+
+.goal-edit-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.goal-edit-actions button {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+}
+
+.goal-edit-actions button:first-child {
+  background: rgba(255,90,90,0.2);
+  border-color: rgba(255,90,90,0.4);
+}
+
+/* ============================================
    LIVE ADMIN – KAMPKORT
    ============================================ */
 
@@ -1460,14 +1512,28 @@
 .lagadmin-file-label {
   font-size: 0.8rem;
   color: #888;
-  cursor: pointer;
 }
 
-.lagadmin-file-label input[type="file"] {
+.lagadmin-file-btn {
   display: block;
-  margin-top: 4px;
-  font-size: 0.8rem;
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px dashed rgba(255,255,255,0.2);
+  border-radius: 6px;
   color: #aaa;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  min-height: 44px;
+}
+
+.lagadmin-file-btn:hover,
+.lagadmin-file-btn:active {
+  background: rgba(255,255,255,0.09);
+  border-color: rgba(255,255,255,0.35);
+  color: #fff;
 }
 
 .lagadmin-player-form-actions {

@@ -37,13 +37,13 @@ export default function GoalForm({ data, setData, homeTeam, awayTeam }) {
       </select>
 
       {/* ⭐ Målscorer */}
-      <label>Målscorer</label>
+      <label>Målscorer (valgfritt)</label>
       <select
         value={data.player || ""}
         onChange={(e) => setData({ ...data, player: e.target.value })}
         disabled={!selectedTeam}
       >
-        <option value="">Velg spiller</option>
+        <option value="">Ukjent scorer</option>
         {players.map((p) => (
           <option key={p.id} value={p.id}>
             {p.name}

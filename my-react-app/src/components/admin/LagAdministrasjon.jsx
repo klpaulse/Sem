@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { db } from "../../config/Firebase";
 import {
   collection,
@@ -40,6 +40,9 @@ export default function LagAdministrasjon({ divisions }) {
   const [editPlayerName, setEditPlayerName] = useState("");
   const [editPlayerBirthdate, setEditPlayerBirthdate] = useState("");
   const [editPlayerFile, setEditPlayerFile] = useState(null);
+
+  const addFileRef = useRef(null);
+  const editFileRef = useRef(null);
 
   // Bulk import
   const [showBulk, setShowBulk] = useState(false);
@@ -275,14 +278,22 @@ export default function LagAdministrasjon({ divisions }) {
                             onChange={(e) => setEditPlayerBirthdate(e.target.value)}
                           />
                         </label>
-                        <label className="lagadmin-file-label">
-                          Bytt bilde
+                        <div className="lagadmin-file-label">
                           <input
+                            ref={editFileRef}
                             type="file"
-                            accept="image/*"
-                            onChange={(e) => setEditPlayerFile(e.target.files[0])}
+                            accept="image/*,image/heic,image/heif"
+                            style={{ display: "none" }}
+                            onChange={(e) => setEditPlayerFile(e.target.files[0] || null)}
                           />
-                        </label>
+                          <button
+                            type="button"
+                            className="lagadmin-file-btn"
+                            onClick={() => editFileRef.current?.click()}
+                          >
+                            {editPlayerFile ? "✓ " + editPlayerFile.name : "Bytt bilde"}
+                          </button>
+                        </div>
                         <div className="lagadmin-player-form-actions">
                           <button className="btn-primary btn-sm" onClick={() => savePlayer(team)}>Lagre</button>
                           <button className="btn-secondary btn-sm" onClick={() => setEditingPlayer(null)}>Avbryt</button>
@@ -337,14 +348,22 @@ export default function LagAdministrasjon({ divisions }) {
                         onChange={(e) => setPlayerBirthdate(e.target.value)}
                       />
                     </label>
-                    <label className="lagadmin-file-label">
-                      Velg bilde
+                    <div className="lagadmin-file-label">
                       <input
+                        ref={addFileRef}
                         type="file"
-                        accept="image/*"
-                        onChange={(e) => setPlayerFile(e.target.files[0])}
+                        accept="image/*,image/heic,image/heif"
+                        style={{ display: "none" }}
+                        onChange={(e) => setPlayerFile(e.target.files[0] || null)}
                       />
-                    </label>
+                      <button
+                        type="button"
+                        className="lagadmin-file-btn"
+                        onClick={() => addFileRef.current?.click()}
+                      >
+                        {playerFile ? "✓ " + playerFile.name : "Velg bilde"}
+                      </button>
+                    </div>
                     <div className="lagadmin-player-form-actions">
                       <button className="btn-primary btn-sm" onClick={() => addPlayer(team)}>Legg til</button>
                       <button

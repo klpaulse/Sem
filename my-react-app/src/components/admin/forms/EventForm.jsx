@@ -222,7 +222,11 @@ export default function EventForm({
         </div>
       )}
 
-      <button className="submit-event" onClick={addEvent}>
+      <button
+        className="submit-event"
+        onClick={addEvent}
+        disabled={type === "goal" && !goalData.team}
+      >
         Legg til hendelse
       </button>
     </div>
