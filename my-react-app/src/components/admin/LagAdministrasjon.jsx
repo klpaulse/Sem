@@ -10,7 +10,8 @@ import {
   updateDoc,
   addDoc,
 } from "firebase/firestore";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "../../config/Firebase";
 
 export default function LagAdministrasjon({ divisions }) {
   const [selectedDivision, setSelectedDivision] = useState(divisions[0] || "");
@@ -43,6 +44,8 @@ export default function LagAdministrasjon({ divisions }) {
 
   const addFileRef = useRef(null);
   const editFileRef = useRef(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   // Bulk import
   const [showBulk, setShowBulk] = useState(false);
@@ -96,7 +99,6 @@ export default function LagAdministrasjon({ divisions }) {
 
   /* -------- IMAGE UPLOAD -------- */
   async function uploadImage(teamId, file) {
-    const storage = getStorage();
     const fileRef = ref(storage, `players/${teamId}/${crypto.randomUUID()}`);
     await uploadBytes(fileRef, file);
     return getDownloadURL(fileRef);
@@ -111,32 +113,50 @@ export default function LagAdministrasjon({ divisions }) {
 
   async function addPlayer(team) {
     if (!playerName.trim()) return;
-    let imgUrl = null;
-    if (playerFile) imgUrl = await uploadImage(team.id, playerFile);
-    const newPlayer = {
-      id: crypto.randomUUID(),
-      name: playerName.trim(),
-      birthdate: playerBirthdate || null,
-      img: imgUrl,
-    };
-    const updated = [...(team.players || []), newPlayer];
-    await updateDoc(doc(db, "teams", team.id), { players: updated });
-    setPlayerName("");
-    setPlayerBirthdate("");
-    setPlayerFile(null);
-    setAddingPlayerForTeam(null);
+    setSaving(true);
+    setSaveError("");
+    try {
+      let imgUrl = null;
+      if (playerFile) imgUrl = await uploadImage(team.id, playerFile);
+      const newPlayer = {
+        id: crypto.randomUUID(),
+        name: playerName.trim(),
+        birthdate: playerBirthdate || null,
+        img: imgUrl,
+      };
+      const updated = [...(team.players || []), newPlayer];
+      await updateDoc(doc(db, "teams", team.id), { players: updated });
+      setPlayerName("");
+      setPlayerBirthdate("");
+      setPlayerFile(null);
+      setAddingPlayerForTeam(null);
+    } catch (err) {
+      console.error("addPlayer feilet:", err);
+      setSaveError("Feil ved lagring: " + err.message);
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function savePlayer(team) {
-    let imgUrl = editingPlayer.img;
-    if (editPlayerFile) imgUrl = await uploadImage(team.id, editPlayerFile);
-    const updated = (team.players || []).map((p) =>
-      p.id === editingPlayer.id
-        ? { ...p, name: editPlayerName.trim(), birthdate: editPlayerBirthdate || null, img: imgUrl }
-        : p
-    );
-    await updateDoc(doc(db, "teams", team.id), { players: updated });
-    setEditingPlayer(null);
+    setSaving(true);
+    setSaveError("");
+    try {
+      let imgUrl = editingPlayer.img;
+      if (editPlayerFile) imgUrl = await uploadImage(team.id, editPlayerFile);
+      const updated = (team.players || []).map((p) =>
+        p.id === editingPlayer.id
+          ? { ...p, name: editPlayerName.trim(), birthdate: editPlayerBirthdate || null, img: imgUrl }
+          : p
+      );
+      await updateDoc(doc(db, "teams", team.id), { players: updated });
+      setEditingPlayer(null);
+    } catch (err) {
+      console.error("savePlayer feilet:", err);
+      setSaveError("Feil ved lagring: " + err.message);
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function deletePlayer(team, playerId) {
@@ -294,9 +314,10 @@ export default function LagAdministrasjon({ divisions }) {
                             {editPlayerFile ? "✓ " + editPlayerFile.name : "Bytt bilde"}
                           </button>
                         </div>
+                        {saveError && <p style={{ color: "#e74c3c", fontSize: "0.8rem", margin: 0 }}>{saveError}</p>}
                         <div className="lagadmin-player-form-actions">
-                          <button className="btn-primary btn-sm" onClick={() => savePlayer(team)}>Lagre</button>
-                          <button className="btn-secondary btn-sm" onClick={() => setEditingPlayer(null)}>Avbryt</button>
+                          <button className="btn-primary btn-sm" onClick={() => savePlayer(team)} disabled={saving}>{saving ? "Lagrer..." : "Lagre"}</button>
+                          <button className="btn-secondary btn-sm" onClick={() => { setEditingPlayer(null); setSaveError(""); }} disabled={saving}>Avbryt</button>
                         </div>
                       </div>
                     ) : (
@@ -364,15 +385,18 @@ export default function LagAdministrasjon({ divisions }) {
                         {playerFile ? "✓ " + playerFile.name : "Velg bilde"}
                       </button>
                     </div>
+                    {saveError && <p style={{ color: "#e74c3c", fontSize: "0.8rem", margin: 0 }}>{saveError}</p>}
                     <div className="lagadmin-player-form-actions">
-                      <button className="btn-primary btn-sm" onClick={() => addPlayer(team)}>Legg til</button>
+                      <button className="btn-primary btn-sm" onClick={() => addPlayer(team)} disabled={saving}>{saving ? "Lagrer..." : "Legg til"}</button>
                       <button
                         className="btn-secondary btn-sm"
+                        disabled={saving}
                         onClick={() => {
                           setAddingPlayerForTeam(null);
                           setPlayerName("");
                           setPlayerBirthdate("");
                           setPlayerFile(null);
+                          setSaveError("");
                         }}
                       >
                         Avbryt
