@@ -1,4 +1,4 @@
-
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLeagueTable } from "./useLeagueTable";
 
@@ -25,14 +25,41 @@ export default function TabellComponent({ match, division: divProp, season: seas
   const season = seasProp ?? match?.season;
 
   const navigate = useNavigate();
-  const { table, loading } = useLeagueTable(division, season);
+  const { table, liveTable, hasLive, loading } = useLeagueTable(division, season);
+  const [showLive, setShowLive] = useState(false);
 
   if (loading) return <TableSkeleton />;
   if (table.length === 0) return null;
 
+  const displayTable = showLive && hasLive ? liveTable : table;
+
+  // Build a map of teamId -> normal position for comparison
+  const normalPositions = {};
+  table.forEach((team, i) => { normalPositions[team.teamId] = i; });
+
   return (
     <div className="tabell-block">
-      {title && <h2 className="tabell-division-title">{title}</h2>}
+      <div className="tabell-header-row">
+        {title && <h2 className="tabell-division-title">{title}</h2>}
+        {hasLive && (
+          <div className="tabell-toggle">
+            <button
+              className={"tabell-toggle-btn" + (!showLive ? " active" : "")}
+              onClick={() => setShowLive(false)}
+            >
+              Tabell
+            </button>
+            <button
+              className={"tabell-toggle-btn tabell-toggle-btn--live" + (showLive ? " active" : "")}
+              onClick={() => setShowLive(true)}
+            >
+              <span className="tabell-live-dot" />
+              Live
+            </button>
+          </div>
+        )}
+      </div>
+
       <table className="league-table">
         <thead>
           <tr className="table-header">
@@ -47,21 +74,34 @@ export default function TabellComponent({ match, division: divProp, season: seas
         </thead>
 
         <tbody>
-          {table.map((team, index) => (
-            <tr key={team.teamId} className={`table-row ${team.teamId === highlightTeamId ? "highlight" : ""}`}>
-              <td>{index + 1}</td>
-              <td>
-                <button className="team-link" onClick={() => navigate(`/lag/${team.teamSlug || team.teamId}`)}>
-                  {team.teamName}
-                </button>
-              </td>
-              <td>{team.wins}</td>
-              <td>{team.draws}</td>
-              <td>{team.losses}</td>
-              <td>{team.goalsFor}-{team.goalsAgainst}</td>
-              <td>{team.points}</td>
-            </tr>
-          ))}
+          {displayTable.map((team, index) => {
+            const normalPos = normalPositions[team.teamId] ?? index;
+            const diff = showLive ? normalPos - index : 0;
+            const isLiveAffected = showLive && diff !== 0;
+
+            return (
+              <tr
+                key={team.teamId}
+                className={`table-row ${team.teamId === highlightTeamId ? "highlight" : ""} ${isLiveAffected ? "table-row--live" : ""}`}
+              >
+                <td className="table-pos-cell">
+                  {index + 1}
+                  {diff > 0 && <span className="table-pos-up">▲</span>}
+                  {diff < 0 && <span className="table-pos-down">▼</span>}
+                </td>
+                <td>
+                  <button className="team-link" onClick={() => navigate(`/lag/${team.teamSlug || team.teamId}`)}>
+                    {team.teamName}
+                  </button>
+                </td>
+                <td>{team.wins}</td>
+                <td>{team.draws}</td>
+                <td>{team.losses}</td>
+                <td>{team.goalsFor}-{team.goalsAgainst}</td>
+                <td>{team.points}</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

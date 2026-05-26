@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { db } from "../config/Firebase";
-import { collection, onSnapshot, getDocs } from "firebase/firestore";
+import { collection, onSnapshot, getDocs, doc, query, where } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
 import { getTeam } from "../services/TeamService";
@@ -10,6 +10,7 @@ import Calandar from "../components/home/Calandar";
 import DivisionList from "../components/home/DivisionList";
 import TabellComponent from "../components/match/TabellComponent";
 import TopscorersComponent from "../components/match/TopscorersComponent";
+import SponsorBanner from "../components/shared/SponsorBanner";
 import "../assets/style/homePage.css";
 
 export default function HomePage() {
@@ -19,6 +20,8 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState("kamper");
   const [activeDivision, setActiveDivision] = useState(null);
   const [allTeams, setAllTeams] = useState([]);
+  const [announcement, setAnnouncement] = useState(null);
+  const [competitions, setCompetitions] = useState([]);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
@@ -30,6 +33,21 @@ export default function HomePage() {
     getDocs(collection(db, "teams")).then(snap => {
       setAllTeams(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     });
+  }, []);
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "announcements", "active"), snap => {
+      setAnnouncement(snap.exists() ? snap.data() : null);
+    });
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    const unsub = onSnapshot(
+      query(collection(db, "competitions"), where("active", "==", true)),
+      snap => setCompetitions(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+    );
+    return () => unsub();
   }, []);
 
   useEffect(() => {
@@ -139,6 +157,53 @@ export default function HomePage() {
 
       <main className="page">
 
+        {announcement && (
+          announcement.url ? (
+            <a href={announcement.url} target="_blank" rel="noopener noreferrer" className="announcement-banner">
+              <span className="announcement-banner__icon">📣</span>
+              <span>{announcement.text}</span>
+              <span className="announcement-banner__arrow">→</span>
+            </a>
+          ) : (
+            <div className="announcement-banner">
+              <span className="announcement-banner__icon">📣</span>
+              <span>{announcement.text}</span>
+            </div>
+          )
+        )}
+
+        {competitions.length > 0 && (
+          <div className="competitions-block">
+            <span className="competitions-block__icon">🏆</span>
+            <div className="competitions-block__list">
+              {competitions.map(comp => (
+                <a
+                  key={comp.id}
+                  href={`/konkurranse/${comp.id}`}
+                  className="competitions-block__link"
+                >
+                  <span>{comp.title}</span>
+                  <span className="competitions-block__arrow">→</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {todaysFeaturedMatches.length > 0 && (
+          <div className="live-banner">
+            <div className="live-row-title">Dagens livekamp:</div>
+            <ul className="live-list">
+              {todaysFeaturedMatches.map((m) => (
+                <li key={m.id} className="live-row">
+                  <span className="live-dot"></span>
+                  {teamNames[m.homeTeamId]} – {teamNames[m.awayTeamId]}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <div ref={searchRef}>
         <div className="home-tabs-row">
           <nav className="home-tabs">
@@ -203,19 +268,6 @@ export default function HomePage() {
         {activeTab === "kamper" && (
           <div className="home-layout">
             <div className="home-main">
-              {todaysFeaturedMatches.length > 0 && (
-                <div className="live-banner">
-                  <div className="live-row-title">Dagens livekamp:</div>
-                  <ul className="live-list">
-                    {todaysFeaturedMatches.map((m) => (
-                      <li key={m.id} className="live-row">
-                        <span className="live-dot"></span>
-                        {teamNames[m.homeTeamId]} – {teamNames[m.awayTeamId]}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
 
               <section className="calandar-section">
                 <Calandar
@@ -261,6 +313,7 @@ export default function HomePage() {
           </section>
         )}
 
+        <SponsorBanner />
       </main>
     </>
   );

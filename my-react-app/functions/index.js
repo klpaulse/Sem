@@ -1,60 +1,80 @@
-const { onSchedule } = require("firebase-functions/v2/scheduler");
+// Firebase Cloud Functions – Breddefotball Live
+// Deploy: firebase deploy --only functions
+// Krever Blaze-plan (gratis kvoter inkludert)
+
+const { onDocumentCreated, onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
+const { getMessaging } = require("firebase-admin/messaging");
 
 initializeApp();
-const db = getFirestore();
 
-exports.syncNFFResults = onSchedule(
-  {
-    schedule: "every 60 minutes",
-    timeZone: "Europe/Oslo",
-  },
-  async () => {
-    const seriesId = 208637; // 7. div menn avd. 1
+async function getAllTokens() {
+  const snap = await getFirestore().collection("fcm_tokens").get();
+  return snap.docs.map(d => d.data().token).filter(Boolean);
+}
 
-    try {
-      const res = await fetch(`https://www.fotball.no/api/series/${seriesId}/matches`);
-      const data = await res.json();
+async function sendToAll(notification, data = {}) {
+  const tokens = await getAllTokens();
+  if (!tokens.length) return;
 
-      const matches = data.matches;
+  for (let i = 0; i < tokens.length; i += 500) {
+    const chunk = tokens.slice(i, i + 500);
+    const response = await getMessaging().sendEachForMulticast({
+      tokens: chunk,
+      notification,
+      webpush: {
+        notification: { icon: "/favicon.svg" },
+        fcmOptions: { link: data.url || "/" },
+      },
+      data,
+    });
 
-      for (const match of matches) {
-        const matchId = match.matchId;
-
-        const snap = await db
-          .collection("matches")
-          .where("nffMatchId", "==", matchId)
-          .get();
-
-        if (snap.empty) continue;
-
-        const matchDoc = snap.docs[0];
-        const matchData = matchDoc.data();
-
-        const noResult =
-          matchData.homeScore === null &&
-          matchData.awayScore === null;
-
-        if (!noResult) continue;
-
-        const detailsRes = await fetch(
-          `https://www.fotball.no/api/matches/matchdetails/${matchId}`
-        );
-        const details = await detailsRes.json();
-
-        await matchDoc.ref.update({
-          homeScore: details.homeTeamScore,
-          awayScore: details.awayTeamScore,
-          played: details.status === "Finished",
-          status: details.status,
-          goalScorers: details.goalScorers || [],
-        });
+    // Rydd opp tokens som ikke lenger er gyldige
+    const toDelete = [];
+    response.responses.forEach((r, idx) => {
+      if (!r.success && r.error?.code === "messaging/registration-token-not-registered") {
+        toDelete.push(chunk[idx]);
       }
-
-      console.log("NFF sync completed");
-    } catch (err) {
-      console.error("NFF sync error:", err);
+    });
+    for (const token of toDelete) {
+      await getFirestore().doc(`fcm_tokens/${token}`).delete();
     }
+  }
+}
+
+// Automatisk mål-varsel når et goal-event legges til
+exports.onGoalEvent = onDocumentCreated(
+  "matches/{matchId}/events/{eventId}",
+  async (event) => {
+    const data = event.data?.data();
+    if (!data || data.type !== "goal") return;
+
+    const matchSnap = await getFirestore().doc(`matches/${event.params.matchId}`).get();
+    const match = matchSnap.data();
+    if (!match) return;
+
+    const home = data.homeScore ?? "?";
+    const away = data.awayScore ?? "?";
+
+    await sendToAll(
+      {
+        title: "⚽ MÅL!",
+        body: `${match.homeTeamName || "Hjemmelag"} ${home}–${away} ${match.awayTeamName || "Bortelag"}`,
+      },
+      { url: `/match/${event.params.matchId}` }
+    );
+  }
+);
+
+// Manuell varsling fra adminpanelet
+exports.sendManualPush = onDocumentWritten(
+  "notifications_queue/{docId}",
+  async (event) => {
+    if (!event.data.after.exists) return;
+    const { title, body } = event.data.after.data();
+    if (!title || !body) return;
+    await sendToAll({ title, body });
+    await event.data.after.ref.delete();
   }
 );

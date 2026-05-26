@@ -17,9 +17,14 @@ import ReporterPage from './components/admin/ReporterPage.jsx'
 import ReporterLivePage from './components/admin/livekontroll/ReporterLivePage.jsx'
 import AdminLogin from './pages/AdminLogin.jsx'
 import TeamPage from './pages/TeamPage.jsx'
+import KonkurransePage from './pages/KonkurransePage.jsx'
+import OmSiden from './pages/OmSiden.jsx'
 import ProtectedRoute from './ProtectedRoute.jsx'
 import ReactGA from "react-ga4"
 import Footer from './components/shared/Footer.jsx'
+import GoalNotifier from './components/shared/GoalNotifier.jsx'
+import LiveSidebar from './components/live/LiveSidebar.jsx'
+import { LiveSidebarProvider } from './context/LiveSidebarContext.jsx'
 
 function AnalyticsTracker() {
   const location = useLocation()
@@ -36,6 +41,7 @@ function AnalyticsTracker() {
 function App() {
   const [matches, setMatches] = useState([])
   const [divisions, setDivisions] = useState([])
+  const [teamsMap, setTeamsMap] = useState({})
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -61,10 +67,13 @@ function App() {
     const teamsRef = collection(db, "teams")
 
     const unsubscribe = onSnapshot(teamsRef, (snapshot) => {
-      const allTeams = snapshot.docs.map((doc) => doc.data())
+      const allTeams = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
       const uniqueDivs = [...new Set(allTeams.map((t) => t.division))]
       uniqueDivs.sort()
       setDivisions(uniqueDivs)
+      const map = {}
+      allTeams.forEach(t => { map[t.id] = t.name })
+      setTeamsMap(map)
     })
 
     return () => unsubscribe()
@@ -84,8 +93,10 @@ function App() {
   }
 
   return (
-    <>
+    <LiveSidebarProvider>
       <ErrorBoundary>
+        <GoalNotifier matches={matches} teamsMap={teamsMap} />
+        <LiveSidebar />
         <Routes>
           <Route
             index
@@ -123,11 +134,13 @@ function App() {
 
           <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/lag/:slug" element={<TeamPage />} />
+          <Route path="/konkurranse/:id" element={<KonkurransePage />} />
+          <Route path="/om" element={<OmSiden />} />
 
         </Routes>
         <Footer />
       </ErrorBoundary>
-    </>
+    </LiveSidebarProvider>
   )
 }
 export {AnalyticsTracker}

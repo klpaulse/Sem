@@ -1,0 +1,137 @@
+.kp-page {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 1rem 3rem;
+}
+
+.kp-page .back-btn {
+  align-self: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.kp-card {
+  width: 100%;
+  max-width: 480px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.kp-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.kp-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+  margin: 0;
+}
+
+.kp-question {
+  font-size: 0.95rem;
+  color: #aaa;
+  text-align: center;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.kp-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 0.5rem;
+}
+
+.kp-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #fff;
+  padding: 11px 14px;
+  font-size: 0.9rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.kp-input::placeholder {
+  color: #555;
+}
+
+.kp-input:focus {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.kp-submit {
+  width: 100%;
+  margin-top: 4px;
+  padding: 12px;
+  background: rgba(255, 90, 90, 0.85);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.kp-submit:hover:not(:disabled) {
+  background: rgba(255, 90, 90, 1);
+}
+
+.kp-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.kp-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 1rem 0;
+  color: #2ecc71;
+  text-align: center;
+}
+
+.kp-success__check {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.kp-success p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #aaa;
+}
+
+.kp-closed {
+  padding: 1rem;
+  color: #666;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.kp-error {
+  color: #e74c3c;
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+.kp-loading {
+  color: #666;
+  font-size: 0.9rem;
+}

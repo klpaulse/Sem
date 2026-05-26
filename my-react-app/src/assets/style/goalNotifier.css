@@ -1,0 +1,100 @@
+.goal-notif-stack {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.goal-notif {
+  pointer-events: all;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1a1a1a;
+  border: 1px solid rgba(46, 204, 113, 0.4);
+  border-radius: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  max-width: 300px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  animation: notif-in 0.3s ease;
+  transition: background 0.15s;
+}
+
+.goal-notif:hover {
+  background: #222;
+}
+
+@keyframes notif-in {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.goal-notif__ball {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.goal-notif__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.goal-notif__title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #2ecc71;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.goal-notif__match {
+  font-size: 0.78rem;
+  color: #888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.goal-notif__close {
+  background: none;
+  border: none;
+  color: #555;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 4px;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.goal-notif__close:hover {
+  color: #aaa;
+}
+
+@media (max-width: 600px) {
+  .goal-notif-stack {
+    top: 12px;
+    right: 12px;
+    left: 12px;
+  }
+
+  .goal-notif {
+    max-width: 100%;
+  }
+}

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useLiveSidebar } from "../context/LiveSidebarContext";
 import { collection, onSnapshot, query, orderBy, getDocs, doc } from "firebase/firestore";
 import { db } from "../config/Firebase";
 
@@ -28,6 +29,7 @@ import GoalWidget from "../components/match/GoalWidget"
 export default function MatchPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { pin, pinned } = useLiveSidebar();
 
   const [allMatches, setAllMatches] = useState([]);
   const [selectedMatch, setSelectedMatch] = useState(null);
@@ -99,7 +101,7 @@ useEffect(() => {
         seenEventIdsRef.current.add(e.id);
       }
     });
-    if (isFirstLoad || hasNewGoal) setShowGoalWidget(true);
+    if (!isFirstLoad && hasNewGoal) setShowGoalWidget(true);
   }, [events, selectedMatch]);
 
   useEffect(() => {
@@ -242,6 +244,22 @@ useEffect(() => {
             {selectedMatch.date?.toDate?.().toLocaleDateString("no-NO")}
           </p>
         </MatchScoreCard>
+
+        {isLive && (
+          <button
+            className="follow-live-btn"
+            onClick={() => pin({
+              id: selectedMatch.id,
+              slug: selectedMatch.slug,
+              homeName,
+              awayName,
+              homeTeamId: selectedMatch.homeTeamId,
+              awayTeamId: selectedMatch.awayTeamId,
+            })}
+          >
+            Følg live i sidebar →
+          </button>
+        )}
 
         {selectedMatch.status === "not_started" && !hasPreMatchContent && !effectivelyFinished && (
           <Countdown date={matchDate} />

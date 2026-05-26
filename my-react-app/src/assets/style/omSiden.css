@@ -1,0 +1,46 @@
+.om-page {
+  min-height: 80vh;
+  padding: 1.5rem 1rem 3rem;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.om-content {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.om-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.5rem;
+}
+
+.om-section h2 {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin: 0 0 8px;
+}
+
+.om-section p {
+  font-size: 0.92rem;
+  color: #aaa;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.om-section a {
+  color: #ccc;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.om-section a:hover {
+  color: #fff;
+}

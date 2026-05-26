@@ -24,3 +24,4 @@ export const db = getFirestore(app);
 
 // ⭐ IMPORTANT: Use the correct bucket
 export const storage = getStorage(app, "gs://fotball-lag-4326f.firebasestorage.app");
+

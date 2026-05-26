@@ -7,6 +7,14 @@ import { toSlug } from "../utils/slugify";
 const teamCache = {};
 const slugCache = {};
 
+export function clearTeamCache(teamId) {
+  if (teamId && teamCache[teamId]) {
+    const slug = Object.keys(slugCache).find(s => slugCache[s].id === teamId);
+    if (slug) delete slugCache[slug];
+    delete teamCache[teamId];
+  }
+}
+
 export async function getTeam(teamId) {
   if (!teamId) return null;
 

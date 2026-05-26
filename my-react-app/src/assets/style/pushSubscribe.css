@@ -1,0 +1,26 @@
+.push-subscribe-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #ccc;
+  font-size: 0.82rem;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.push-subscribe-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.push-status {
+  font-size: 0.78rem;
+  margin: 0;
+}
+
+.push-status--on  { color: #555; }
+.push-status--off { color: #4a3030; }

@@ -54,7 +54,7 @@ export default function ResultatAdmin() {
   });
 
   const grouped = matches.reduce((acc, m) => {
-    const div = m.division || "Uten divisjon";
+    const div = m.division?.trim() || "Uten divisjon";
     if (!acc[div]) acc[div] = [];
     acc[div].push(m);
     return acc;
@@ -151,7 +151,10 @@ function MatchResultItem({ match, teamCache, editingMatch, setEditingMatch }) {
     <div className={`resultat-item${isEditing ? " editing" : ""}`}>
       <div className="resultat-item-main">
         <div className="resultat-item-info">
-          <span className="resultat-date">{dateStr}</span>
+          <span className="resultat-meta">
+            <span className="resultat-date">{dateStr}</span>
+            {match.division && <span className="resultat-division">{match.division}</span>}
+          </span>
           <span className="resultat-matchup">
             {home?.name || "…"} – {away?.name || "…"}
           </span>

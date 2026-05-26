@@ -7,6 +7,10 @@ import LagAdministrasjon from "../components/admin/LagAdministrasjon";
 import KampAdministrasjon from "../components/admin/KampAdministrasjon";
 import LiveAdmin from "../components/admin/LiveAdmin";
 import ResultatAdmin from "../components/admin/ResultatAdmin";
+import AnnouncementAdmin from "../components/admin/AnnouncementAdmin";
+import SponsorAdmin from "../components/admin/SponsorAdmin";
+import CompetitionAdmin from "../components/admin/CompetitionAdmin";
+import PushAdmin from "../components/admin/PushAdmin";
 import LiveControls from "../components/admin/livekontroll/LiveControls";
 
 import { loadOrCreateMatchData } from "../components/admin/useMatchData";
@@ -59,6 +63,10 @@ export default function AdminPage() {
             <button className={activeTab === "teams" ? "active" : ""} onClick={() => setActiveTab("teams")}>Lag</button>
             <button className={activeTab === "matches" ? "active" : ""} onClick={() => setActiveTab("matches")}>Kamper</button>
             <button className={activeTab === "results" ? "active" : ""} onClick={() => setActiveTab("results")}>Resultater</button>
+            <button className={activeTab === "announcement" ? "active" : ""} onClick={() => setActiveTab("announcement")}>Kunngjøring</button>
+            <button className={activeTab === "sponsors" ? "active" : ""} onClick={() => setActiveTab("sponsors")}>Sponsorer</button>
+            <button className={activeTab === "competitions" ? "active" : ""} onClick={() => setActiveTab("competitions")}>Konkurranser</button>
+            <button className={activeTab === "push" ? "active" : ""} onClick={() => setActiveTab("push")}>Push</button>
           </>
         )}
       </aside>
@@ -93,6 +101,10 @@ export default function AdminPage() {
                 {activeTab === "teams" && <LagAdministrasjon divisions={divisions} />}
                 {activeTab === "matches" && <KampAdministrasjon divisions={divisions} />}
                 {activeTab === "results" && <ResultatAdmin />}
+                {activeTab === "announcement" && <AnnouncementAdmin />}
+                {activeTab === "sponsors" && <SponsorAdmin />}
+                {activeTab === "competitions" && <CompetitionAdmin />}
+                {activeTab === "push" && <PushAdmin />}
               </>
             )}
           </>
