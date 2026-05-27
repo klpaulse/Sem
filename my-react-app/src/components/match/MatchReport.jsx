@@ -158,9 +158,25 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
           <span className="event-icon"><FontAwesomeIcon icon={faFutbol} /></span>
           <div className="event-text">
             <p className="goal-title">{getTeamName(e.team)} SCORER!</p>
-            <p className="goal-score">{e.homeScore ?? 0}-{e.awayScore ?? 0}</p>
-            <p className="goal-detail">Mål: {getPlayerName(e.team, e.player)}</p>
-            {e.assist && <p className="goal-detail">Målgivende: {getPlayerName(e.team, e.assist)}</p>}
+            {(e.homeScore != null || e.awayScore != null) && (
+              <p className="goal-score">{e.homeScore ?? 0}-{e.awayScore ?? 0}</p>
+            )}
+            <p className="goal-detail">Mål: {e.playerName || getPlayerName(e.team, e.player)}</p>
+            {e.assist && <p className="goal-detail">Målgivende: {e.assistName || getPlayerName(e.team, e.assist)}</p>}
+            {e.text && <p className="goal-comment">{e.text}</p>}
+          </div>
+          {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}
+        </li>
+      );
+    }
+
+    if (e.type === "own_goal") {
+      return (
+        <li key={e.id} className="event event-goal">
+          <span className="event-icon">🥅</span>
+          <div className="event-text">
+            <p className="goal-title">{getTeamName(e.team)} scorer (selvmål)</p>
+            <p className="goal-detail">Selvmål: {e.playerName || getPlayerName(e.team, e.player)}</p>
             {e.text && <p className="goal-comment">{e.text}</p>}
           </div>
           {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}
@@ -174,8 +190,12 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
           <span className="event-icon"><FontAwesomeIcon icon={faArrowsRotate} /></span>
           <div className="event-text">
             <p className="sub-title">Spillerbytte – {getTeamName(e.team)}</p>
-            <p className="sub-in"><FontAwesomeIcon icon={faArrowUp} /> Inn: {getPlayerName(e.team, e.in)}</p>
-            <p className="sub-out"><FontAwesomeIcon icon={faArrowDown} /> Ut: {getPlayerName(e.team, e.out)}</p>
+            {(e.in || e.playerInName) && (
+              <p className="sub-in"><FontAwesomeIcon icon={faArrowUp} /> Inn: {e.playerInName || getPlayerName(e.team, e.in)}</p>
+            )}
+            {(e.out || e.playerOutName) && (
+              <p className="sub-out"><FontAwesomeIcon icon={faArrowDown} /> Ut: {e.playerOutName || getPlayerName(e.team, e.out)}</p>
+            )}
             {e.comment && <p className="sub-comment">{e.comment}</p>}
           </div>
           {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}
@@ -189,7 +209,7 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
           <span className="event-icon"><FontAwesomeIcon icon={faSquare} className="yellow-card" /></span>
           <div className="event-text">
             <p>Gult kort – {getTeamName(e.team)}</p>
-            <p>{getPlayerName(e.team, e.player)}</p>
+            <p>{e.playerName || getPlayerName(e.team, e.player)}</p>
             {e.text && <p>{e.text}</p>}
           </div>
           {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}
@@ -203,7 +223,7 @@ export default function MatchReport({ match, events, matchId, allMatches = [], i
           <span className="event-icon"><FontAwesomeIcon icon={faSquare} className="red-card" /></span>
           <div className="event-text">
             <p>Rødt kort – {getTeamName(e.team)}</p>
-            <p>{getPlayerName(e.team, e.player)}</p>
+            <p>{e.playerName || getPlayerName(e.team, e.player)}</p>
             {e.text && <p>{e.text}</p>}
           </div>
           {showMinute && <span className="event-minute">{formatMinute(e.minute)}'</span>}

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { collectionGroup, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../config/Firebase";
 
-export default function TopscorersComponent({ division, season, teamId, showAssists = false }) {
+export default function TopscorersComponent({ division, season, teamId, showAssists = false, topOnly = false }) {
   const [scorers, setScorers] = useState([]);
   const [assisters, setAssisters] = useState([]);
 
@@ -44,11 +44,14 @@ export default function TopscorersComponent({ division, season, teamId, showAssi
           }
         });
 
+        const sorted = Object.entries(goalCounts)
+          .map(([name, goals]) => ({ name, goals }))
+          .sort((a, b) => b.goals - a.goals);
+
         setScorers(
-          Object.entries(goalCounts)
-            .map(([name, goals]) => ({ name, goals }))
-            .sort((a, b) => b.goals - a.goals)
-            .slice(0, 10)
+          topOnly
+            ? sorted.filter(s => s.goals === sorted[0]?.goals)
+            : sorted.slice(0, 10)
         );
 
         if (showAssists) {

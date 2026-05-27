@@ -306,7 +306,7 @@ export default function HomePage() {
               .map(({ division, season }) => (
                 <div key={division}>
                   <TabellComponent division={division} season={season} title={division} />
-                  <TopscorersComponent division={division} season={season} />
+                  <TopscorersComponent division={division} season={season} topOnly />
                 </div>
               ))
             }

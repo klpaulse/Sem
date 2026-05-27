@@ -283,6 +283,26 @@ body {
   text-align: center;
   word-break: break-word;
   white-space: normal;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+
+.lp-title--home {
+  flex-direction: row;
+}
+
+.lp-title--away {
+  flex-direction: row-reverse;
+}
+
+.lp-team-logo {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
 .lp-result {
@@ -474,6 +494,152 @@ body {
   font-size: 13px;
   font-style: italic;
 }
+
+.no-live-report__text {
+  color: #444;
+  font-size: 0.85rem;
+  font-style: italic;
+  padding: 8px 0;
+}
+
+/* ================================
+   MATCH SUMMARY (manuelt innlagte resultater)
+================================ */
+.match-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ms-empty {
+  color: #444;
+  font-size: 0.85rem;
+  font-style: italic;
+  padding: 8px 0;
+}
+
+/* Lagnavn-rad øverst */
+.ms-team-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding-bottom: 10px;
+  margin-bottom: 2px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.ms-team-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ms-team-name--away {
+  justify-content: flex-end;
+}
+
+.ms-team-logo {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* Seksjoner */
+.ms-section {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.ms-section:last-child {
+  border-bottom: none;
+  padding-bottom: 4px;
+}
+
+.ms-header {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #444;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 8px;
+}
+
+/* Tokolonne-grid */
+.ms-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+}
+
+.ms-col {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Rad: ikon + navn */
+.ms-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: #d0d0d0;
+  line-height: 1.3;
+}
+
+.ms-item--away {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.ms-dot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-top: 3px;
+}
+
+.ms-dot--goal { background: #fff; border-radius: 50%; }
+.ms-dot--og   { background: #888; border-radius: 50%; }
+.ms-dot--yellow { background: #f1c40f; }
+.ms-dot--red    { background: #e74c3c; }
+
+.ms-name {
+  font-size: 0.82rem;
+  word-break: break-word;
+  line-height: 1.35;
+}
+
+.ms-og {
+  font-size: 0.72rem;
+  color: #555;
+  font-style: normal;
+}
+
+/* Bytter */
+.ms-item--sub {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+}
+
+.ms-item--sub-away {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.ms-in  { color: #2ecc71; font-size: 0.84rem; }
+.ms-out { color: #e05252; font-size: 0.84rem; }
 
 /* ================================
    EVENTS
@@ -1401,7 +1567,7 @@ body {
 .table-header,
 .table-row {
   display: grid;
-  grid-template-columns: 20px 1fr 20px 20px 20px 44px 24px;
+  grid-template-columns: 20px 1fr 20px 20px 20px 20px 44px 24px;
   padding: 7px 6px;
   align-items: center;
   width: 100%;
@@ -1878,7 +2044,7 @@ body {
 
   .table-header,
   .table-row {
-    grid-template-columns: 28px 1fr 32px 32px 32px 56px 32px;
+    grid-template-columns: 28px 1fr 32px 32px 32px 32px 56px 32px;
     padding: 10px 10px;
   }
 

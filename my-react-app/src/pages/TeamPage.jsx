@@ -117,8 +117,11 @@ export default function TeamPage() {
       <header className="site-header site-header--split">
         <button className="back-btn" onClick={() => navigate(-1)} aria-label="Tilbake" />
         <div className="team-header-title">
-          <h1 className="team-name">{team.name}</h1>
-          <p className="team-meta">{team.division}</p>
+          {team.logoUrl && <img src={team.logoUrl} alt="" className="team-header-logo" />}
+          <div>
+            <h1 className="team-name">{team.name}</h1>
+            <p className="team-meta">{team.division}</p>
+          </div>
         </div>
       </header>
     <main className="page team-page">

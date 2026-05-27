@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLiveSidebar } from "../context/LiveSidebarContext";
-import { collection, onSnapshot, query, orderBy, getDocs, doc } from "firebase/firestore";
+import { collection, onSnapshot, getDocs, doc } from "firebase/firestore";
 import { db } from "../config/Firebase";
 
 import { useParams, useNavigate } from "react-router-dom";
@@ -25,6 +25,7 @@ import MatchScoreCard from "../components/match/MatchScoreCard";
 import ReactGA from "react-ga4"
 import ShareButton from "../components/shared/ShareButton"
 import GoalWidget from "../components/match/GoalWidget"
+import MatchSummary from "../components/match/MatchSummary"
 
 export default function MatchPage() {
   const { slug } = useParams();
@@ -38,6 +39,8 @@ export default function MatchPage() {
   const [activeTab, setActiveTab] = useState("rapport");
   const [homeName, setHomeName] = useState("Hjemmelag");
   const [awayName, setAwayName] = useState("Bortelag");
+  const [homeLogo, setHomeLogo] = useState(null);
+  const [awayLogo, setAwayLogo] = useState(null);
   const [hasFormation, setHasFormation] = useState(false);
   const [homeSeason, setHomeSeason] = useState([])
   const [awaySeason, setAwaySeason] = useState([])
@@ -127,11 +130,7 @@ useEffect(() => {
   useEffect(() => {
     if (!selectedMatch?.id) return;
     setEventsLoaded(false);
-    const q = query(
-      collection(db, "matches", selectedMatch.id, "events"),
-      orderBy("createdAt", "asc")
-    );
-    const unsub = onSnapshot(q, (snapshot) => {
+    const unsub = onSnapshot(collection(db, "matches", selectedMatch.id, "events"), (snapshot) => {
       const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setEvents(list);
       setEventsLoaded(true);
@@ -145,10 +144,12 @@ useEffect(() => {
       if (selectedMatch.homeTeamId) {
         const home = await getTeam(selectedMatch.homeTeamId);
         setHomeName(home?.name || "Ukjent lag");
+        setHomeLogo(home?.logoUrl || null);
       }
       if (selectedMatch.awayTeamId) {
         const away = await getTeam(selectedMatch.awayTeamId);
         setAwayName(away?.name || "Ukjent lag");
+        setAwayLogo(away?.logoUrl || null);
       }
     }
     loadNames();
@@ -174,10 +175,15 @@ useEffect(() => {
   const effectivelyFinished = selectedMatch.status === "finished" ||
     (selectedMatch.status === "not_started" && isPastMatch);
   const hasPreMatchContent = events.length > 0 || polls.length > 0;
-  const noLiveReport = eventsLoaded && effectivelyFinished && events.length === 0;
+  const hasLiveEvents = events.some(e =>
+    e.minute != null || e.type === "system" || e.type === "comment" || e.type === "image" || e.type === "whistle"
+  );
+  const noLiveReport   = eventsLoaded && effectivelyFinished && events.length === 0;
+  const isManualResult = eventsLoaded && effectivelyFinished && events.length > 0 && !hasLiveEvents;
+  const showSummaryLayout = noLiveReport || isManualResult;
   const isUpcomingInLayout = selectedMatch.status === "not_started" && !effectivelyFinished;
   const isLive = selectedMatch.status === "live" || selectedMatch.status === "pause";
-  const useLiveLayout = isLive || events.length > 0 || (!eventsLoaded && effectivelyFinished);
+  const useLiveLayout = isLive || (events.length > 0 && hasLiveEvents) || (!eventsLoaded && effectivelyFinished);
 
   if (selectedMatch.status === "not_started" && !hasPreMatchContent && !isPastMatch) {
     return (
@@ -227,6 +233,8 @@ useEffect(() => {
           awayName={awayName}
           homeTeamId={selectedMatch.homeTeamId}
           awayTeamId={selectedMatch.awayTeamId}
+          homeLogo={homeLogo}
+          awayLogo={awayLogo}
           result={
             effectivelyFinished
               ? (selectedMatch.homeScore != null ? `${selectedMatch.homeScore} - ${selectedMatch.awayScore}` : "–")
@@ -265,7 +273,7 @@ useEffect(() => {
           <Countdown date={matchDate} />
         )}
 
-        {useLiveLayout && !noLiveReport && (
+        {useLiveLayout && !showSummaryLayout && (
           <div className="live-nav-desktop">
             <Tabs activeTab={activeTab} setActiveTab={setActiveTab} hasFormation={hasFormation} />
           </div>
@@ -277,20 +285,32 @@ useEffect(() => {
               ? " match-desktop-main--full"
               : ""
           }`}>
-            <div className={`${noLiveReport || (isUpcomingInLayout && hasFormation) ? "tabs-hidden-desktop" : ""}${useLiveLayout && !noLiveReport ? " live-nav-mobile-only" : ""}`}>
+            <div className={`${showSummaryLayout || (isUpcomingInLayout && hasFormation) ? "tabs-hidden-desktop" : ""}${useLiveLayout && !showSummaryLayout ? " live-nav-mobile-only" : ""}`}>
               <Tabs activeTab={activeTab} setActiveTab={setActiveTab} hasFormation={hasFormation} />
             </div>
 
-            {noLiveReport && activeTab === "rapport" ? (
+            {showSummaryLayout && activeTab === "rapport" ? (
               <>
                 <section className="content-box">
-                  <MatchReport
-                    match={{...selectedMatch, status: "finished"}}
-                    events={[]}
-                    matchId={selectedMatch.id}
-                    allMatches={allMatches}
-                    isFinished={true}
-                  />
+                  {isManualResult ? (
+                    <MatchSummary
+                      events={events}
+                      homeTeamId={selectedMatch.homeTeamId}
+                      awayTeamId={selectedMatch.awayTeamId}
+                      homeName={homeName}
+                      awayName={awayName}
+                      homeLogo={homeLogo}
+                      awayLogo={awayLogo}
+                    />
+                  ) : (
+                    <MatchReport
+                      match={{...selectedMatch, status: "finished"}}
+                      events={[]}
+                      matchId={selectedMatch.id}
+                      allMatches={allMatches}
+                      isFinished={true}
+                    />
+                  )}
                 </section>
                 <div className="no-report-mobile-info">
                   <BeforeMatchInfo

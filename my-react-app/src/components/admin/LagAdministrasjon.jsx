@@ -12,6 +12,7 @@ import {
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../../config/Firebase";
+import { clearTeamCache } from "../../services/TeamService";
 
 export default function LagAdministrasjon({ divisions }) {
   const [selectedDivision, setSelectedDivision] = useState(divisions[0] || "");
@@ -44,8 +45,10 @@ export default function LagAdministrasjon({ divisions }) {
 
   const addFileRef = useRef(null);
   const editFileRef = useRef(null);
+  const logoFileRef = useRef(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [uploadingLogoForTeam, setUploadingLogoForTeam] = useState(null);
 
   // Bulk import
   const [showBulk, setShowBulk] = useState(false);
@@ -102,6 +105,21 @@ export default function LagAdministrasjon({ divisions }) {
     const fileRef = ref(storage, `players/${teamId}/${crypto.randomUUID()}`);
     await uploadBytes(fileRef, file);
     return getDownloadURL(fileRef);
+  }
+
+  async function uploadLogo(team, file) {
+    setUploadingLogoForTeam(team.id);
+    try {
+      const fileRef = ref(storage, `logos/${team.id}/logo`);
+      await uploadBytes(fileRef, file);
+      const url = await getDownloadURL(fileRef);
+      await updateDoc(doc(db, "teams", team.id), { logoUrl: url });
+      clearTeamCache(team.id);
+    } catch (err) {
+      console.error("Logo upload feilet:", err);
+    } finally {
+      setUploadingLogoForTeam(null);
+    }
   }
 
   /* -------- PLAYER ACTIONS -------- */
@@ -277,6 +295,27 @@ export default function LagAdministrasjon({ divisions }) {
             {/* Expanded: players */}
             {expandedTeam === team.id && (
               <div className="lagadmin-players">
+                <div className="lagadmin-logo-section">
+                  {team.logoUrl
+                    ? <img src={team.logoUrl} alt="Logo" className="lagadmin-logo-img" />
+                    : <div className="lagadmin-logo-placeholder">Logo</div>
+                  }
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    id={`logo-upload-${team.id}`}
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) uploadLogo(team, file);
+                      e.target.value = "";
+                    }}
+                  />
+                  <label htmlFor={`logo-upload-${team.id}`} className="lagadmin-logo-btn">
+                    {uploadingLogoForTeam === team.id ? "Laster opp..." : team.logoUrl ? "Bytt logo" : "Last opp logo"}
+                  </label>
+                </div>
+
                 {(team.players || []).length === 0 && (
                   <p className="lagadmin-empty-players">Ingen spillere lagt til ennå.</p>
                 )}

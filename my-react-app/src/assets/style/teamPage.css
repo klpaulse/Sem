@@ -1,5 +1,16 @@
 .team-header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   text-align: center;
+}
+
+.team-header-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 6px;
+  flex-shrink: 0;
 }
 
 .team-name {

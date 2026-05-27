@@ -12,6 +12,7 @@ function TableSkeleton() {
           <div className="skeleton-cell skeleton" />
           <div className="skeleton-cell skeleton" />
           <div className="skeleton-cell skeleton" />
+          <div className="skeleton-cell skeleton" />
           <div className="skeleton-cell skeleton skeleton-cell--goals" />
           <div className="skeleton-cell skeleton" />
         </div>
@@ -65,6 +66,7 @@ export default function TabellComponent({ match, division: divProp, season: seas
           <tr className="table-header">
             <th scope="col">#</th>
             <th scope="col">Lag</th>
+            <th scope="col">K</th>
             <th scope="col">V</th>
             <th scope="col">U</th>
             <th scope="col">T</th>
@@ -94,6 +96,7 @@ export default function TabellComponent({ match, division: divProp, season: seas
                     {team.teamName}
                   </button>
                 </td>
+                <td>{team.played}</td>
                 <td>{team.wins}</td>
                 <td>{team.draws}</td>
                 <td>{team.losses}</td>

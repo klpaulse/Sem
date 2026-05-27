@@ -166,7 +166,7 @@ export default function ResultsForm({ editingMatch, setEditingMatch }) {
             playerName: name,
             season,
             division,
-            timestamp: new Date(),
+            createdAt: new Date(),
           });
         }
       }
@@ -183,7 +183,7 @@ export default function ResultsForm({ editingMatch, setEditingMatch }) {
             playerName: name,
             season,
             division,
-            timestamp: new Date(),
+            createdAt: new Date(),
           });
         }
       }
@@ -205,7 +205,7 @@ export default function ResultsForm({ editingMatch, setEditingMatch }) {
             playerInName: inName,
             season,
             division,
-            timestamp: new Date(),
+            createdAt: new Date(),
           });
         }
       }
