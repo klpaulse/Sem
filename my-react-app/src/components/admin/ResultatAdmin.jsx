@@ -61,7 +61,7 @@ export default function ResultatAdmin() {
   }, {});
   const divisions = Object.keys(grouped).sort();
 
-  const allMatches = selectedDivision ? (grouped[selectedDivision] || []) : [];
+  const allMatches = selectedDivision ? (grouped[selectedDivision] || []) : matches;
 
   return (
     <section className="resultatadmin">
@@ -116,9 +116,7 @@ export default function ResultatAdmin() {
             ))}
           </div>
           <div className="resultat-list">
-            {!selectedDivision ? (
-              <p className="resultat-empty">Velg en divisjon.</p>
-            ) : allMatches.length === 0 ? (
+            {allMatches.length === 0 ? (
               <p className="resultat-empty">Ingen kamper i denne divisjonen.</p>
             ) : (
               allMatches.map(match => (

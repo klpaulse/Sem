@@ -66,7 +66,19 @@ export default function KonkurransePage() {
           <p className="kp-question">{competition.question}</p>
         )}
 
-        {!competition.active ? (
+        {competition.endsAt && (() => {
+          const end = competition.endsAt?.toDate ? competition.endsAt.toDate() : new Date(competition.endsAt);
+          if (end > new Date()) return (
+            <p className="kp-deadline">Stenger {end.toLocaleString("no-NO", { dateStyle: "long", timeStyle: "short" })}</p>
+          );
+          return null;
+        })()}
+
+        {(() => {
+          const endsAt = competition.endsAt?.toDate ? competition.endsAt.toDate() : competition.endsAt ? new Date(competition.endsAt) : null;
+          const expired = endsAt && endsAt < new Date();
+          return (!competition.active || expired);
+        })() ? (
           <div className="kp-closed">Denne konkurransen er avsluttet.</div>
         ) : submitted ? (
           <div className="kp-success">

@@ -20,6 +20,7 @@ export default function CompetitionAdmin() {
   const [competitions, setCompetitions] = useState([]);
   const [title, setTitle] = useState("");
   const [question, setQuestion] = useState("");
+  const [endsAt, setEndsAt] = useState("");
   const [saving, setSaving] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
   const [submissions, setSubmissions] = useState({});
@@ -42,10 +43,12 @@ export default function CompetitionAdmin() {
         title: title.trim(),
         question: question.trim() || null,
         active: true,
+        endsAt: endsAt ? new Date(endsAt) : null,
         createdAt: serverTimestamp(),
       });
       setTitle("");
       setQuestion("");
+      setEndsAt("");
     } finally {
       setSaving(false);
     }
@@ -104,6 +107,15 @@ export default function CompetitionAdmin() {
                       {comp.question}
                     </div>
                   )}
+                  {comp.endsAt && (() => {
+                    const end = comp.endsAt?.toDate ? comp.endsAt.toDate() : new Date(comp.endsAt);
+                    const expired = end < new Date();
+                    return (
+                      <div style={{ fontSize: "0.72rem", color: expired ? "#e74c3c" : "#888", marginTop: "2px" }}>
+                        {expired ? "Utløpt" : "Stenger"}: {end.toLocaleString("no-NO", { dateStyle: "short", timeStyle: "short" })}
+                      </div>
+                    );
+                  })()}
                 </div>
                 <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
                   <button
@@ -179,6 +191,17 @@ export default function CompetitionAdmin() {
           rows={3}
           style={{ ...inputStyle, resize: "vertical" }}
         />
+        <div>
+          <label style={{ fontSize: "0.78rem", color: "#888", display: "block", marginBottom: "5px" }}>
+            Avsluttes automatisk (valgfritt)
+          </label>
+          <input
+            type="datetime-local"
+            value={endsAt}
+            onChange={e => setEndsAt(e.target.value)}
+            style={inputStyle}
+          />
+        </div>
         <button
           className="btn-primary"
           onClick={addCompetition}

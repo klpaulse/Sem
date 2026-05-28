@@ -1604,6 +1604,21 @@
   color: #eee;
 }
 
+.lagadmin-logo-remove {
+  font-size: 0.78rem;
+  color: #e74c3c;
+  background: none;
+  border: 1px solid rgba(231,76,60,0.3);
+  border-radius: 6px;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.lagadmin-logo-remove:hover {
+  border-color: rgba(231,76,60,0.7);
+}
+
 /* Bottom section: add team + bulk */
 .lagadmin-bottom {
   display: flex;

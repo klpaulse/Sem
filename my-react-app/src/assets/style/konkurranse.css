@@ -45,6 +45,13 @@
   line-height: 1.5;
 }
 
+.kp-deadline {
+  font-size: 0.78rem;
+  color: #e67e22;
+  text-align: center;
+  margin: 4px 0 0;
+}
+
 .kp-form {
   width: 100%;
   display: flex;

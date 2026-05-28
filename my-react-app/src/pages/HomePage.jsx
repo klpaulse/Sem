@@ -143,7 +143,7 @@ export default function HomePage() {
   });
 
   const matchesByDivision = todaysMatches.reduce((acc, match) => {
-    const division = match.division || "Ukjent divisjon";
+    const division = match.division?.trim() || "Ukjent divisjon";
     if (!acc[division]) acc[division] = [];
     acc[division].push(match);
     return acc;

@@ -1,16 +1,15 @@
+import TeamLogo from "../shared/TeamLogo";
+
 export default function MatchSummary({ events, homeTeamId, awayTeamId, homeName, awayName, homeLogo, awayLogo }) {
   const goals = events.filter(e => e.type === "goal" || e.type === "own_goal");
   const cards = events.filter(e => e.type === "yellow" || e.type === "red");
-  const subs  = events.filter(e => e.type === "sub");
 
   const homeGoals = goals.filter(e => e.team === homeTeamId);
   const awayGoals = goals.filter(e => e.team === awayTeamId);
   const homeCards = cards.filter(e => e.team === homeTeamId);
   const awayCards = cards.filter(e => e.team === awayTeamId);
-  const homeSubs  = subs.filter(e => e.team === homeTeamId);
-  const awaySubs  = subs.filter(e => e.team === awayTeamId);
 
-  if (!goals.length && !cards.length && !subs.length) return (
+  if (!goals.length && !cards.length) return (
     <p className="ms-empty">Ingen hendelser registrert</p>
   );
 
@@ -19,12 +18,12 @@ export default function MatchSummary({ events, homeTeamId, awayTeamId, homeName,
 
       <div className="ms-team-row">
         <span className="ms-team-name">
-          {homeLogo && <img src={homeLogo} alt="" className="ms-team-logo" />}
+          <TeamLogo logoUrl={homeLogo} name={homeName} size={22} />
           {homeName}
         </span>
         <span className="ms-team-name ms-team-name--away">
           {awayName}
-          {awayLogo && <img src={awayLogo} alt="" className="ms-team-logo" />}
+          <TeamLogo logoUrl={awayLogo} name={awayName} size={22} />
         </span>
       </div>
 
@@ -82,29 +81,6 @@ export default function MatchSummary({ events, homeTeamId, awayTeamId, homeName,
         </div>
       )}
 
-      {subs.length > 0 && (
-        <div className="ms-section">
-          <div className="ms-header">Bytter</div>
-          <div className="ms-cols">
-            <ul className="ms-col">
-              {homeSubs.map((s, i) => (
-                <li key={i} className="ms-item ms-item--sub">
-                  {s.playerInName  && <span className="ms-in">&#8593; {s.playerInName}</span>}
-                  {s.playerOutName && <span className="ms-out">&#8595; {s.playerOutName}</span>}
-                </li>
-              ))}
-            </ul>
-            <ul className="ms-col ms-col--away">
-              {awaySubs.map((s, i) => (
-                <li key={i} className="ms-item ms-item--sub ms-item--sub-away">
-                  {s.playerOutName && <span className="ms-out">&#8595; {s.playerOutName}</span>}
-                  {s.playerInName  && <span className="ms-in">&#8593; {s.playerInName}</span>}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      )}
 
     </div>
   );

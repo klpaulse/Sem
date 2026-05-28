@@ -8,7 +8,8 @@
       "Bash(cp /tmp/AdminManager.jsx c:/Users/Lovis/OneDrive/Dokumenter/GitHub/Sem/my-react-app/src/components/admin/AdminManager.jsx)",
       "Bash(npm run *)",
       "PowerShell(Remove-Item \"c:\\\\Users\\\\Lovis\\\\OneDrive\\\\Dokumenter\\\\GitHub\\\\Sem\\\\my-react-app\\\\src\\\\components\\\\admin\\\\MigrationAdmin.jsx\" -Confirm:$false)",
-      "PowerShell(Remove-Item \"c:\\\\Users\\\\Lovis\\\\OneDrive\\\\Dokumenter\\\\GitHub\\\\Sem\\\\my-react-app\\\\src\\\\components\\\\admin\\\\AddStatusToMatches.jsx\" -Confirm:$false)"
+      "PowerShell(Remove-Item \"c:\\\\Users\\\\Lovis\\\\OneDrive\\\\Dokumenter\\\\GitHub\\\\Sem\\\\my-react-app\\\\src\\\\components\\\\admin\\\\AddStatusToMatches.jsx\" -Confirm:$false)",
+      "Bash(npx vite *)"
     ]
   }
 }

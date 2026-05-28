@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { db } from "../../config/Firebase";
 import {
-  collection, query, where, onSnapshot,
+  collection, onSnapshot,
   deleteDoc, doc, updateDoc, getDocs
 } from "firebase/firestore";
 import { getTeam } from "../../services/TeamService";
@@ -32,20 +32,25 @@ export default function KampAdministrasjon({ divisions }) {
     loadTeams();
   }, []);
 
+  const [allMatches, setAllMatches] = useState([]);
+
   useEffect(() => {
-    if (!selectedDivision) return;
-    const q = query(collection(db, "matches"), where("division", "==", selectedDivision));
-    const unsub = onSnapshot(q, snap => {
+    const unsub = onSnapshot(collection(db, "matches"), snap => {
       const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       list.sort((a, b) => {
         const da = a.date?.toDate ? a.date.toDate() : new Date(a.date);
         const db2 = b.date?.toDate ? b.date.toDate() : new Date(b.date);
         return da - db2;
       });
-      setMatches(list);
+      setAllMatches(list);
     });
     return () => unsub();
-  }, [selectedDivision]);
+  }, []);
+
+  useEffect(() => {
+    if (!selectedDivision) return;
+    setMatches(allMatches.filter(m => m.division?.trim() === selectedDivision.trim()));
+  }, [selectedDivision, allMatches]);
 
   useEffect(() => {
     async function loadNames() {

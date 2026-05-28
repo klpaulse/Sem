@@ -122,6 +122,11 @@ export default function LagAdministrasjon({ divisions }) {
     }
   }
 
+  async function removeLogo(team) {
+    await updateDoc(doc(db, "teams", team.id), { logoUrl: null });
+    clearTeamCache(team.id);
+  }
+
   /* -------- PLAYER ACTIONS -------- */
   function calcAge(birthdate) {
     if (!birthdate) return null;
@@ -314,6 +319,11 @@ export default function LagAdministrasjon({ divisions }) {
                   <label htmlFor={`logo-upload-${team.id}`} className="lagadmin-logo-btn">
                     {uploadingLogoForTeam === team.id ? "Laster opp..." : team.logoUrl ? "Bytt logo" : "Last opp logo"}
                   </label>
+                  {team.logoUrl && (
+                    <button className="lagadmin-logo-remove" onClick={() => removeLogo(team)}>
+                      Fjern
+                    </button>
+                  )}
                 </div>
 
                 {(team.players || []).length === 0 && (

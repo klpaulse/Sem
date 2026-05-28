@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import TeamLogo from "../components/shared/TeamLogo";
 import { getTeam, getTeamBySlug } from "../services/TeamService";
 import { getTeamMatches } from "../services/MatchService";
 import MatchCard from "../components/match/MatchCard";
@@ -64,7 +65,7 @@ export default function TeamPage() {
   }, [matches]);
 
   const seasonMatches = useMemo(() =>
-    matches.filter(m => m.season === season), [matches, season]);
+    matches.filter(m => m.season == null || String(m.season) === season), [matches, season]);
 
   const today = useMemo(() => {
     const d = new Date();
@@ -74,13 +75,13 @@ export default function TeamPage() {
 
   const upcomingMatches = useMemo(() =>
     seasonMatches
-      .filter(m => m.status !== "finished" && m.date >= today)
+      .filter(m => m.status !== "finished" && m.status !== "live" && m.status !== "pause" && m.date >= today)
       .sort((a, b) => a.date - b.date),
     [seasonMatches, today]);
 
   const playedMatches = useMemo(() =>
     seasonMatches
-      .filter(m => m.status === "finished" || m.date < today)
+      .filter(m => m.status === "finished" || m.status === "live" || m.status === "pause" || m.date < today)
       .sort((a, b) => b.date - a.date),
     [seasonMatches, today]);
 
@@ -114,14 +115,12 @@ export default function TeamPage() {
 
   return (
     <>
-      <header className="site-header site-header--split">
-        <button className="back-btn" onClick={() => navigate(-1)} aria-label="Tilbake" />
-        <div className="team-header-title">
-          {team.logoUrl && <img src={team.logoUrl} alt="" className="team-header-logo" />}
-          <div>
-            <h1 className="team-name">{team.name}</h1>
-            <p className="team-meta">{team.division}</p>
-          </div>
+      <header className="team-banner">
+        <button className="back-btn team-banner__back" onClick={() => navigate(-1)} aria-label="Tilbake" />
+        <div className="team-banner__content">
+          <TeamLogo logoUrl={team.logoUrl} name={team.name} size={64} />
+          <h1 className="team-banner__name">{team.name}</h1>
+          <p className="team-banner__meta">{team.division}</p>
         </div>
       </header>
     <main className="page team-page">
