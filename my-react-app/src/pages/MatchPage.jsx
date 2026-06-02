@@ -185,7 +185,7 @@ useEffect(() => {
   const isLive = selectedMatch.status === "live" || selectedMatch.status === "pause";
   const useLiveLayout = isLive || (events.length > 0 && hasLiveEvents) || (!eventsLoaded && effectivelyFinished);
 
-  if ((selectedMatch.status === "not_started" || selectedMatch.status === "postponed") && !hasPreMatchContent) {
+  if ((selectedMatch.status === "postponed" || (selectedMatch.status === "not_started" && !isPastMatch)) && !hasPreMatchContent) {
     return (
       <BeforeMatch
         match={selectedMatch}

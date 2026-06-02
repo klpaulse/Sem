@@ -11,6 +11,7 @@ import DivisionList from "../components/home/DivisionList";
 import TabellComponent from "../components/match/TabellComponent";
 import TopscorersComponent from "../components/match/TopscorersComponent";
 import SponsorBanner from "../components/shared/SponsorBanner";
+import UpcomingMatches from "../components/home/UpcomingMatches";
 import "../assets/style/homePage.css";
 
 export default function HomePage() {
@@ -214,6 +215,12 @@ export default function HomePage() {
               Kamper
             </button>
             <button
+              className={`home-tab ${activeTab === "kommende" ? "active" : ""}`}
+              onClick={() => setActiveTab("kommende")}
+            >
+              Kommende
+            </button>
+            <button
               className={`home-tab ${activeTab === "tabell" ? "active" : ""}`}
               onClick={() => setActiveTab("tabell")}
             >
@@ -285,6 +292,16 @@ export default function HomePage() {
               </section>
             </div>
           </div>
+        )}
+
+        {activeTab === "kommende" && (
+          <section className="upcoming-section">
+            <UpcomingMatches
+              matches={matches}
+              teamNames={teamNames}
+              navigate={navigate}
+            />
+          </section>
         )}
 
         {activeTab === "tabell" && (
