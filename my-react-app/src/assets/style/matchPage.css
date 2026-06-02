@@ -372,6 +372,12 @@ body {
   color: #aaa;
 }
 
+.lp-status--postponed {
+  background: rgba(255, 160, 0, 0.1);
+  border-color: rgba(255, 160, 0, 0.35);
+  color: #ffa000;
+}
+
 .follow-live-btn {
   display: none;
 }

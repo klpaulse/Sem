@@ -643,6 +643,13 @@
   animation: pulse 1.5s infinite;
 }
 
+.match-badge--postponed {
+  background: rgba(255, 160, 0, 0.12);
+  border: 1px solid rgba(255, 160, 0, 0.35);
+  color: #ffa000;
+  font-weight: 700;
+}
+
 /* Behold gamle klasser for evt. andre steder */
 .row { display: flex; align-items: center; gap: 8px; }
 

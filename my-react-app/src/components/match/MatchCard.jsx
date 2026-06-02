@@ -9,7 +9,8 @@ export default function MatchCard({ match, homeName, awayName, onClick, showDate
   const isPast = matchDate && matchDate < now && matchDate.toDateString() !== now.toDateString();
   const isLive = status === "live";
   const isPaused = status === "pause";
-  const isEnded = status === "finished" || (isPast && !isLive && !isPaused);
+  const isPostponed = status === "postponed";
+  const isEnded = !isPostponed && (status === "finished" || (isPast && !isLive && !isPaused));
 
   const showScore = played || isLive || isPaused;
 
@@ -27,7 +28,8 @@ export default function MatchCard({ match, homeName, awayName, onClick, showDate
   });
 
   let badgeType, badgeLabel;
-  if (isLive)        { badgeType = "live";  badgeLabel = "LIVE"; }
+  if (isPostponed)   { badgeType = "postponed"; badgeLabel = "Utsatt"; }
+  else if (isLive)   { badgeType = "live";  badgeLabel = "LIVE"; }
   else if (isPaused) { badgeType = "pause"; badgeLabel = "Pause"; }
   else if (isEnded)  { badgeType = "ended"; badgeLabel = "Slutt"; }
   else               { badgeType = "time";  badgeLabel = timeStr; }

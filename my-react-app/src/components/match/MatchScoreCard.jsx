@@ -7,6 +7,7 @@ export default function MatchScoreCard({ status, homeName, awayName, homeTeamId,
 
   const statusMod =
     (status === "Slutt" || status === "Før kamp") ? " lp-status--slutt"
+    : status === "Utsatt" ? " lp-status--postponed"
     : status === "Live" ? " lp-status--live"
     : status === "Pause" ? " lp-status--pause"
     : "";

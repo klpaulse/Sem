@@ -97,6 +97,11 @@ export default function KampAdministrasjon({ divisions }) {
     setDeleteConfirm(null);
   };
 
+  const togglePostponed = async (match) => {
+    const newStatus = match.status === "postponed" ? "not_started" : "postponed";
+    await updateDoc(doc(db, "matches", match.id), { status: newStatus });
+  };
+
   return (
     <section className="kampadmin">
 
@@ -166,12 +171,19 @@ export default function KampAdministrasjon({ divisions }) {
                     <div className="kampadmin-item-info">
                       <span className="kampadmin-item-date">
                         {dateObj.toLocaleDateString("nb-NO", { day: "numeric", month: "short" })} kl {match.time}
+                        {match.status === "postponed" && <span className="kampadmin-postponed-badge">Utsatt</span>}
                       </span>
                       <span className="kampadmin-item-matchup">{homeName} – {awayName}</span>
                       {match.arena && <span className="kampadmin-item-arena">{match.arena}</span>}
                     </div>
                     <div className="kampadmin-item-actions">
                       <button className="btn-secondary btn-sm" onClick={() => startEditing(match)}>Rediger</button>
+                      <button
+                        className={`btn-sm ${match.status === "postponed" ? "btn-primary" : "btn-secondary"}`}
+                        onClick={() => togglePostponed(match)}
+                      >
+                        {match.status === "postponed" ? "Fjern utsatt" : "Sett utsatt"}
+                      </button>
                       {deleteConfirm === match.id ? (
                         <>
                           <button className="btn-danger btn-sm" onClick={() => deleteMatch(match.id)}>Bekreft</button>

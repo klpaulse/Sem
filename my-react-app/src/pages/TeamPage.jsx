@@ -75,13 +75,13 @@ export default function TeamPage() {
 
   const upcomingMatches = useMemo(() =>
     seasonMatches
-      .filter(m => m.status !== "finished" && m.status !== "live" && m.status !== "pause" && m.date >= today)
+      .filter(m => m.status !== "finished" && m.status !== "live" && m.status !== "pause" && (m.status === "postponed" || m.date >= today))
       .sort((a, b) => a.date - b.date),
     [seasonMatches, today]);
 
   const playedMatches = useMemo(() =>
     seasonMatches
-      .filter(m => m.status === "finished" || m.status === "live" || m.status === "pause" || m.date < today)
+      .filter(m => m.status !== "postponed" && (m.status === "finished" || m.status === "live" || m.status === "pause" || m.date < today))
       .sort((a, b) => b.date - a.date),
     [seasonMatches, today]);
 

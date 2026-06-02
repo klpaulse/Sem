@@ -77,7 +77,7 @@ export default function BeforeMatch({ match, allMatches }) {
 
       <main className="page">
         <MatchScoreCard
-          status="Før kamp"
+          status={match.status === "postponed" ? "Utsatt" : "Før kamp"}
           homeName={homeName}
           awayName={awayName}
           homeTeamId={match.homeTeamId}

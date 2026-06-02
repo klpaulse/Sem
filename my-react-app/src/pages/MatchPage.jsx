@@ -185,7 +185,7 @@ useEffect(() => {
   const isLive = selectedMatch.status === "live" || selectedMatch.status === "pause";
   const useLiveLayout = isLive || (events.length > 0 && hasLiveEvents) || (!eventsLoaded && effectivelyFinished);
 
-  if (selectedMatch.status === "not_started" && !hasPreMatchContent && !isPastMatch) {
+  if ((selectedMatch.status === "not_started" || selectedMatch.status === "postponed") && !hasPreMatchContent) {
     return (
       <BeforeMatch
         match={selectedMatch}
@@ -224,7 +224,8 @@ useEffect(() => {
       }`}>
         <MatchScoreCard
           status={
-            effectivelyFinished ? "Slutt"
+            selectedMatch.status === "postponed" ? "Utsatt"
+            : effectivelyFinished ? "Slutt"
             : selectedMatch.status === "pause" ? "Pause"
             : selectedMatch.status === "live" ? "Live"
             : "Før kamp"
@@ -236,14 +237,17 @@ useEffect(() => {
           homeLogo={homeLogo}
           awayLogo={awayLogo}
           result={
-            effectivelyFinished
+            selectedMatch.status === "postponed"
+              ? `Kl ${selectedMatch.time}`
+            : effectivelyFinished
               ? (selectedMatch.homeScore != null ? `${selectedMatch.homeScore} - ${selectedMatch.awayScore}` : "–")
-              : (selectedMatch.status === "live" || selectedMatch.status === "pause")
+            : (selectedMatch.status === "live" || selectedMatch.status === "pause")
               ? `${selectedMatch.homeScore ?? 0} - ${selectedMatch.awayScore ?? 0}`
               : `Kl ${selectedMatch.time}`
           }
           resultClassName={
-            effectivelyFinished && selectedMatch.homeScore == null ? "lp-result--text"
+            selectedMatch.status === "postponed" ? "lp-result--time"
+            : effectivelyFinished && selectedMatch.homeScore == null ? "lp-result--text"
             : !effectivelyFinished && selectedMatch.status !== "live" && selectedMatch.status !== "pause" ? "lp-result--time"
             : ""
           }

@@ -54,15 +54,24 @@ exports.onGoalEvent = onDocumentCreated(
     const match = matchSnap.data();
     if (!match) return;
 
-    const home = data.homeScore ?? "?";
-    const away = data.awayScore ?? "?";
+    const home = data.homeScore ?? match.homeScore ?? "?";
+    const away = data.awayScore ?? match.awayScore ?? "?";
+
+    const [homeSnap, awaySnap] = await Promise.all([
+      getFirestore().doc(`teams/${match.homeTeamId}`).get(),
+      getFirestore().doc(`teams/${match.awayTeamId}`).get(),
+    ]);
+    const homeName = homeSnap.data()?.name || "Hjemmelag";
+    const awayName = awaySnap.data()?.name || "Bortelag";
+
+    const matchUrl = match.slug ? `/match/${match.slug}` : `/match/${event.params.matchId}`;
 
     await sendToAll(
       {
         title: "⚽ MÅL!",
-        body: `${match.homeTeamName || "Hjemmelag"} ${home}–${away} ${match.awayTeamName || "Bortelag"}`,
+        body: `${homeName} ${home}–${away} ${awayName}`,
       },
-      { url: `/match/${event.params.matchId}` }
+      { url: matchUrl }
     );
   }
 );

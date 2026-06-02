@@ -50,7 +50,7 @@ export default function ResultatAdmin() {
     const matchDate = m.date?.toDate?.();
     const isPast = matchDate && matchDate < now;
     const noResult = m.homeScore == null && m.awayScore == null;
-    return isPast && noResult && m.status !== "live";
+    return isPast && noResult && m.status !== "live" && m.status !== "postponed";
   });
 
   const grouped = matches.reduce((acc, m) => {
@@ -84,7 +84,7 @@ export default function ResultatAdmin() {
         </button>
       </div>
 
-      {activeTab === "missing" && (
+{activeTab === "missing" && (
         <div className="resultat-list">
           {missingResults.length === 0 ? (
             <p className="resultat-empty">Alle kamper har resultat.</p>
