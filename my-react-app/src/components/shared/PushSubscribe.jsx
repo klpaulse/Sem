@@ -8,19 +8,11 @@ import "../../assets/style/pushSubscribe.css";
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
 
 async function getSWAndToken() {
-  const sw = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
-  // Vent til SW er aktiv
-  await new Promise(resolve => {
-    if (sw.active) { resolve(); return; }
-    const candidate = sw.installing || sw.waiting;
-    if (!candidate) { resolve(); return; }
-    candidate.addEventListener("statechange", function handler() {
-      if (this.state === "activated") { resolve(); candidate.removeEventListener("statechange", handler); }
-    });
-  });
+  await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+  const swReg = await navigator.serviceWorker.ready;
   const app = getApps()[0];
   const msg = getMessaging(app);
-  const token = await getToken(msg, { vapidKey: VAPID_KEY, serviceWorkerRegistration: sw });
+  const token = await getToken(msg, { vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg });
   return token || null;
 }
 
@@ -34,6 +26,7 @@ async function saveToken(token) {
 
 export default function PushSubscribe() {
   const [status, setStatus] = useState("checking");
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
     async function check() {
@@ -80,6 +73,7 @@ export default function PushSubscribe() {
       setStatus("granted");
     } catch (err) {
       console.error("Push feilet:", err);
+      setErrorMsg(err?.message || String(err));
       setStatus("error");
     }
   }
@@ -97,9 +91,12 @@ export default function PushSubscribe() {
   );
 
   if (status === "error") return (
-    <button className="push-subscribe-btn" onClick={subscribe}>
-      ⚠️ Prøv igjen
-    </button>
+    <div>
+      <button className="push-subscribe-btn" onClick={subscribe}>
+        ⚠️ Prøv igjen
+      </button>
+      {errorMsg && <p style={{ fontSize: "0.7rem", color: "#f66", marginTop: 4 }}>{errorMsg}</p>}
+    </div>
   );
 
   if (status === "loading") return (
