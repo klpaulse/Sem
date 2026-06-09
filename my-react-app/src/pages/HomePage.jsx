@@ -8,6 +8,7 @@ import { toSlug } from "../utils/slugify";
 
 import Calandar from "../components/home/Calandar";
 import DivisionList from "../components/home/DivisionList";
+import BrandLogo from "../components/shared/BrandLogo";
 import TabellComponent from "../components/match/TabellComponent";
 import TopscorersComponent from "../components/match/TopscorersComponent";
 import SponsorBanner from "../components/shared/SponsorBanner";
@@ -153,7 +154,7 @@ export default function HomePage() {
   return (
     <>
       <header className="site-header">
-        <h1 className="live-header">Breddefotball Live</h1>
+        <BrandLogo height={42} />
       </header>
 
       <main className="page">

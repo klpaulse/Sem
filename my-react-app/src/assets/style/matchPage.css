@@ -1068,7 +1068,6 @@ body {
   gap: 10px;
   overflow-x: auto;
   padding: 10px 0 6px;
-  scroll-snap-type: x mandatory;
   scrollbar-width: thin;
   scrollbar-color: rgba(255,255,255,0.15) transparent;
 }

@@ -29,7 +29,7 @@ export default function MatchSummary({ events, homeTeamId, awayTeamId, homeName,
 
       {goals.length > 0 && (
         <div className="ms-section">
-          <div className="ms-header">Mal</div>
+          <div className="ms-header">Mål</div>
           <div className="ms-cols">
             <ul className="ms-col">
               {homeGoals.map((g, i) => (

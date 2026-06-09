@@ -8,17 +8,17 @@ export default function SeasonTimeline({ matches, teamId, currentMatchId }) {
   const containerRef = useRef(null);
 
   useEffect(() => {
-    if (!currentRef.current || !containerRef.current) return;
     const id = setTimeout(() => {
       const container = containerRef.current;
       const item = currentRef.current;
       if (!container || !item) return;
       const containerRect = container.getBoundingClientRect();
       const itemRect = item.getBoundingClientRect();
-      container.scrollLeft += itemRect.left - containerRect.left - containerRect.width / 2 + itemRect.width / 2;
-    }, 50);
+      const offset = itemRect.left - containerRect.left - containerRect.width / 2 + itemRect.width / 2;
+      container.scrollTo({ left: container.scrollLeft + offset, behavior: "instant" });
+    }, 80);
     return () => clearTimeout(id);
-  }, [currentMatchId]);
+  }, [currentMatchId, matches]);
 
   if (!matches || matches.length === 0) {
     return (

@@ -1,5 +1,4 @@
 import { useLocation, Link } from "react-router-dom";
-import PushSubscribe from "./PushSubscribe";
 
 const HIDDEN_ON = ["/admin", "/reporter", "/admin-login", "/login"];
 
@@ -10,7 +9,6 @@ export default function Footer() {
 
   return (
     <footer className="site-footer">
-      <PushSubscribe />
       <p className="site-footer__tagline">Følg kampene live – mål, hendelser og tabeller</p>
       <p className="site-footer__contact">
         Kontakt: <a href="mailto:Breddefotball-92@hotmail.com">Breddefotball-92@hotmail.com</a>

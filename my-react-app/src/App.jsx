@@ -1,6 +1,5 @@
 import { Route, Routes, useLocation } from 'react-router-dom'
 import './App.css'
-
 import AdminPage from './pages/AdminPage'
 import MatchPage from './pages/MatchPage'
 
@@ -44,6 +43,7 @@ function App() {
   const [teamsMap, setTeamsMap] = useState({})
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+
 
   const location = useLocation()
 
